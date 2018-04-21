@@ -5,10 +5,10 @@ use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
-class Topic extends Controller
+class Role extends Controller
 {
     public function __construct() {
-        parent::__construct('topic');
+        parent::__construct('role');
     }
 
     public function get(Request $request) {
@@ -16,7 +16,7 @@ class Topic extends Controller
         $results = $collection->find([])->toArray();
         return json_encode($results, $this->prettify());
     }
-
+    
     public function post(Request $request) {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -27,9 +27,10 @@ class Topic extends Controller
         }
 
         $data = [
-            'name' => $this->input('name'),
+            'user_id' => new ObjectId($this->input('user_id')),
+            'role_type_id' => new ObjectId($this->input('role_type_id')),
             'school_id' => new ObjectId($this->input('school_id')),
-            'topic_type_id' => new ObjectId($this->input('topic_type_id')),
+            'aproved' => (bool) $this->input('aproved'),
             'updated_at' => new UTCDateTime()
         ];
         
@@ -42,9 +43,10 @@ class Topic extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'name'  => ['required', ['lengthBetween', 5, 30]],
+            'user_id' => ['required', 'objectId', ['inCollection', 'user']],
+            'role_type_id' => ['required', 'objectId', ['inCollection', 'role_type']],
             'school_id' => ['required', 'objectId', ['inCollection', 'school']],
-            'topic_type_id' => ['required', 'objectId', ['inCollection', 'topic_type']]
+            'aproved' => ['required', 'boolean']
         ];
 
         return $this->run_validation($rules);
@@ -60,9 +62,10 @@ class Topic extends Controller
         }
 
         $data = array_filter([
-            'name' => $this->input('name'),
+            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
+            'role_type_id' => $this->input('role_type_id') ? new ObjectId($this->input('role_type_id')) : null,
             'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
-            'topic_type_id' => $this->input('topic_type_id') ? new ObjectId($this->input('topic_type_id')) : null,
+            'aproved' => (bool) $this->input('aproved'),
             'updated_at' => new UTCDateTime()
         ]);
 
@@ -76,9 +79,10 @@ class Topic extends Controller
     private function validate_put() : bool {
         $rules = [
             'id' => ['required', 'objectId', 'inCollection'],
-            'name'  => ['optional', ['lengthBetween', 5, 30]],
+            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
+            'role_type_id' => ['optional', 'objectId', ['inCollection', 'role_type']],
             'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
-            'topic_type_id' => ['optional', 'objectId', ['inCollection', 'topic_type']]
+            'aproved' => ['optional', 'boolean']
         ];
 
         return $this->run_validation($rules);

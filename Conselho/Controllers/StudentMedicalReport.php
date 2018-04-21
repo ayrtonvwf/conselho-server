@@ -5,10 +5,10 @@ use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
-class Topic extends Controller
+class StudentMedicalReport extends Controller
 {
     public function __construct() {
-        parent::__construct('topic');
+        parent::__construct('student_medical_report');
     }
 
     public function get(Request $request) {
@@ -16,7 +16,7 @@ class Topic extends Controller
         $results = $collection->find([])->toArray();
         return json_encode($results, $this->prettify());
     }
-
+    
     public function post(Request $request) {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -27,12 +27,12 @@ class Topic extends Controller
         }
 
         $data = [
-            'name' => $this->input('name'),
-            'school_id' => new ObjectId($this->input('school_id')),
-            'topic_type_id' => new ObjectId($this->input('topic_type_id')),
+            'student_id' => new ObjectId($this->input('student_id')),
+            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($this->input('subject_id')); }, $this->input('subject_ids')),
+            'description' => $this->input('description'),
             'updated_at' => new UTCDateTime()
         ];
-        
+
         try {
             $this->get_collection()->insertOne($data);
         } catch (\Exception $e) {
@@ -42,9 +42,9 @@ class Topic extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'objectId', ['inCollection', 'school']],
-            'topic_type_id' => ['required', 'objectId', ['inCollection', 'topic_type']]
+            'student_id' => ['required', 'objectId', ['inCollection', 'student']],
+            'subject_id' => ['required', 'array'],
+            'description' => ['required', 'string', ['maxLength', 50]]
         ];
 
         return $this->run_validation($rules);
@@ -60,9 +60,9 @@ class Topic extends Controller
         }
 
         $data = array_filter([
-            'name' => $this->input('name'),
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
-            'topic_type_id' => $this->input('topic_type_id') ? new ObjectId($this->input('topic_type_id')) : null,
+            'student_id' => new ObjectId($this->input('student_id')),
+            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($this->input('subject_id')); }, $this->input('subject_ids')),
+            'description' => $this->input('description'),
             'updated_at' => new UTCDateTime()
         ]);
 
@@ -76,9 +76,9 @@ class Topic extends Controller
     private function validate_put() : bool {
         $rules = [
             'id' => ['required', 'objectId', 'inCollection'],
-            'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
-            'topic_type_id' => ['optional', 'objectId', ['inCollection', 'topic_type']]
+            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
+            'subject_id' => ['optional', 'array'],
+            'description' => ['optional', 'string', ['maxLength', 50]]
         ];
 
         return $this->run_validation($rules);

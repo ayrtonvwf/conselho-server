@@ -1,0 +1,14 @@
+{
+    "bsonType": "object",
+    "additionalProperties": false,
+    "required": ["council_id", "user_id", "grade_id", "subject_id", "description", "updated_at"],
+    "properties": {
+        "_id":          { "bsonType": "objectId" },
+        "council_id":   { "bsonType": "objectId" },
+        "user_id":      { "bsonType": "objectId" },
+        "grade_id":     { "bsonType": "objectId" },
+        "subject_id":   { "bsonType": "objectId" },
+        "description":  { "bsonType": "string", "maxLength": 300 },
+        "updated_at":   { "bsonType": "date" }
+    }
+}

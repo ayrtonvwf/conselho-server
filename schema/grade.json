@@ -1,0 +1,12 @@
+{
+    "bsonType": "object",
+    "additionalProperties": false,
+    "required": ["name", "level", "school_id", "updated_at"],
+    "properties": {
+        "_id":          { "bsonType": "objectId" },
+        "name":         { "bsonType": "string", "minLength": 1, "maxLength": 50 },
+        "level":        { "bsonType": "int" },
+        "school_id":    { "bsonType": "objectId" },
+        "updated_at":   { "bsonType": "date" }
+    }
+}

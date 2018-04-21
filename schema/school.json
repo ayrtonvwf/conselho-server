@@ -1,0 +1,10 @@
+{
+    "bsonType": "object",
+    "additionalProperties": false,
+    "required": ["name", "updated_at"],
+    "properties": {
+        "_id":          { "bsonType": "objectId" },
+        "name":         { "bsonType": "string", "minLength": 5, "maxLength": 100 },
+        "updated_at":   { "bsonType": "date" }
+    }
+}

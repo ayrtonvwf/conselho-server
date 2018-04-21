@@ -1,0 +1,263 @@
+{
+    "user": [
+        {
+            "_id" : 1,
+            "name": "Janice",
+            "email": "janice@gmail.com",
+            "password": "senhacriptografada",
+            "dev" : false,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "_id" : 2,
+            "name": "Magda",
+            "email": "magda@gmail.com",
+            "password": "senhacriptografada",
+            "dev" : false,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "role_type": [
+        {
+            "_id" : 1,
+            "name" : "Professor",
+            "reference" : "teacher",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "_id" : 2,
+            "name" : "Administrador",
+            "reference" : "admin",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "_id": 3,
+            "name" : "Supervisor",
+            "reference": "super",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "topic_type": [
+        {
+            "_id": 1,
+            "name": "0 a 10",
+            "reference": "0-10",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        },{
+            "_id": 2,
+            "name": "Sim ou não",
+            "reference": "bool",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "school": [{
+        "_id" : 1,
+        "name" : "Mondrone",
+        "created_at": "2018-02-05 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }],
+    "grade": [
+        {
+            "_id": 1,
+            "name": "1° A",
+            "level": 1,
+            "school_id": 1,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        },
+        {
+            "_id": 2,
+            "name": "1° B",
+            "level": 1,
+            "school_id": 1,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        },
+        {
+            "_id": 3,
+            "name": "2° A",
+            "level": 2,
+            "school_id": 1,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "student": [{
+        "_id": 1,
+        "name": "João da Silva",
+        "number": 24,
+        "school_id": 1,
+        "created_at": "2018-04-10 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }],
+    "role": [
+        {
+            "user_id": 1,
+            "school_id": 1,
+            "user_type_id": 1,
+            "aproved": true,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "user_id": 1,
+            "school_id": 1,
+            "user_type_id": 2,
+            "aproved": true,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "user_id": 2,
+            "school_id": 1,
+            "user_type_id": 1,
+            "aproved": true,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "topic": [
+        {
+            "_id": 1,
+            "name" : "Comportamento",
+            "school_id": 1,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        },
+        {
+            "_id": 2,
+            "name": "Tarefas",
+            "school_id": 2,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "council": [{
+        "_id": 1,
+        "start_date": "2018-04-09",
+        "end_date": "2018-04-20",
+        "name": "Primeiro trimestre",
+        "school_id": 1,
+        "created_at": "2018-02-05 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }],
+    "grade_subject": [
+        {
+            "grade_id": 1,
+            "subject_id": 1,
+            "teacher_id": 2,
+            "aproved": true,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "grade_id": 2,
+            "subject_id": 1,
+            "teacher_id": 2,
+            "aproved": true,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "grade_id": 3,
+            "subject_id": 2,
+            "teacher_id": 2,
+            "aproved": false,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "grade_observation": [{
+        "_id": 1,
+        "council_id": 1,
+        "user_id": 1,
+        "grade_id": 1,
+        "description": "Turma produtiva, apesar de conversar demais",
+        "created_at": "2018-02-05 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }],
+    "subject": [
+        {
+            "_id": 1,
+            "name": "Matemática",
+            "school_id": 1,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        },
+        {
+            "_id": 2,
+            "name": "Português",
+            "school_id": 1,
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "user_token": [
+        {
+            "value": "randomtoken",
+            "user_id": 1,
+            "expires_at": "2018-04-07 18:55:02",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "value": "randomtoken",
+            "user_id": 2,
+            "expires_at": "2018-04-07 18:55:02",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "student_grade": [
+        {
+            "grade_id": 2,
+            "number": 13,
+            "student_id": 1,
+            "start": "2018-01-01",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "grade_id": 1,
+            "number": 12,
+            "user_id": 1,
+            "start": "2018-01-01",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }, {
+            "grade_id": 3,
+            "number": 15,
+            "user_id": 1,
+            "start": "2018-01-01",
+            "created_at": "2018-02-05 20:53:12",
+            "updated_at": "2018-04-10 20:53:12"
+        }
+    ],
+    "student_medical_report": [{
+        "student_id": 1,
+        "subject_ids": [1, 2],
+        "description": "Dislexia",
+        "created_at": "2018-04-10 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }],
+    "student_observation": [{
+        "_id": 1,
+        "user_id": 2,
+        "student_id": 2, 
+        "grade_id": 3,
+        "subject_id": 2,
+        "council_id": 1,
+        "description": "Aluno quieto mas desinteressado",
+        "created_at": "2018-04-10 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }],
+    "evaluation": [{
+        "_id": 1,
+        "user_id": 2,
+        "grade_id": 3,
+        "subject_id": 2,
+        "council_id": 1,
+        "topic_id": 1,
+        "value": 9,
+        "created_at": "2018-04-10 20:53:12",
+        "updated_at": "2018-04-10 20:53:12"
+    }]
+}

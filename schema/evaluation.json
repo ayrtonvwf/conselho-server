@@ -1,0 +1,16 @@
+{
+    "bsonType": "object",
+    "additionalProperties": false,
+    "required": ["user_id", "student_id", "grade_id", "subject_id", "council_id", "topic_id", "value", "updated_at"],
+    "properties": {
+        "_id":              { "bsonType": "objectId" },
+        "user_id":          { "bsonType": "objectId" },
+        "student_id":       { "bsonType": "objectId" },
+        "grade_id":         { "bsonType": "objectId" },
+        "subject_id":       { "bsonType": "objectId" },
+        "council_id":       { "bsonType": "objectId" },
+        "topic_id":         { "bsonType": "objectId" },
+        "value":            { "anyOf": [ { "bsonType": "bool" }, { "bsonType": "int" }] },
+        "updated_at":       { "bsonType": "date" }
+    }
+}

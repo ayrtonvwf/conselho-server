@@ -2,13 +2,9 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-const BASE_PATH = __DIR__;
-
 use Dotenv\Dotenv;
 use MiladRahimi\PHPRouter\Router;
 use MiladRahimi\PHPRouter\Exceptions\HttpError;
-
-date_default_timezone_set('UTC');
 
 if (($_SERVER['HTTP_ACCEPT'] ?? '') != 'application/json') {
     http_response_code(406);
@@ -50,9 +46,9 @@ $router->map('POST', '/subject[/]*', 'Conselho\\Controllers\\Subject@post', 'Con
 $router->map('PUT', '/subject[/]*', 'Conselho\\Controllers\\Subject@put', 'Conselho\\Auth@check');
 $router->map('DELETE', '/subject[/]*', 'Conselho\\Controllers\\Subject@delete', 'Conselho\\Auth@check');
 
-$router->map('GET', '/user_token[/]*', 'Conselho\\Controllers\\UserToken@get', 'Conselho\\Auth@check');
-$router->map('POST', '/user_token[/]*', 'Conselho\\Controllers\\UserToken@post');
-$router->map('DELETE', '/user_token[/]*', 'Conselho\\Controllers\\UserToken@delete', 'Conselho\\Auth@check');
+$router->map('GET', '/token[/]*', 'Conselho\\Controllers\\Token@get', 'Conselho\\Auth@check');
+$router->map('POST', '/token[/]*', 'Conselho\\Controllers\\Token@post');
+$router->map('DELETE', '/token[/]*', 'Conselho\\Controllers\\Token@delete', 'Conselho\\Auth@check');
 
 $router->map('GET', '/topic[/]*', 'Conselho\\Controllers\\Topic@get', 'Conselho\\Auth@check');
 $router->map('POST', '/topic[/]*', 'Conselho\\Controllers\\Topic@post', 'Conselho\\Auth@check');
@@ -64,18 +60,8 @@ $router->map('POST', '/user[/]*', 'Conselho\\Controllers\\User@post');
 $router->map('PUT', '/user[/]*', 'Conselho\\Controllers\\User@put', 'Conselho\\Auth@check');
 $router->map('DELETE', '/user[/]*', 'Conselho\\Controllers\\User@delete', 'Conselho\\Auth@check');
 
-$router->map('GET', '/role[/]*', 'Conselho\\Controllers\\Role@get', 'Conselho\\Auth@check');
-$router->map('POST', '/role[/]*', 'Conselho\\Controllers\\Role@post', 'Conselho\\Auth@check');
-$router->map('DELETE', '/role[/]*', 'Conselho\\Controllers\\Role@delete', 'Conselho\\Auth@check');
-
-$router->map('GET', '/school[/]*', 'Conselho\\Controllers\\School@get', 'Conselho\\Auth@check');
-$router->map('GET', '/user_type[/]*', 'Conselho\\Controllers\\UserType@get', 'Conselho\\Auth@check');
-$router->map('GET', '/topic_type[/]*', 'Conselho\\Controllers\\TopicType@get', 'Conselho\\Auth@check');
-
 if (getenv('env') == 'dev') {
-    $router->get('/dev/playground[/]*', 'Conselho\\Controllers\\Dev@playground');
-    $router->get('/dev/rebuild_schemas[/]*', 'Conselho\\Controllers\\Dev@rebuild_schemas');
-    $router->get('/dev/populate_database[/]*', 'Conselho\\Controllers\\Dev@populate_database');
+    $router->any('/dev[/]*', 'Conselho\\Controllers\\Dev@any');
 }
 
 try {

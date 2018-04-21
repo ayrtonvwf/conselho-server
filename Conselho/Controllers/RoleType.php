@@ -3,10 +3,10 @@ namespace Conselho\Controllers;
 use MiladRahimi\PHPRouter\Request;
 use Conselho\Controller;
 
-class TopicType extends Controller
+class RoleType extends Controller
 {
     public function __construct() {
-        parent::__construct('topic_type');
+        parent::__construct('role_type');
     }
 
     public function get(Request $request) {

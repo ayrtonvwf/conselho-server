@@ -5,10 +5,10 @@ use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
-class Topic extends Controller
+class StudentGrade extends Controller
 {
     public function __construct() {
-        parent::__construct('topic');
+        parent::__construct('student_grade');
     }
 
     public function get(Request $request) {
@@ -16,7 +16,7 @@ class Topic extends Controller
         $results = $collection->find([])->toArray();
         return json_encode($results, $this->prettify());
     }
-
+    
     public function post(Request $request) {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -27,12 +27,13 @@ class Topic extends Controller
         }
 
         $data = [
-            'name' => $this->input('name'),
-            'school_id' => new ObjectId($this->input('school_id')),
-            'topic_type_id' => new ObjectId($this->input('topic_type_id')),
+            'grade_id' => new ObjectId($this->input('grade_id')),
+            'number' => (int) $this->input('number'),
+            'student_id' => new ObjectId($this->input('student_id')),
+            'start' => new UTCDateTime($this->input('start')),
             'updated_at' => new UTCDateTime()
         ];
-        
+
         try {
             $this->get_collection()->insertOne($data);
         } catch (\Exception $e) {
@@ -42,9 +43,10 @@ class Topic extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'objectId', ['inCollection', 'school']],
-            'topic_type_id' => ['required', 'objectId', ['inCollection', 'topic_type']]
+            'grade_id' => ['required', 'objectId', ['inCollection', 'grade']],
+            'number' => ['required', 'integer', ['min', 1]],
+            'student_id' => ['required', 'objectId', ['inCollection', 'student']],
+            'start' => ['required', ['dateFormat', 'Y-m-d']]
         ];
 
         return $this->run_validation($rules);
@@ -60,9 +62,10 @@ class Topic extends Controller
         }
 
         $data = array_filter([
-            'name' => $this->input('name'),
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
-            'topic_type_id' => $this->input('topic_type_id') ? new ObjectId($this->input('topic_type_id')) : null,
+            'grade_id' => $this->input('grade_id') ? new ObjectId($this->input('grade_id')) : null,
+            'number' => (int) $this->input('number'),
+            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
+            'start' => new UTCDateTime($this->input('start')),
             'updated_at' => new UTCDateTime()
         ]);
 
@@ -76,9 +79,10 @@ class Topic extends Controller
     private function validate_put() : bool {
         $rules = [
             'id' => ['required', 'objectId', 'inCollection'],
-            'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
-            'topic_type_id' => ['optional', 'objectId', ['inCollection', 'topic_type']]
+            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
+            'number' => ['optional', 'integer', ['min', 1]],
+            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
+            'start' => ['optional', ['dateFormat', 'Y-m-d']]
         ];
 
         return $this->run_validation($rules);
