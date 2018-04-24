@@ -11,18 +11,18 @@ class UserToken extends Controller
         parent::__construct('user_token');
     }
 
-    public function get(Request $request) {
+    public function get() {
         $collection = $this->get_collection();
         $results = $collection->find([])->toArray();
-        return json_encode($results, $this->prettify());
+        return json_encode(['results' => $results], $this->prettify());
     }
 
-    public function post(Request $request) : string {
+    public function post() : string {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
                 'error' => 'INVALID_INPUT',
-                'errors' => $this->get_validation_errors()
+                'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
         
@@ -74,7 +74,7 @@ class UserToken extends Controller
         ];
     }
 
-    public function delete(Request $request) : void {
+    public function delete() : void {
         $current_token = $this->get_token();
 
         $this->get_collection()->deleteOne(['value' => $current_token]);

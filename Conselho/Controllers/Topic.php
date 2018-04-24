@@ -11,18 +11,18 @@ class Topic extends Controller
         parent::__construct('topic');
     }
 
-    public function get(Request $request) {
+    public function get() {
         $collection = $this->get_collection();
         $results = $collection->find([])->toArray();
-        return json_encode($results, $this->prettify());
+        return json_encode(['results' => $results], $this->prettify());
     }
 
-    public function post(Request $request) {
+    public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
                 'error' => 'INVALID_INPUT',
-                'errors' => $this->get_validation_errors()
+                'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
 
@@ -36,7 +36,8 @@ class Topic extends Controller
         try {
             $this->get_collection()->insertOne($data);
         } catch (\Exception $e) {
-            print_r($e->getWriteResult());
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_INSERT_TOPIC'], $this->prettify());
         }
     }
 
@@ -50,12 +51,12 @@ class Topic extends Controller
         return $this->run_validation($rules);
     }
 
-    public function put(Request $request) {
+    public function put() {
         if (!$this->validate_put()) {
             http_response_code(400);
             return json_encode([
                 'error' => 'INVALID_INPUT',
-                'errors' => $this->get_validation_errors()
+                'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
 
@@ -69,7 +70,7 @@ class Topic extends Controller
         $criteria = ['_id' => new ObjectId($this->input('id'))];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
-            return;
+            return json_encode(['error' => 'CANNOT_UPDATE_TOPIC'], $this->prettify());
         }
     }
 
@@ -84,12 +85,12 @@ class Topic extends Controller
         return $this->run_validation($rules);
     }
 
-    public function delete(Request $request) {
-        if (!$this->validate_put()) {
+    public function delete() {
+        if (!$this->validate_delete()) {
             http_response_code(400);
             return json_encode([
                 'error' => 'INVALID_INPUT',
-                'errors' => $this->get_validation_errors()
+                'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
         

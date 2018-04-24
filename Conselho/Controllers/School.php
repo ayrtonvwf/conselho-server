@@ -9,9 +9,9 @@ class School extends Controller
         parent::__construct('school');
     }
 
-    public function get(Request $request) {
+    public function get() {
         $collection = $this->get_collection();
         $results = $collection->find([])->toArray();
-        return json_encode($results, $this->prettify());
+        return json_encode(['results' => $results], $this->prettify());
     }
 }
