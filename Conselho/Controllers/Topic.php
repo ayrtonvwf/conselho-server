@@ -19,8 +19,8 @@ class Topic extends Controller
 
     private function get_filters() : array {
         $filters = [
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
-            'topic_type_id' => $this->input('topic_type_id') ? new ObjectId($this->input('topic_type_id')) : null,
+            'school_id' => $this->input_id('school_id'),
+            'topic_type_id' => $this->input_id('topic_type_id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -29,11 +29,11 @@ class Topic extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input_date('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input_date('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
     }
@@ -49,8 +49,8 @@ class Topic extends Controller
 
         $data = [
             'name' => $this->input('name'),
-            'school_id' => new ObjectId($this->input('school_id')),
-            'topic_type_id' => new ObjectId($this->input('topic_type_id')),
+            'school_id' => $this->input_id('school_id'),
+            'topic_type_id' => $this->input_id('topic_type_id'),
             'updated_at' => new UTCDateTime()
         ];
         
@@ -83,12 +83,12 @@ class Topic extends Controller
 
         $data = array_filter([
             'name' => $this->input('name'),
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
-            'topic_type_id' => $this->input('topic_type_id') ? new ObjectId($this->input('topic_type_id')) : null,
+            'school_id' => $this->input_id('school_id'),
+            'topic_type_id' => $this->input_id('topic_type_id'),
             'updated_at' => new UTCDateTime()
         ]);
 
-        $criteria = ['_id' => new ObjectId($this->input('id'))];
+        $criteria = ['_id' => $this->input_id('id')];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE_TOPIC'], $this->prettify());
@@ -115,7 +115,7 @@ class Topic extends Controller
             ], $this->prettify());
         }
         
-        $this->get_collection()->deleteOne(['_id' => $this->input('id')]);
+        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
     }
 
     private function validate_delete() : bool {

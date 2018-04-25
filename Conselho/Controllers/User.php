@@ -26,11 +26,11 @@ class User extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input_date('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input_date('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
     }

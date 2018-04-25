@@ -19,8 +19,8 @@ class StudentGrade extends Controller
 
     private function get_filters() : array {
         $filters = [
-            'grade_id' => $this->input('grade_id') ? new ObjectId($this->input('grade_id')) : null,
-            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
+            'grade_id' => $this->input_id('grade_id'),
+            'student_id' => $this->input_id('student_id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -41,11 +41,11 @@ class StudentGrade extends Controller
         if ($this->input('max_start')) {
             $filters['start']['lte'] = $this->input('max_start');
         }
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
     }
@@ -60,10 +60,10 @@ class StudentGrade extends Controller
         }
 
         $data = [
-            'grade_id' => new ObjectId($this->input('grade_id')),
+            'grade_id' => $this->input_id('grade_id'),
             'number' => (int) $this->input('number'),
-            'student_id' => new ObjectId($this->input('student_id')),
-            'start' => new UTCDateTime($this->input('start')),
+            'student_id' => $this->input_id('student_id'),
+            'start' => $this->input_date('start'),
             'updated_at' => new UTCDateTime()
         ];
 
@@ -96,14 +96,14 @@ class StudentGrade extends Controller
         }
 
         $data = array_filter([
-            'grade_id' => $this->input('grade_id') ? new ObjectId($this->input('grade_id')) : null,
+            'grade_id' => $this->input_id('grade_id'),
             'number' => (int) $this->input('number'),
-            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
-            'start' => new UTCDateTime($this->input('start')),
+            'student_id' => $this->input_id('student_id'),
+            'start' => $this->input_date('start'),
             'updated_at' => new UTCDateTime()
         ]);
 
-        $criteria = ['_id' => new ObjectId($this->input('id'))];
+        $criteria = ['_id' => $this->input_id('id')];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE_STUDENT_GRADE'], $this->prettify());
@@ -131,7 +131,7 @@ class StudentGrade extends Controller
             ], $this->prettify());
         }
         
-        $this->get_collection()->deleteOne(['_id' => $this->input('id')]);
+        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
     }
 
     private function validate_delete() : bool {

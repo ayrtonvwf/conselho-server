@@ -22,26 +22,26 @@ class Council extends Controller
             'start_date' => [],
             'end_date' => [],
             'updated_at' => [],
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'school_id' => $this->input_id('school_id'),
             'search' => $this->input('search')
         ];
-        if ($this->input('min_start_date')) {
-            $filters['start_date']['gte'] = new UTCDateTime($this->input('min_start_date'));
+        if ($min_start_date = $this->input_date('min_start_date')) {
+            $filters['start_date']['gte'] = $min_start_date;
         }
-        if ($this->input('max_start_date')) {
-            $filters['start_date']['lte'] = new UTCDateTime($this->input('max_start_date'));
+        if ($max_start_date = $this->input_date('max_start_date')) {
+            $filters['start_date']['lte'] = $max_start_date;
         }
-        if ($this->input('min_end_date')) {
-            $filters['end_date']['gte'] = new UTCDateTime($this->input('min_end_date'));
+        if ($min_end_date = $this->input_date('min_end_date')) {
+            $filters['end_date']['gte'] = $min_end_date;
         }
-        if ($this->input('max_end_date')) {
-            $filters['end_date']['lte'] = new UTCDateTime($this->input('max_end_date'));
+        if ($max_end_date = $this->input_date('max_end_date')) {
+            $filters['end_date']['lte'] = $max_end_date;
         }
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input_date('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input_date('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
     }
@@ -56,10 +56,10 @@ class Council extends Controller
         }
 
         $data = [
-            'start_date' => new UTCDateTime($this->input('start_date')),
-            'end_date' => new UTCDateTime($this->input('end_date')),
+            'start_date' => $this->input_date('start_date'),
+            'end_date' => $this->input_date('end_date'),
             'name' => $this->input('name'),
-            'school_id' => new ObjectId($this->input('school_id')),
+            'school_id' => $this->input_id('school_id'),
             'updated_at' => new UTCDateTime()
         ];
         
@@ -92,14 +92,14 @@ class Council extends Controller
         }
 
         $data = array_filter([
-            'start_date' => $this->input('start_date') ? new UTCDateTime($this->input('start_date')) : null,
-            'end_date' => $this->input('end_date') ? new UTCDateTime($this->input('end_date')) : null,
+            'start_date' => $this->input_date('start_date'),
+            'end_date' => $this->input_date('end_date'),
             'name' => $this->input('name'),
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'school_id' => $this->input_id('school_id'),
             'updated_at' => new UTCDateTime()
         ]);
 
-        $criteria = ['_id' => new ObjectId($this->input('id'))];
+        $criteria = ['_id' => $this->input_id('id')];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE_COUNCIL'], $this->prettify());
@@ -127,7 +127,7 @@ class Council extends Controller
             ], $this->prettify());
         }
         
-        $this->get_collection()->deleteOne(['_id' => $this->input('id')]);
+        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
     }
 
     private function validate_delete() : bool {

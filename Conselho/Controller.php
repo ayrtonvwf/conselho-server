@@ -1,9 +1,9 @@
 <?php
 namespace Conselho;
-use MongoDB, StdClass;
+use MongoDB;
 use Valitron\Validator;
 use MongoDB\Model\BSONDocument;
-use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\{ObjectId, UTCDateTime};
 
 abstract class Controller {
     private $db;
@@ -39,6 +39,38 @@ abstract class Controller {
         return !is_null($value) ? trim(strip_tags($value)) : null;
     }
 
+    protected function input_id(string $key) : ?ObjectId {
+        $value = $this->input_raw($key);
+
+        if (!$value) {
+            return null;
+        }
+
+        try {
+            $object_id = new ObjectId($value);
+        } catch (\Exception $error) {
+            return null;
+        }
+
+        return $object_id;
+    }
+
+    protected function input_date(string $key) : ?UTCDateTime {
+        $value = $this->input_raw($key);
+
+        if (!$value) {
+            return null;
+        }
+
+        try {
+            $date = new UTCDateTime($value);
+        } catch (\Exception $error) {
+            return null;
+        }
+
+        return $date;
+    }
+
     protected function get_db() : MongoDB\Database {
         return $this->db;
     }
@@ -50,7 +82,7 @@ abstract class Controller {
     protected function get_collection() : MongoDB\Collection {
         $collection_name = $this->get_collection_name();
         if (!$collection_name) {
-            throw 'No default collection set';
+            throw new \Exception('No default collection set');
         }
         return $this->get_db()->$collection_name;
     }

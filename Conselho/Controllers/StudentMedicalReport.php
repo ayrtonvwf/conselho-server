@@ -19,7 +19,7 @@ class StudentMedicalReport extends Controller
 
     private function get_filters() : array {
         $filters = [
-            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
+            'student_id' => $this->input_id('student_id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -28,14 +28,14 @@ class StudentMedicalReport extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($this->input('subject_id')) {
-            $filters['subject_ids']['$in'] = [new ObjectId($this->input('subject_id'))];
+        if ($subject_id = $this->input_id('subject_id')) {
+            $filters['subject_ids']['$in'] = [$subject_id];
         }
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
     }
@@ -50,8 +50,8 @@ class StudentMedicalReport extends Controller
         }
 
         $data = [
-            'student_id' => new ObjectId($this->input('student_id')),
-            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($this->input('subject_id')); }, $this->input('subject_ids')),
+            'student_id' => $this->input_id('student_id'),
+            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($subject_id); }, $this->input('subject_ids')),
             'description' => $this->input('description'),
             'updated_at' => new UTCDateTime()
         ];
@@ -84,13 +84,13 @@ class StudentMedicalReport extends Controller
         }
 
         $data = array_filter([
-            'student_id' => new ObjectId($this->input('student_id')),
-            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($this->input('subject_id')); }, $this->input('subject_ids')),
+            'student_id' => $this->input_id('student_id'),
+            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($subject_id); }, $this->input('subject_ids')),
             'description' => $this->input('description'),
             'updated_at' => new UTCDateTime()
         ]);
 
-        $criteria = ['_id' => new ObjectId($this->input('id'))];
+        $criteria = ['_id' => $this->input_id('id')];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE_STUDENT_MEDICAL_REPORT'], $this->prettify());
@@ -117,7 +117,7 @@ class StudentMedicalReport extends Controller
             ], $this->prettify());
         }
         
-        $this->get_collection()->deleteOne(['_id' => $this->input('id')]);
+        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
     }
 
     private function validate_delete() : bool {

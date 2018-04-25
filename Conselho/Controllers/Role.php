@@ -19,16 +19,16 @@ class Role extends Controller
 
     private function get_filters() : array {
         $filters = [
-            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
-            'role_type_id' => $this->input('role_type_id') ? new ObjectId($this->input('role_type_id')) : null,
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'user_id' => $this->input_id('user_id'),
+            'role_type_id' => $this->input_id('role_type_id'),
+            'school_id' => $this->input_id('school_id'),
             'updated_at' => [],
         ];
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input_date('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input_date('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         $filters = array_filter($filters);
         if ($this->input('aproved') !== null) {
@@ -47,9 +47,9 @@ class Role extends Controller
         }
 
         $data = [
-            'user_id' => new ObjectId($this->input('user_id')),
-            'role_type_id' => new ObjectId($this->input('role_type_id')),
-            'school_id' => new ObjectId($this->input('school_id')),
+            'user_id' => $this->input_id('user_id'),
+            'role_type_id' => $this->input_id('role_type_id'),
+            'school_id' => $this->input_id('school_id'),
             'aproved' => (bool) $this->input('aproved'),
             'updated_at' => new UTCDateTime()
         ];
@@ -83,14 +83,14 @@ class Role extends Controller
         }
 
         $data = array_filter([
-            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
-            'role_type_id' => $this->input('role_type_id') ? new ObjectId($this->input('role_type_id')) : null,
-            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'user_id' => $this->input_id('user_id'),
+            'role_type_id' => $this->input_id('role_type_id'),
+            'school_id' => $this->input_id('school_id'),
             'aproved' => (bool) $this->input('aproved'),
             'updated_at' => new UTCDateTime()
         ]);
 
-        $criteria = ['_id' => new ObjectId($this->input('id'))];
+        $criteria = ['_id' => $this->input_id('id')];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE_ROLE'], $this->prettify());
@@ -118,7 +118,7 @@ class Role extends Controller
             ], $this->prettify());
         }
         
-        $this->get_collection()->deleteOne(['_id' => $this->input('id')]);
+        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
     }
 
     private function validate_delete() : bool {

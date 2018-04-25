@@ -21,12 +21,12 @@ class Evaluation extends Controller
         $filters = [
             'value' => [],
             'updated_at' => [],
-            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
-            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
-            'grade_id' => $this->input('grade_id') ? new ObjectId($this->input('grade_id')) : null,
-            'subject_id' => $this->input('subject_id') ? new ObjectId($this->input('subject_id')) : null,
-            'council_id' => $this->input('council_id') ? new ObjectId($this->input('council_id')) : null,
-            'topic_id' => $this->input('topic_id') ? new ObjectId($this->input('topic_id')) : null
+            'user_id' => $this->input_id('user_id'),
+            'student_id' => $this->input_id('student_id'),
+            'grade_id' => $this->input_id('grade_id'),
+            'subject_id' => $this->input_id('subject_id'),
+            'council_id' => $this->input_id('council_id'),
+            'topic_id' => $this->input_id('topic_id')
         ];
         if ($this->input('min_value')) {
             $filters['value']['gte'] = $this->input('min_value');
@@ -34,11 +34,11 @@ class Evaluation extends Controller
         if ($this->input('max_value')) {
             $filters['value']['lte'] = $this->input('max_value');
         }
-        if ($this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        if ($min_updated_at = $this->input_date('min_updated_at')) {
+            $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        if ($max_updated_at = $this->input_date('max_updated_at')) {
+            $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
     }
@@ -53,12 +53,12 @@ class Evaluation extends Controller
         }
 
         $data = [
-            'user_id' => new ObjectId($this->input('user_id')),
-            'student_id' => new ObjectId($this->input('student_id')),
-            'grade_id' => new ObjectId($this->input('grade_id')),
-            'subject_id' => new ObjectId($this->input('subject_id')),
-            'council_id' => new ObjectId($this->input('council_id')),
-            'topic_id' => new ObjectId($this->input('topic_id')),
+            'user_id' => $this->input_id('user_id'),
+            'student_id' => $this->input_id('student_id'),
+            'grade_id' => $this->input_id('grade_id'),
+            'subject_id' => $this->input_id('subject_id'),
+            'council_id' => $this->input_id('council_id'),
+            'topic_id' => $this->input_id('topic_id'),
             'value' => $this->input('value'),
             'updated_at' => new UTCDateTime()
         ];
@@ -95,17 +95,17 @@ class Evaluation extends Controller
         }
 
         $data = array_filter([
-            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
-            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
-            'grade_id' => $this->input('grade_id') ? new ObjectId($this->input('grade_id')) : null,
-            'subject_id' => $this->input('subject_id') ? new ObjectId($this->input('subject_id')) : null,
-            'council_id' => $this->input('council_id') ? new ObjectId($this->input('council_id')) : null,
-            'topic_id' => $this->input('topic_id') ? new ObjectId($this->input('topic_id')) : null,
+            'user_id' => $this->input_id('user_id'),
+            'student_id' => $this->input_id('student_id'),
+            'grade_id' => $this->input_id('grade_id'),
+            'subject_id' => $this->input_id('subject_id'),
+            'council_id' => $this->input_id('council_id'),
+            'topic_id' => $this->input_id('topic_id'),
             'value' => $this->input('value'),
             'updated_at' => new UTCDateTime()
         ]);
 
-        $criteria = ['_id' => new ObjectId($this->input('id'))];
+        $criteria = ['_id' => $this->input_id('id')];
         if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE_EVALUATION'], $this->prettify());
@@ -136,7 +136,7 @@ class Evaluation extends Controller
             ], $this->prettify());
         }
         
-        $this->get_collection()->deleteOne(['_id' => $this->input('id')]);
+        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
     }
 
     private function validate_delete() : bool {
