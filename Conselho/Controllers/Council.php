@@ -19,6 +19,7 @@ class Council extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'start_date' => [],
             'end_date' => [],
             'updated_at' => [],

@@ -19,6 +19,7 @@ class StudentObservation extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'user_id' => $this->input_id('user_id'),
             'student_id' => $this->input_id('student_id'),
             'grade_id' => $this->input_id('grade_id'),

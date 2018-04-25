@@ -19,6 +19,7 @@ class Topic extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'school_id' => $this->input_id('school_id'),
             'topic_type_id' => $this->input_id('topic_type_id'),
             'updated_at' => []

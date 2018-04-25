@@ -17,6 +17,7 @@ class School extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {

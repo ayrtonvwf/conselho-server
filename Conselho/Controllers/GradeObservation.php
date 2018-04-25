@@ -19,6 +19,7 @@ class GradeObservation extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'updated_at' => [],
             'council_id' => $this->input_id('council_id'),
             'user_id' => $this->input_id('user_id'),

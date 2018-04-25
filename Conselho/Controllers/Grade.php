@@ -19,6 +19,7 @@ class Grade extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'level' => [],
             'updated_at' => [],
             'school_id' => $this->input_id('school_id')

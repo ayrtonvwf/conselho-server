@@ -19,6 +19,7 @@ class Role extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'user_id' => $this->input_id('user_id'),
             'role_type_id' => $this->input_id('role_type_id'),
             'school_id' => $this->input_id('school_id'),

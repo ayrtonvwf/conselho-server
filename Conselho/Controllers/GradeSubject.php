@@ -19,6 +19,7 @@ class GradeSubject extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'grade_id' => $this->input_id('grade_id'),
             'subject_id' => $this->input_id('subject_id'),
             'user_id' => $this->input_id('user_id'),

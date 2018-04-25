@@ -19,6 +19,7 @@ class Evaluation extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'value' => [],
             'updated_at' => [],
             'user_id' => $this->input_id('user_id'),

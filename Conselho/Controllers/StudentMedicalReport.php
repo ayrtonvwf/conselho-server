@@ -19,6 +19,7 @@ class StudentMedicalReport extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'student_id' => $this->input_id('student_id'),
             'updated_at' => []
         ];

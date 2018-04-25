@@ -19,6 +19,7 @@ class StudentGrade extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'grade_id' => $this->input_id('grade_id'),
             'student_id' => $this->input_id('student_id'),
             'updated_at' => []

@@ -19,6 +19,7 @@ class Subject extends Controller
 
     private function get_filters() : array {
         $filters = [
+            '_id' => $this->input_id('id'),
             'school_id' => $this->input_id('school_id'),
             'updated_at' => []
         ];
