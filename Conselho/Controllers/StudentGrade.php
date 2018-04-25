@@ -10,10 +10,34 @@ class StudentGrade extends Controller
     }
 
     public function get() {
+        if (!$this->validate_get()) {
+            http_response_code(400);
+            return json_encode([
+                'error' => 'INVALID_INPUT',
+                'error_messages' => $this->get_validation_errors()
+            ], $this->prettify());
+        }
+
         $collection = $this->get_collection();
         $filters = $this->get_filters();
         $results = $collection->find($filters)->toArray();
         return json_encode(['results' => $results], $this->prettify());
+    }
+
+    private function validate_get() : bool {
+        $rules = [
+            'id' => ['optional', 'objectId', 'inCollection'],
+            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
+            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
+            'min_number' => ['optional', 'integer', ['min', 1]],
+            'max_number' => ['optional', 'integer', ['min', 1]],
+            'max_start'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'min_start'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']]
+        ];
+
+        return $this->run_validation($rules);
     }
 
     private function get_filters() : array {
@@ -21,25 +45,21 @@ class StudentGrade extends Controller
             '_id' => $this->input_id('id'),
             'grade_id' => $this->input_id('grade_id'),
             'student_id' => $this->input_id('student_id'),
+            'number' => [],
+            'start' => [],
             'updated_at' => []
         ];
-        if ($this->input('search')) {
-            $filters['$text'] = [
-                'search' => $this->input('search'),
-                'language' => 'pt'
-            ];
+        if ($min_number = $this->input('min_number')) {
+            $filters['number']['gte'] = $min_number;
         }
-        if ($this->input('min_number')) {
-            $filters['number']['gte'] = $this->input('min_number');
+        if ($max_number = $this->input('max_number')) {
+            $filters['number']['lte'] = $max_number;
         }
-        if ($this->input('max_number')) {
-            $filters['number']['lte'] = $this->input('max_number');
+        if ($min_start = $this->input_date('min_start')) {
+            $filters['start']['gte'] = $min_start;
         }
-        if ($this->input('min_start')) {
-            $filters['start']['gte'] = $this->input('min_start');
-        }
-        if ($this->input('max_start')) {
-            $filters['start']['lte'] = $this->input('max_start');
+        if ($max_start = $this->input_date('max_start')) {
+            $filters['start']['lte'] = $max_start;
         }
         if ($min_updated_at = $this->input('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
