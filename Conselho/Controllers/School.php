@@ -1,6 +1,5 @@
 <?php
 namespace Conselho\Controllers;
-use MiladRahimi\PHPRouter\Request;
 use Conselho\Controller;
 
 class School extends Controller

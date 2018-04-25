@@ -1,8 +1,6 @@
 <?php
 namespace Conselho\Controllers;
-use MiladRahimi\PHPRouter\Request;
 use Conselho\Controller;
-use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 
 class User extends Controller

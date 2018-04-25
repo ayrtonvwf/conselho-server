@@ -1,4 +1,5 @@
 <?php
+namespace Conselho\Controllers;
 use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;

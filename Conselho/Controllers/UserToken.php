@@ -1,9 +1,8 @@
 <?php
 namespace Conselho\Controllers;
-use MiladRahimi\PHPRouter\Request;
 use Conselho\Controller;
 use MongoDB\BSON\UTCDateTime;
-use DateTime, DateInterval;
+use DateTime;
 
 class UserToken extends Controller
 {
