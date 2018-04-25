@@ -4,8 +4,71 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "017ca4980476007d0c09d8fcc968700a",
+    "content-hash": "980c40c3ad1dab8e2b4bc91573a70420",
     "packages": [
+        {
+            "name": "alcaeus/mongo-php-adapter",
+            "version": "1.0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/alcaeus/mongo-php-adapter.git",
+                "reference": "fea3f8333c7b22dde97d7dbe8a82528fc5c27992"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/alcaeus/mongo-php-adapter/zipball/fea3f8333c7b22dde97d7dbe8a82528fc5c27992",
+                "reference": "fea3f8333c7b22dde97d7dbe8a82528fc5c27992",
+                "shasum": ""
+            },
+            "require": {
+                "ext-hash": "*",
+                "mongodb/mongodb": "^1.0.1",
+                "php": "^5.5 || ^7.0"
+            },
+            "provide": {
+                "ext-mongo": "1.6.14"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8 || ^5.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Mongo": "lib/Mongo"
+                },
+                "psr-4": {
+                    "Alcaeus\\MongoDbAdapter\\": "lib/Alcaeus/MongoDbAdapter"
+                },
+                "files": [
+                    "lib/Mongo/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "alcaeus",
+                    "email": "alcaeus@alcaeus.org"
+                },
+                {
+                    "name": "Olivier Lechevalier",
+                    "email": "olivier.lechevalier@gmail.com"
+                }
+            ],
+            "description": "Adapter to provide ext-mongo interface on top of mongo-php-libary",
+            "keywords": [
+                "database",
+                "mongodb"
+            ],
+            "time": "2017-01-29T08:35:26+00:00"
+        },
         {
             "name": "miladrahimi/phprouter",
             "version": "v2.3.5",
@@ -117,6 +180,50 @@
                 "persistence"
             ],
             "time": "2018-04-19T17:20:30+00:00"
+        },
+        {
+            "name": "purekid/mongodm",
+            "version": "1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/purekid/mongodm.git",
+                "reference": "45a3b22dbcf66b456b598d48e0872fdc8e242de8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/purekid/mongodm/zipball/45a3b22dbcf66b456b598d48e0872fdc8e242de8",
+                "reference": "45a3b22dbcf66b456b598d48e0872fdc8e242de8",
+                "shasum": ""
+            },
+            "require": {
+                "alcaeus/mongo-php-adapter": "1.0.9"
+            },
+            "require-dev": {
+                "chriskite/phactory": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Purekid\\Mongodm\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael.Gan",
+                    "homepage": "http://github/purekid"
+                }
+            ],
+            "description": "MongoDB ORM that includes support for references,embed and multilevel inheritance.",
+            "keywords": [
+                "mongodb",
+                "mongodm",
+                "orm"
+            ],
+            "time": "2017-03-02T03:20:33+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
