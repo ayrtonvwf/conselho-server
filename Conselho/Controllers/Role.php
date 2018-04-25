@@ -34,7 +34,7 @@ class Role extends Controller
             'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'aproved'  => ['optional', 'boolean'],
+            'approved'  => ['optional', 'boolean'],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
 
@@ -56,8 +56,8 @@ class Role extends Controller
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         $filters = array_filter($filters);
-        if ($this->input('aproved') !== null) {
-            $filters['aproved'] = (bool) $this->input('aproved');
+        if ($this->input('approved') !== null) {
+            $filters['approved'] = (bool) $this->input('approved');
         }
         return $filters;
     }
@@ -67,7 +67,7 @@ class Role extends Controller
             'user_id' => $this->input_id('user_id'),
             'role_type_id' => $this->input_id('role_type_id'),
             'school_id' => $this->input_id('school_id'),
-            'aproved' => (bool) $this->input('aproved')
+            'approved' => (bool) $this->input('approved')
         ];
     }
 
@@ -95,7 +95,7 @@ class Role extends Controller
             'user_id' => ['required', 'objectId', ['inCollection', 'user']],
             'role_type_id' => ['required', 'objectId', ['inCollection', 'role_type']],
             'school_id' => ['required', 'objectId', ['inCollection', 'school']],
-            'aproved' => ['required', 'boolean']
+            'approved' => ['required', 'boolean']
         ];
 
         return $this->run_validation($rules);
@@ -128,7 +128,7 @@ class Role extends Controller
             'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
             'role_type_id' => ['optional', 'objectId', ['inCollection', 'role_type']],
             'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
-            'aproved' => ['optional', 'boolean']
+            'approved' => ['optional', 'boolean']
         ];
 
         return $this->run_validation($rules);

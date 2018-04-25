@@ -10,7 +10,7 @@ class GradeSubject extends Model
         'grade_id' => ['type' => Model::DATA_TYPE_REFERENCE, 'model' => 'Conselho\Models\Grade'],
         'subject_id' => ['type' => Model::DATA_TYPE_REFERENCE, 'model' => 'Conselho\Models\Subject'],
         'user_id' => ['type' => Model::DATA_TYPE_REFERENCE, 'model' => 'Conselho\Models\User'],
-        'aproved' => ['type' => Model::DATA_TYPE_BOOLEAN],
+        'approved' => ['type' => Model::DATA_TYPE_BOOLEAN],
         'updated_at' => ['type' => Model::DATA_TYPE_DATE]
     ];
 

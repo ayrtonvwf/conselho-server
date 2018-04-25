@@ -34,7 +34,7 @@ class GradeSubject extends Controller
             'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'aproved' => ['optional', 'boolean'],
+            'approved' => ['optional', 'boolean'],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
 
@@ -56,8 +56,8 @@ class GradeSubject extends Controller
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         $filters = array_filter($filters);
-        if ($this->input('aproved') !== null) {
-            $filters['aproved'] = (bool) $this->input('aproved');
+        if ($this->input('approved') !== null) {
+            $filters['approved'] = (bool) $this->input('approved');
         }
         return $filters;
     }
@@ -67,7 +67,7 @@ class GradeSubject extends Controller
             'grade_id' => $this->input_id('grade_id'),
             'subject_id' => $this->input_id('subject_id'),
             'user_id' => $this->input_id('user_id'),
-            'aproved' => (bool) $this->input('aproved')
+            'approved' => (bool) $this->input('approved')
         ];
     }
 
@@ -95,7 +95,7 @@ class GradeSubject extends Controller
             'grade_id' => ['required', 'objectId', ['inCollection', 'grade']],
             'subject_id' => ['required', 'objectId', ['inCollection', 'subject']],
             'user_id' => ['required', 'objectId', ['inCollection', 'user']],
-            'aproved' => ['required', 'boolean']
+            'approved' => ['required', 'boolean']
         ];
 
         return $this->run_validation($rules);
@@ -128,7 +128,7 @@ class GradeSubject extends Controller
             'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
             'subject_id' => ['optional', 'objectId', ['inCollection', 'subject']],
             'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
-            'aproved' => ['optional', 'boolean']
+            'approved' => ['optional', 'boolean']
         ];
 
         return $this->run_validation($rules);

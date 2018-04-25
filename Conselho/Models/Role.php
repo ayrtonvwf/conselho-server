@@ -10,7 +10,7 @@ class Role extends Model
         'user_id' => ['type' => Model::DATA_TYPE_REFERENCE, 'model' => 'Conselho\Models\User'],
         'role_type_id' => ['type' => Model::DATA_TYPE_REFERENCE, 'model' => 'Conselho\Models\RoleType'],
         'school_id' => ['type' => Model::DATA_TYPE_REFERENCE, 'model' => 'Conselho\Models\School'],
-        'aproved' => ['type' => Model::DATA_TYPE_BOOLEAN],
+        'approved' => ['type' => Model::DATA_TYPE_BOOLEAN],
         'updated_at' => ['type' => Model::DATA_TYPE_DATE]
     ];
 

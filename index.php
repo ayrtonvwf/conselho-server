@@ -191,7 +191,7 @@ if (getenv('env') == 'dev') {
             'user_id' => $user_id,
             'role_type_id' => $role_type_id,
             'school_id' => $school_id,
-            'aproved' => true,
+            'approved' => true,
             'updated_at' => $now
         ])->getInsertedId();
 
@@ -213,7 +213,7 @@ if (getenv('env') == 'dev') {
             'grade_id' => $grade_id,
             'subject_id' => $subject_id,
             'user_id' => $user_id,
-            'aproved' => true,
+            'approved' => true,
             'updated_at' => $now
         ]);
 

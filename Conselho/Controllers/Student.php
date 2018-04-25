@@ -89,8 +89,7 @@ class Student extends Controller
     private function validate_post() : bool {
         $rules = [
             'name' => ['required', 'string', ['lengthBetween', 5, 50]],
-            'school_id' => ['required', 'objectId', ['inCollection', 'school']],
-            'aproved' => ['required', 'boolean']
+            'school_id' => ['required', 'objectId', ['inCollection', 'school']]
         ];
 
         return $this->run_validation($rules);
