@@ -21,6 +21,11 @@ class User extends Controller
         $collection = $this->get_collection();
         $filters = $this->get_filters();
         $results = $collection->find($filters)->toArray();
+        $results = $this->sanitize_output($results);
+        $results = array_map(function($result) {
+            unset($result['password']);
+            return $result;
+        }, $results);
         return json_encode(['results' => $results], $this->prettify());
     }
 

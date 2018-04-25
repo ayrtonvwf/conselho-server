@@ -1,6 +1,6 @@
 <?php
 namespace Conselho;
-use MongoDB;
+use MongoDB, DateTime;
 use Valitron\Validator;
 use MongoDB\Model\BSONDocument;
 use MongoDB\BSON\{ObjectId, UTCDateTime};
@@ -23,6 +23,40 @@ abstract class Controller {
         $this->input_data = json_decode(file_get_contents('php://input'), true) ?? [];
 
         $this->prettify = (bool) ($_SERVER['HTTP_PRETTIFY'] ?? false);
+    }
+
+    protected function sanitize_output($output) : array {
+        $output = (array) $output;
+
+        $output = array_map(function($value) {
+           if (is_array($value)) {
+               return $this->sanitize_output($value);
+           }
+           if ($value instanceof ObjectId) {
+               return (string) $value;
+           }
+           if ($value instanceof UTCDateTime) {
+               return $this->datetime_to_string($value);
+           }
+           return $value;
+        }, $output);
+
+        if (isset($output['_id'])) {
+            $output['id'] = $output['_id'];
+            $id = new ObjectId($output['id']);
+            $output['created_at'] = date('Y-m-d H:i:s', $id->getTimestamp());
+            unset($output['id']);
+        }
+
+        return $output;
+    }
+
+    protected function datetime_to_string(UTCDateTime $date) : string {
+        $format = 'Y-m-d';
+        if (($date = $date->toDateTime()) > new DateTime(date('Y-m-d'))) {
+            $format .= ' H:i:s';
+        }
+        return $date->format($format);
     }
 
     protected function prettify() : ?int {

@@ -20,6 +20,7 @@ class RoleType extends Controller
         $collection = $this->get_collection();
         $filters = $this->get_filters();
         $results = $collection->find($filters)->toArray();
+        $results = $this->sanitize_output($results);
         return json_encode(['results' => $results], $this->prettify());
     }
 

@@ -13,6 +13,7 @@ class UserToken extends Controller
     public function get() {
         $collection = $this->get_collection();
         $results = $collection->find([])->toArray();
+        $results = $this->sanitize_output($results);
         return json_encode(['results' => $results], $this->prettify());
     }
 
