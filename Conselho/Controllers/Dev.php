@@ -17,31 +17,41 @@ class Dev extends Controller
         $db->drop();
 
         $collection_names = [
-            'council',
-            'evaluation',
-            'grade_observation',
-            'grade_subject',
-            'grade',
-            'role_type',
-            'role',
-            'school',
-            'student_grade',
-            'student_medical_report',
-            'student_observation',
-            'student',
-            'subject',
-            'topic_type',
-            'topic',
-            'user_token',
-            'user'
+            'council' => ['name'],
+            'evaluation' => [],
+            'grade_observation' => ['description'],
+            'grade_subject' => [],
+            'grade' => ['name'],
+            'role_type' => ['name'],
+            'role' => [],
+            'school' => ['name'],
+            'student_grade' => [],
+            'student_medical_report' => ['description'],
+            'student_observation' => ['description'],
+            'student' => ['name'],
+            'subject' => ['name'],
+            'topic_type' => ['name'],
+            'topic' => ['name'],
+            'user_token' => [],
+            'user' => ['name', 'email']
         ];
 
-        array_walk($collection_names, function ($collection_name) use ($db) {
+        array_walk($collection_names, function ($text_indexes, $collection_name) use ($db) {
             $schema = json_decode(file_get_contents(BASE_PATH."/schema/$collection_name.json"));
             try {
                 $db->createCollection($collection_name, ['validator' => ['$jsonSchema' => $schema]]);
             } catch (\Exception $error) {
                 echo "Cannot create collection $collection_name:\n\n";
+                print_r($error);
+                exit;
+            }
+            try {
+                $text_indexes = array_map(function($field_name) {
+                    return [$field_name => 'text'];
+                }, $text_indexes);
+                $db->$collection_name->createIndex($text_indexes);
+            } catch (\Exception $error) {
+                echo "Cannot create indexes of $collection_name";
                 print_r($error);
                 exit;
             }

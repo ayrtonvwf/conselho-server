@@ -13,10 +13,35 @@ class StudentObservation extends Controller
 
     public function get() {
         $collection = $this->get_collection();
-        $results = $collection->find([])->toArray();
+        $filters = $this->get_filters();
+        $results = $collection->find($filters)->toArray();
         return json_encode(['results' => $results], $this->prettify());
     }
-    
+
+    private function get_filters() : array {
+        $filters = [
+            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
+            'student_id' => $this->input('student_id') ? new ObjectId($this->input('student_id')) : null,
+            'grade_id' => $this->input('grade_id') ? new ObjectId($this->input('grade_id')) : null,
+            'subject_id' => $this->input('subject_id') ? new ObjectId($this->input('subject_id')) : null,
+            'council_id' => $this->input('council_id') ? new ObjectId($this->input('council_id')) : null,
+            'updated_at' => []
+        ];
+        if ($this->input('search')) {
+            $filters['$text'] = [
+                'search' => $this->input('search'),
+                'language' => 'pt'
+            ];
+        }
+        if ($this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        }
+        if ($this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        }
+        return array_filter($filters);
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);

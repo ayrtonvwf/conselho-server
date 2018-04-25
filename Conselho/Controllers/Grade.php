@@ -1,6 +1,5 @@
 <?php
 namespace Conselho\Controllers;
-use MiladRahimi\PHPRouter\Request;
 use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
@@ -13,10 +12,38 @@ class Grade extends Controller
 
     public function get() {
         $collection = $this->get_collection();
-        $results = $collection->find([])->toArray();
+        $filters = $this->get_filters();
+        $results = $collection->find($filters)->toArray();
         return json_encode(['results' => $results], $this->prettify());
     }
-    
+
+    private function get_filters() : array {
+        $filters = [
+            'level' => [],
+            'updated_at' => [],
+            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null
+        ];
+        if ($this->input('search')) {
+            $filters['$text'] = [
+                'search' => $this->input('search'),
+                'language' => 'pt'
+            ];
+        }
+        if ($this->input('min_level')) {
+            $filters['level']['gte'] = $this->input('min_level');
+        }
+        if ($this->input('max_level')) {
+            $filters['level']['lte'] = $this->input('max_level');
+        }
+        if ($this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        }
+        if ($this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        }
+        return array_filter($filters);
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);

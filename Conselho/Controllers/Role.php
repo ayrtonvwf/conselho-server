@@ -13,10 +13,31 @@ class Role extends Controller
 
     public function get() {
         $collection = $this->get_collection();
-        $results = $collection->find([])->toArray();
+        $filters = $this->get_filters();
+        $results = $collection->find($filters)->toArray();
         return json_encode(['results' => $results], $this->prettify());
     }
-    
+
+    private function get_filters() : array {
+        $filters = [
+            'user_id' => $this->input('user_id') ? new ObjectId($this->input('user_id')) : null,
+            'role_type_id' => $this->input('role_type_id') ? new ObjectId($this->input('role_type_id')) : null,
+            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'updated_at' => [],
+        ];
+        if ($this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        }
+        if ($this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        }
+        $filters = array_filter($filters);
+        if ($this->input('aproved') !== null) {
+            $filters['aproved'] = (bool) $this->input('aproved');
+        }
+        return $filters;
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);

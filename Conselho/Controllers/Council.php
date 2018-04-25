@@ -1,6 +1,4 @@
 <?php
-namespace Conselho\Controllers;
-use MiladRahimi\PHPRouter\Request;
 use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
@@ -13,8 +11,38 @@ class Council extends Controller
 
     public function get() {
         $collection = $this->get_collection();
-        $results = $collection->find([])->toArray();
+        $filters = $this->get_filters();
+        $results = $collection->find($filters)->toArray();
         return json_encode(['results' => $results], $this->prettify());
+    }
+
+    private function get_filters() : array {
+        $filters = [
+            'start_date' => [],
+            'end_date' => [],
+            'updated_at' => [],
+            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'search' => $this->input('search')
+        ];
+        if ($this->input('min_start_date')) {
+            $filters['start_date']['gte'] = new UTCDateTime($this->input('min_start_date'));
+        }
+        if ($this->input('max_start_date')) {
+            $filters['start_date']['lte'] = new UTCDateTime($this->input('max_start_date'));
+        }
+        if ($this->input('min_end_date')) {
+            $filters['end_date']['gte'] = new UTCDateTime($this->input('min_end_date'));
+        }
+        if ($this->input('max_end_date')) {
+            $filters['end_date']['lte'] = new UTCDateTime($this->input('max_end_date'));
+        }
+        if ($this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        }
+        if ($this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        }
+        return array_filter($filters);
     }
     
     public function post() {

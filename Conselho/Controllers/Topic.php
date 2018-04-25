@@ -13,8 +13,30 @@ class Topic extends Controller
 
     public function get() {
         $collection = $this->get_collection();
-        $results = $collection->find([])->toArray();
+        $filters = $this->get_filters();
+        $results = $collection->find($filters)->toArray();
         return json_encode(['results' => $results], $this->prettify());
+    }
+
+    private function get_filters() : array {
+        $filters = [
+            'school_id' => $this->input('school_id') ? new ObjectId($this->input('school_id')) : null,
+            'topic_type_id' => $this->input('topic_type_id') ? new ObjectId($this->input('topic_type_id')) : null,
+            'updated_at' => []
+        ];
+        if ($this->input('search')) {
+            $filters['$text'] = [
+                'search' => $this->input('search'),
+                'language' => 'pt'
+            ];
+        }
+        if ($this->input('min_updated_at')) {
+            $filters['updated_at']['gte'] = new UTCDateTime($this->input('min_updated_at'));
+        }
+        if ($this->input('max_updated_at')) {
+            $filters['updated_at']['lte'] = new UTCDateTime($this->input('max_updated_at'));
+        }
+        return array_filter($filters);
     }
 
     public function post() {
