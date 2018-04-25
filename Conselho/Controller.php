@@ -81,9 +81,6 @@ abstract class Controller {
 
     protected function get_collection() : MongoDB\Collection {
         $collection_name = $this->get_collection_name();
-        if (!$collection_name) {
-            throw new \Exception('No default collection set');
-        }
         return $this->get_db()->$collection_name;
     }
 
