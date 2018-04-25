@@ -4,10 +4,6 @@ use Conselho\Controller;
 
 class School extends Controller
 {
-    public function __construct() {
-        parent::__construct('school');
-    }
-
     public function get() {
         if (!$this->validate_get()) {
             http_response_code(400);
@@ -17,14 +13,14 @@ class School extends Controller
             ], $this->prettify());
         }
 
-        $collection = $this->get_collection();
         $filters = $this->get_filters();
         $pagination = $this->get_pagination();
-        $results = $collection->find($filters, $pagination)->toArray();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
         $results = $this->sanitize_output($results);
         $return = [
             'results' => $results,
-            'all_results' => $collection->count($filters),
+            'all_results' => $default_model::count($filters),
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());

@@ -1,20 +1,19 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use MongoDB\BSON\UTCDateTime;
+use Conselho\Models;
 use DateTime;
 
 class UserToken extends Controller
 {
-    public function __construct() {
-        parent::__construct('user_token');
-    }
-
     public function get() {
-        $collection = $this->get_collection();
-        $results = $collection->find([])->toArray();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find()->toArray();
         $results = $this->sanitize_output($results);
-        return json_encode(['results' => $results], $this->prettify());
+        $return = [
+            'results' => $results
+        ];
+        return json_encode($return, $this->prettify());
     }
 
     public function post() : string {
@@ -25,10 +24,8 @@ class UserToken extends Controller
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
-        
-        $db = $this->get_db();
 
-        $user = $db->user->findOne(['email' => $this->input('email')]);
+        $user = Models\User::one(['email' => $this->input('email')]);
         if (!$user) {
             http_response_code(400);
             return json_encode(['error' => 'EMAIL_NOT_FOUND'], $this->prettify());
@@ -41,18 +38,18 @@ class UserToken extends Controller
 
         if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
             $user->password = password_hash($this->input('password'), PASSWORD_DEFAULT);
-            $db->user->updateOne(['_id' => $user->_id], ['$set' => ['password' => $user->password]]);
+            $user->save();
         }
 
+        $default_model = $this->get_default_model();
         $token = $this->generate_token();
         $token['user_id'] = $user->_id;
-        $token['updated_at'] = new UTCDateTime();
-        
-        $this->get_collection()->insertOne($token);
+        $entity = new $default_model($token);
+        $entity->save();
 
         $output = [
             'value' => $token['value'],
-            'expires_at' => $token['expires_at']->toDateTime()->format('Y-m-d H:i:s'),
+            'expires_at' => $token['expires_at']->format('Y-m-d H:i:s'),
             'user_id' => (string) $token['user_id']
         ];
         return json_encode($output, $this->prettify());
@@ -70,13 +67,12 @@ class UserToken extends Controller
     private function generate_token() : array {
         return [
             'value' => sodium_bin2hex(random_bytes(32)),
-            'expires_at' => new UTCDateTime(new DateTime('+1 day'))
+            'expires_at' => new DateTime(new DateTime('+1 day'))
         ];
     }
 
     public function delete() : void {
         $current_token = $this->get_token();
-
-        $this->get_collection()->deleteOne(['value' => $current_token]);
+        UserToken::one(['value' => $current_token])->delete();
     }
 }

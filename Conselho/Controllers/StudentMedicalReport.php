@@ -2,14 +2,9 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use MongoDB\BSON\ObjectId;
-use MongoDB\BSON\UTCDateTime;
 
 class StudentMedicalReport extends Controller
 {
-    public function __construct() {
-        parent::__construct('student_medical_report');
-    }
-
     public function get() {
         if (!$this->validate_get()) {
             http_response_code(400);
@@ -19,14 +14,14 @@ class StudentMedicalReport extends Controller
             ], $this->prettify());
         }
 
-        $collection = $this->get_collection();
         $filters = $this->get_filters();
         $pagination = $this->get_pagination();
-        $results = $collection->find($filters, $pagination)->toArray();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
         $results = $this->sanitize_output($results);
         $return = [
             'results' => $results,
-            'all_results' => $collection->count($filters),
+            'all_results' => $default_model::count($filters),
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -70,6 +65,14 @@ class StudentMedicalReport extends Controller
         return array_filter($filters);
     }
 
+    private function get_data() : array {
+        return [
+            'student_id' => $this->input_id('student_id'),
+            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($subject_id); }, $this->input('subject_ids')),
+            'description' => $this->input('description')
+        ];
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -79,18 +82,13 @@ class StudentMedicalReport extends Controller
             ], $this->prettify());
         }
 
-        $data = [
-            'student_id' => $this->input_id('student_id'),
-            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($subject_id); }, $this->input('subject_ids')),
-            'description' => $this->input('description'),
-            'updated_at' => new UTCDateTime()
-        ];
+        $data = $this->get_data();
+        $default_model = $this->get_default_model();
 
-        try {
-            $this->get_collection()->insertOne($data);
-        } catch (\Exception $e) {
+        $entity = new $default_model($data);
+        if (!$entity->save()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_INSERT_STUDENT_MEDICAL_REPORT'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
     }
 
@@ -113,17 +111,15 @@ class StudentMedicalReport extends Controller
             ], $this->prettify());
         }
 
-        $data = array_filter([
-            'student_id' => $this->input_id('student_id'),
-            'subject_ids' => array_map(function ($subject_id) { return new ObjectId($subject_id); }, $this->input('subject_ids')),
-            'description' => $this->input('description'),
-            'updated_at' => new UTCDateTime()
-        ]);
-
+        $default_model = $this->get_default_model();
         $criteria = ['_id' => $this->input_id('id')];
-        if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
+        $entity = $default_model::one($criteria);
+
+        $data = $this->get_data();
+
+        if (!$entity->update($data)) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_UPDATE_STUDENT_MEDICAL_REPORT'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
     }
 
@@ -146,8 +142,11 @@ class StudentMedicalReport extends Controller
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
-        
-        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
+
+        $default_model = $this->get_default_model();
+        $criteria = ['_id' => $this->input_id('id')];
+        $entity = $default_model::one($criteria);
+        $entity->delete();
     }
 
     private function validate_delete() : bool {

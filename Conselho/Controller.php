@@ -1,28 +1,41 @@
 <?php
 namespace Conselho;
-use MongoDB, DateTime;
+use DateTime, Exception;
 use Valitron\Validator;
-use MongoDB\Model\BSONDocument;
-use MongoDB\BSON\{ObjectId, UTCDateTime};
+use MongoDB\BSON\ObjectId;
+use Conselho\Models;
 
 abstract class Controller {
-    private $db;
     private $token;
     private $input_data = [];
     private $validation_errors = [];
     private $prettify = false;
-    private $collection_name = null;
+    private $default_model;
     
-    public function __construct(string $collection_name = null) {
-        $db_client = new MongoDB\Client;
-        $db_name = getenv('DB_NAME');
-        $this->db = $db_client->$db_name;
-        $this->collection_name = $collection_name;
+    public function __construct()
+    {
+        $this->setup_db();
+        $this->default_model = '\\Conselho\\Models\\'.get_called_class();
 
         $this->token = $_SERVER['HTTP_TOKEN'] ?? null;
         $this->input_data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-        $this->prettify = (bool) ($_SERVER['HTTP_PRETTIFY'] ?? false);
+        $this->prettify = (bool)($_SERVER['HTTP_PRETTIFY'] ?? false);
+    }
+
+    protected function get_default_model() : string {
+        return $this->default_model;
+    }
+
+    private function setup_db() : void {
+        $db_name = getenv('DB_NAME');
+        \Purekid\Mongodm\MongoDB::setConfigBlock($db_name, [
+            'connection' => [
+                'hostnames' => 'localhost',
+                'database' => $db_name,
+                'options' => []
+            ]
+        ]);
     }
 
     protected function get_pagination(int $limit = 50) : array {
@@ -44,7 +57,7 @@ abstract class Controller {
            if ($value instanceof ObjectId) {
                return (string) $value;
            }
-           if ($value instanceof UTCDateTime) {
+           if ($value instanceof DateTime) {
                return $this->datetime_to_string($value);
            }
            return $value;
@@ -60,9 +73,9 @@ abstract class Controller {
         return $output;
     }
 
-    protected function datetime_to_string(UTCDateTime $date) : string {
+    protected function datetime_to_string(DateTime $date) : string {
         $format = 'Y-m-d';
-        if (($date = $date->toDateTime()) > new DateTime(date('Y-m-d'))) {
+        if ($date > new DateTime(date('Y-m-d'))) {
             $format .= ' H:i:s';
         }
         return $date->format($format);
@@ -91,14 +104,14 @@ abstract class Controller {
 
         try {
             $object_id = new ObjectId($value);
-        } catch (\Exception $error) {
+        } catch (Exception $error) {
             return null;
         }
 
         return $object_id;
     }
 
-    protected function input_date(string $key) : ?UTCDateTime {
+    protected function input_date(string $key) : ?DateTime {
         $value = $this->input_raw($key);
 
         if (!$value) {
@@ -106,37 +119,17 @@ abstract class Controller {
         }
 
         try {
-            $date = new UTCDateTime($value);
-        } catch (\Exception $error) {
+            $date = new DateTime($value);
+        } catch (Exception $error) {
             return null;
         }
 
         return $date;
     }
 
-    protected function get_db() : MongoDB\Database {
-        return $this->db;
-    }
-
-    protected function get_collection_name() : ?string {
-        return $this->collection_name;
-    }
-
-    protected function get_collection() : MongoDB\Collection {
-        $collection_name = $this->get_collection_name();
-        return $this->get_db()->$collection_name;
-    }
-
-    protected function get_user() : ?BSONDocument {
-        if (!$this->token) {
-            return null;
-        }
-
-        $db = $this->get_db();
-
-        $token = $db->user_token->findOne(['value' => $this->token]);
-
-        return $db->user->findOne(['_id' => $token->user_id]);
+    protected function get_user() : Models\User {
+        $user_token = Models\UserToken::find(['value' => $this->token]);
+        return Models\User::one(['_id' => $user_token->user_id]);
     }
 
     protected function get_token() : ?string {
@@ -146,8 +139,9 @@ abstract class Controller {
     protected function run_validation(array $rules) : bool {
         $data = array_map('strip_tags', $this->input_data);
         $data = array_map('trim', $data);
-        
-        $db = $this->get_db();
+
+        $default_model = $this->default_model;
+
         $validator = new Validator($data);
 
         $validator->addRule('objectId', function($field, $objectId) {
@@ -158,18 +152,18 @@ abstract class Controller {
                 return false; // cannot parse object id
             }
         }, '{field} must be a valid ObjectID');
-        
-        $validator->addRule('inCollection', function($field, $objectId, array $params) use ($db) {
-            $collection_name = $params[0] ?? $this->get_collection_name();
+
+        $validator->addRule('inCollection', function($field, $objectId, array $params) use ($default_model) {
+            $model = "\\Council\\Models\\$params[0]" ?? $default_model;
             $search_criteria = ['_id' => new ObjectId($objectId)];
-            return (bool) $db->$collection_name->findOne($search_criteria);
+            return (bool) $model::one($search_criteria);
         }, '{field} not found in database');
 
-        $validator->addRule('notInCollection', function($field, $value, array $params) use ($db) {
-            $collection_name = $params[0] ?? $this->get_collection_name();
+        $validator->addRule('notInCollection', function($field, $value, array $params) use ($default_model) {
+            $model = "\\Council\\Model\\$params[0]" ?? $default_model;
             $except_for = $params[1] ?? null;
             $search_criteria = [$field => $value];
-            if (!$found = $db->$collection_name->findOne($search_criteria)) {
+            if (!$found = $model::one($search_criteria)) {
                 return true;
             }
             return $except_for && $found->_id == $except_for;

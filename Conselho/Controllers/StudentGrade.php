@@ -1,14 +1,9 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use MongoDB\BSON\UTCDateTime;
 
 class StudentGrade extends Controller
 {
-    public function __construct() {
-        parent::__construct('student_grade');
-    }
-
     public function get() {
         if (!$this->validate_get()) {
             http_response_code(400);
@@ -18,14 +13,14 @@ class StudentGrade extends Controller
             ], $this->prettify());
         }
 
-        $collection = $this->get_collection();
         $filters = $this->get_filters();
         $pagination = $this->get_pagination();
-        $results = $collection->find($filters, $pagination)->toArray();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
         $results = $this->sanitize_output($results);
         $return = [
             'results' => $results,
-            'all_results' => $collection->count($filters),
+            'all_results' => $default_model::count($filters),
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -78,6 +73,15 @@ class StudentGrade extends Controller
         return array_filter($filters);
     }
 
+    private function get_data() : array {
+        return     [
+            'grade_id' => $this->input_id('grade_id'),
+            'number' => (int) $this->input('number'),
+            'student_id' => $this->input_id('student_id'),
+            'start' => $this->input_date('start')
+        ];
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -87,19 +91,13 @@ class StudentGrade extends Controller
             ], $this->prettify());
         }
 
-        $data = [
-            'grade_id' => $this->input_id('grade_id'),
-            'number' => (int) $this->input('number'),
-            'student_id' => $this->input_id('student_id'),
-            'start' => $this->input_date('start'),
-            'updated_at' => new UTCDateTime()
-        ];
+        $data = $this->get_data();
+        $default_model = $this->get_default_model();
 
-        try {
-            $this->get_collection()->insertOne($data);
-        } catch (\Exception $e) {
+        $entity = new $default_model($data);
+        if (!$entity->save()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_INSERT_STUDENT_GRADE'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
     }
 
@@ -123,18 +121,15 @@ class StudentGrade extends Controller
             ], $this->prettify());
         }
 
-        $data = array_filter([
-            'grade_id' => $this->input_id('grade_id'),
-            'number' => (int) $this->input('number'),
-            'student_id' => $this->input_id('student_id'),
-            'start' => $this->input_date('start'),
-            'updated_at' => new UTCDateTime()
-        ]);
-
+        $default_model = $this->get_default_model();
         $criteria = ['_id' => $this->input_id('id')];
-        if (!$this->get_collection()->updateOne($criteria, ['$set' => $data])) {
+        $entity = $default_model::one($criteria);
+
+        $data = $this->get_data();
+
+        if (!$entity->update($data)) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_UPDATE_STUDENT_GRADE'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
     }
 
@@ -158,8 +153,11 @@ class StudentGrade extends Controller
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
-        
-        $this->get_collection()->deleteOne(['_id' => $this->input_id('id')]);
+
+        $default_model = $this->get_default_model();
+        $criteria = ['_id' => $this->input_id('id')];
+        $entity = $default_model::one($criteria);
+        $entity->delete();
     }
 
     private function validate_delete() : bool {

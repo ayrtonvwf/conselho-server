@@ -1,14 +1,9 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use MongoDB\BSON\UTCDateTime;
 
 class User extends Controller
 {
-    public function __construct() {
-        parent::__construct('user');
-    }
-
     public function get() {
         if (!$this->validate_get()) {
             http_response_code(400);
@@ -18,10 +13,10 @@ class User extends Controller
             ], $this->prettify());
         }
 
-        $collection = $this->get_collection();
         $filters = $this->get_filters();
         $pagination = $this->get_pagination();
-        $results = $collection->find($filters, $pagination)->toArray();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
         $results = $this->sanitize_output($results);
         $results = array_map(function($result) {
             unset($result['password']);
@@ -29,7 +24,7 @@ class User extends Controller
         }, $results);
         $return = [
             'results' => $results,
-            'all_results' => $collection->count($filters),
+            'all_results' => $default_model::count($filters),
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -67,6 +62,16 @@ class User extends Controller
         return array_filter($filters);
     }
 
+    private function get_data() : array {
+        return [
+            'name' => $this->input('name'),
+            'email' => $this->input('email'),
+            'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null,
+            'dev' => false,
+            'updated_at' => new UTCDateTime()
+        ];
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -76,19 +81,13 @@ class User extends Controller
             ], $this->prettify());
         }
 
-        $data = [
-            'name' => $this->input('name'),
-            'email' => $this->input('email'),
-            'password' => password_hash($this->input_raw('password'), PASSWORD_DEFAULT),
-            'dev' => false,
-            'updated_at' => new UTCDateTime()
-        ];
-        
-        try {
-            $this->get_collection()->insertOne($data);
-        } catch (\Exception $e) {
+        $data = $this->get_data();
+        $default_model = $this->get_default_model();
+
+        $entity = new $default_model($data);
+        if (!$entity->save()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_INSERT_USER'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
     }
 
@@ -111,18 +110,15 @@ class User extends Controller
             ], $this->prettify());
         }
 
-        $user = $this->get_user();
+        $default_model = $this->get_default_model();
+        $criteria = ['_id' => $this->input_id('id')];
+        $entity = $default_model::one($criteria);
 
-        $data = array_filter([
-            'name' => $this->input('name'),
-            'email' => $this->input('email'),
-            'password' => $this->input('password') ? password_hash($this->input('password'), PASSWORD_DEFAULT) : null,
-            'updated_at' => new UTCDateTime()
-        ]);
+        $data = $this->get_data();
 
-        if (!$this->get_collection()->updateOne(['_id' => $user->_id], ['$set' => $data])) {
+        if (!$entity->update($data)) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_UPDATE_USER'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
     }
 
@@ -137,7 +133,6 @@ class User extends Controller
     }
 
     public function delete() {
-        $user = $this->get_user();
-        $this->get_collection()->deleteOne(['_id' => $user->_id]);
+        $this->get_user()->delete();
     }
 }
