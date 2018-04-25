@@ -20,9 +20,15 @@ class StudentObservation extends Controller
 
         $collection = $this->get_collection();
         $filters = $this->get_filters();
-        $results = $collection->find($filters)->toArray();
+        $pagination = $this->get_pagination();
+        $results = $collection->find($filters, $pagination)->toArray();
         $results = $this->sanitize_output($results);
-        return json_encode(['results' => $results], $this->prettify());
+        $return = [
+            'results' => $results,
+            'all_results' => $collection->count($filters),
+            'per_page' => $pagination['limit']
+        ];
+        return json_encode($return, $this->prettify());
     }
 
     private function validate_get() : bool {
@@ -35,7 +41,8 @@ class StudentObservation extends Controller
             'council_id' => ['optional', 'objectId', ['inCollection', 'council']],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'search'  => ['optional', ['lengthMin', 3]]
+            'search'  => ['optional', ['lengthMin', 3]],
+            'page' => ['optional', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);

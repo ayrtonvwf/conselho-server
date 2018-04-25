@@ -20,9 +20,15 @@ class StudentGrade extends Controller
 
         $collection = $this->get_collection();
         $filters = $this->get_filters();
-        $results = $collection->find($filters)->toArray();
+        $pagination = $this->get_pagination();
+        $results = $collection->find($filters, $pagination)->toArray();
         $results = $this->sanitize_output($results);
-        return json_encode(['results' => $results], $this->prettify());
+        $return = [
+            'results' => $results,
+            'all_results' => $collection->count($filters),
+            'per_page' => $pagination['limit']
+        ];
+        return json_encode($return, $this->prettify());
     }
 
     private function validate_get() : bool {
@@ -35,7 +41,8 @@ class StudentGrade extends Controller
             'max_start'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_start'  => ['optional', ['dateFormat', 'Y-m-d']],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']]
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'page' => ['optional', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);

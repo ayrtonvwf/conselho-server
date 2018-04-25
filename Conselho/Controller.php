@@ -25,6 +25,15 @@ abstract class Controller {
         $this->prettify = (bool) ($_SERVER['HTTP_PRETTIFY'] ?? false);
     }
 
+    protected function get_pagination(int $limit = 50) : array {
+        $page = (int) $this->input('page');
+        $skip = $limit*$page-1;
+        return [
+            'limit' => $limit,
+            'skip' => $skip
+        ];
+    }
+
     protected function sanitize_output($output) : array {
         $output = (array) $output;
 
