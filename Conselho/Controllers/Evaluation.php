@@ -4,47 +4,6 @@ use Conselho\Controller;
 
 class Evaluation extends Controller
 {
-    public function get() {
-        if (!$this->validate_get()) {
-            http_response_code(400);
-            return json_encode([
-                'error' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
-        }
-
-        $filters = $this->get_filters();
-        $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
-        $return = [
-            'results' => $results,
-            'all_results' => $default_model::count($filters),
-            'per_page' => $pagination['limit']
-        ];
-        return json_encode($return, $this->prettify());
-    }
-
-    private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
-            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
-            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
-            'subject_id' => ['optional', 'objectId', ['inCollection', 'subject_id']],
-            'council_id' => ['optional', 'objectId', ['inCollection', 'council_id']],
-            'topic_id' => ['optional', 'objectId', ['inCollection', 'topic_id']],
-            'min_value' => ['optional'],
-            'max_value' => ['optional'],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'page' => ['optional', 'integer', ['min', 1]]
-        ];
-
-        return $this->run_validation($rules);
-    }
-
     private function get_filters() : array {
         $filters = [
             '_id' => $this->input_id('id'),
@@ -84,6 +43,88 @@ class Evaluation extends Controller
         ];
     }
 
+    // VALIDATION
+
+    private function validate_get() : bool {
+        $rules = [
+            'id' => ['optional', 'objectId', 'inCollection'],
+            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
+            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
+            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
+            'subject_id' => ['optional', 'objectId', ['inCollection', 'subject_id']],
+            'council_id' => ['optional', 'objectId', ['inCollection', 'council_id']],
+            'topic_id' => ['optional', 'objectId', ['inCollection', 'topic_id']],
+            'min_value' => ['optional'],
+            'max_value' => ['optional'],
+            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'page' => ['optional', 'integer', ['min', 1]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_post() : bool {
+        $rules = [
+            'user_id' => ['required', 'objectId', ['inCollection', 'user']],
+            'student_id' => ['required', 'objectId', ['inCollection', 'student']],
+            'grade_id' => ['required', 'objectId', ['inCollection', 'grade']],
+            'subject_id' => ['required', 'objectId', ['inCollection', 'subject']],
+            'council_id' => ['required', 'objectId', ['inCollection', 'council']],
+            'topic_id' => ['required', 'objectId', ['inCollection', 'topic']],
+            'value' => ['required']
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_put() : bool {
+        $rules = [
+            'id' => ['required', 'objectId', 'inCollection'],
+            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
+            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
+            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
+            'subject_id' => ['optional', 'objectId', ['inCollection', 'subject']],
+            'council_id' => ['optional', 'objectId', ['inCollection', 'council']],
+            'topic_id' => ['optional', 'objectId', ['inCollection', 'topic']],
+            'value' => ['optional']
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_delete() : bool {
+        $rules = [
+            'id' => ['required', 'objectId', 'inCollection']
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    // METHODS
+
+    public function get() {
+        if (!$this->validate_get()) {
+            http_response_code(400);
+            return json_encode([
+                'error' => 'INVALID_INPUT',
+                'error_messages' => $this->get_validation_errors()
+            ], $this->prettify());
+        }
+
+        $filters = $this->get_filters();
+        $pagination = $this->get_pagination();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
+        $results = $this->sanitize_output($results);
+        $return = [
+            'results' => $results,
+            'all_results' => $default_model::count($filters),
+            'per_page' => $pagination['limit']
+        ];
+        return json_encode($return, $this->prettify());
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -101,20 +142,6 @@ class Evaluation extends Controller
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
-    }
-
-    private function validate_post() : bool {
-        $rules = [
-            'user_id' => ['required', 'objectId', ['inCollection', 'user']],
-            'student_id' => ['required', 'objectId', ['inCollection', 'student']],
-            'grade_id' => ['required', 'objectId', ['inCollection', 'grade']],
-            'subject_id' => ['required', 'objectId', ['inCollection', 'subject']],
-            'council_id' => ['required', 'objectId', ['inCollection', 'council']],
-            'topic_id' => ['required', 'objectId', ['inCollection', 'topic']],
-            'value' => ['required']
-        ];
-
-        return $this->run_validation($rules);
     }
 
     public function put() {
@@ -138,21 +165,6 @@ class Evaluation extends Controller
         }
     }
 
-    private function validate_put() : bool {
-        $rules = [
-            'id' => ['required', 'objectId', 'inCollection'],
-            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
-            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
-            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
-            'subject_id' => ['optional', 'objectId', ['inCollection', 'subject']],
-            'council_id' => ['optional', 'objectId', ['inCollection', 'council']],
-            'topic_id' => ['optional', 'objectId', ['inCollection', 'topic']],
-            'value' => ['optional']
-        ];
-
-        return $this->run_validation($rules);
-    }
-
     public function delete() {
         if (!$this->validate_delete()) {
             http_response_code(400);
@@ -168,11 +180,4 @@ class Evaluation extends Controller
         $entity->delete();
     }
 
-    private function validate_delete() : bool {
-        $rules = [
-            'id' => ['required', 'objectId', 'inCollection']
-        ];
-
-        return $this->run_validation($rules);
-    }
 }

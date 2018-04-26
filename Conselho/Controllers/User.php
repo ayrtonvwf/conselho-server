@@ -4,44 +4,6 @@ use Conselho\Controller;
 
 class User extends Controller
 {
-    public function get() {
-        if (!$this->validate_get()) {
-            http_response_code(400);
-            return json_encode([
-                'error' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
-        }
-
-        $filters = $this->get_filters();
-        $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
-        $results = array_map(function($result) {
-            unset($result['password']);
-            return $result;
-        }, $results);
-        $return = [
-            'results' => $results,
-            'all_results' => $default_model::count($filters),
-            'per_page' => $pagination['limit']
-        ];
-        return json_encode($return, $this->prettify());
-    }
-
-    private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
-        ];
-
-        return $this->run_validation($rules);
-    }
-
     private function get_filters() : array {
         $filters = [
             '_id' => $this->input_id('id'),
@@ -72,6 +34,68 @@ class User extends Controller
         ];
     }
 
+    // VALIDATION
+
+    private function validate_get() : bool {
+        $rules = [
+            'id' => ['optional', 'objectId', 'inCollection'],
+            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'search'  => ['optional', ['lengthMin', 3]],
+            'page' => ['optional', 'integer', ['min', 1]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_post() : bool {
+        $rules = [
+            'name'  => ['required', ['lengthBetween', 5, 100]],
+            'email' => ['required', 'email', ['lengthBetween', 5, 200], 'notInCollection'],
+            'password' => ['required', ['lengthBetween', 5, 32]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_put() : bool {
+        $rules = [
+            'name'  => ['optional', ['lengthBetween', 5, 100]],
+            'email' => ['optional', 'email', ['lengthBetween', 5, 200]],
+            'password' => ['optional', ['lengthBetween', 5, 32]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    // METHODS
+
+    public function get() {
+        if (!$this->validate_get()) {
+            http_response_code(400);
+            return json_encode([
+                'error' => 'INVALID_INPUT',
+                'error_messages' => $this->get_validation_errors()
+            ], $this->prettify());
+        }
+
+        $filters = $this->get_filters();
+        $pagination = $this->get_pagination();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
+        $results = $this->sanitize_output($results);
+        $results = array_map(function($result) {
+            unset($result['password']);
+            return $result;
+        }, $results);
+        $return = [
+            'results' => $results,
+            'all_results' => $default_model::count($filters),
+            'per_page' => $pagination['limit']
+        ];
+        return json_encode($return, $this->prettify());
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -89,16 +113,6 @@ class User extends Controller
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
-    }
-
-    private function validate_post() : bool {
-        $rules = [
-            'name'  => ['required', ['lengthBetween', 5, 100]],
-            'email' => ['required', 'email', ['lengthBetween', 5, 200], 'notInCollection'],
-            'password' => ['required', ['lengthBetween', 5, 32]]
-        ];
-
-        return $this->run_validation($rules);
     }
 
     public function put() {
@@ -120,16 +134,6 @@ class User extends Controller
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
-    }
-
-    private function validate_put() : bool {
-        $rules = [
-            'name'  => ['optional', ['lengthBetween', 5, 100]],
-            'email' => ['optional', 'email', ['lengthBetween', 5, 200]],
-            'password' => ['optional', ['lengthBetween', 5, 32]]
-        ];
-
-        return $this->run_validation($rules);
     }
 
     public function delete() {

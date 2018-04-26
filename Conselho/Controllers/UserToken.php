@@ -6,6 +6,26 @@ use DateTime;
 
 class UserToken extends Controller
 {
+    private function generate_token() : array {
+        return [
+            'value' => sodium_bin2hex(random_bytes(32)),
+            'expires_at' => new DateTime(new DateTime('+1 day'))
+        ];
+    }
+
+    // VALIDATION
+
+    private function validate_post() : bool {
+        $rules = [
+            'email' => ['required', 'email', ['lengthBetween', 5, 200]],
+            'password' => ['required', ['lengthBetween', 5, 32]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    // METHODS
+
     public function get() {
         $default_model = $this->get_default_model();
         $results = $default_model::find()->toArray();
@@ -53,22 +73,6 @@ class UserToken extends Controller
             'user_id' => (string) $token['user_id']
         ];
         return json_encode($output, $this->prettify());
-    }
-
-    private function validate_post() : bool {
-        $rules = [
-            'email' => ['required', 'email', ['lengthBetween', 5, 200]],
-            'password' => ['required', ['lengthBetween', 5, 32]]
-        ];
-
-        return $this->run_validation($rules);
-    }
-
-    private function generate_token() : array {
-        return [
-            'value' => sodium_bin2hex(random_bytes(32)),
-            'expires_at' => new DateTime(new DateTime('+1 day'))
-        ];
     }
 
     public function delete() : void {

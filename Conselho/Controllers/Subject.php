@@ -4,41 +4,6 @@ use Conselho\Controller;
 
 class Subject extends Controller
 {
-    public function get() {
-        if (!$this->validate_get()) {
-            http_response_code(400);
-            return json_encode([
-                'error' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
-        }
-
-        $filters = $this->get_filters();
-        $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
-        $return = [
-            'results' => $results,
-            'all_results' => $default_model::count($filters),
-            'per_page' => $pagination['limit']
-        ];
-        return json_encode($return, $this->prettify());
-    }
-
-    private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
-        ];
-
-        return $this->run_validation($rules);
-    }
-
     private function get_filters() : array {
         $filters = [
             '_id' => $this->input_id('id'),
@@ -67,6 +32,72 @@ class Subject extends Controller
         ];
     }
 
+    // VALIDATION
+
+    private function validate_get() : bool {
+        $rules = [
+            'id' => ['optional', 'objectId', 'inCollection'],
+            'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
+            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'search'  => ['optional', ['lengthMin', 3]],
+            'page' => ['optional', 'integer', ['min', 1]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_post() : bool {
+        $rules = [
+            'name'  => ['required', ['lengthBetween', 5, 50]],
+            'school_id' => ['required', 'objectId', ['inCollection', 'school']]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_put() : bool {
+        $rules = [
+            'id' => ['required', 'objectId', 'inCollection'],
+            'name'  => ['optional', ['lengthBetween', 5, 50]],
+            'school_id' => ['optional', 'objectId', ['inCollection', 'school']]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_delete() : bool {
+        $rules = [
+            'id' => ['required', 'objectId', 'inCollection']
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    // METHODS
+
+    public function get() {
+        if (!$this->validate_get()) {
+            http_response_code(400);
+            return json_encode([
+                'error' => 'INVALID_INPUT',
+                'error_messages' => $this->get_validation_errors()
+            ], $this->prettify());
+        }
+
+        $filters = $this->get_filters();
+        $pagination = $this->get_pagination();
+        $default_model = $this->get_default_model();
+        $results = $default_model::find($filters, $pagination)->toArray();
+        $results = $this->sanitize_output($results);
+        $return = [
+            'results' => $results,
+            'all_results' => $default_model::count($filters),
+            'per_page' => $pagination['limit']
+        ];
+        return json_encode($return, $this->prettify());
+    }
+
     public function post() {
         if (!$this->validate_post()) {
             http_response_code(400);
@@ -84,15 +115,6 @@ class Subject extends Controller
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
-    }
-
-    private function validate_post() : bool {
-        $rules = [
-            'name'  => ['required', ['lengthBetween', 5, 50]],
-            'school_id' => ['required', 'objectId', ['inCollection', 'school']]
-        ];
-
-        return $this->run_validation($rules);
     }
 
     public function put() {
@@ -116,16 +138,6 @@ class Subject extends Controller
         }
     }
 
-    private function validate_put() : bool {
-        $rules = [
-            'id' => ['required', 'objectId', 'inCollection'],
-            'name'  => ['optional', ['lengthBetween', 5, 50]],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']]
-        ];
-
-        return $this->run_validation($rules);
-    }
-
     public function delete() {
         if (!$this->validate_delete()) {
             http_response_code(400);
@@ -139,13 +151,5 @@ class Subject extends Controller
         $criteria = ['_id' => $this->input_id('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
-    }
-
-    private function validate_delete() : bool {
-        $rules = [
-            'id' => ['required', 'objectId', 'inCollection']
-        ];
-
-        return $this->run_validation($rules);
     }
 }
