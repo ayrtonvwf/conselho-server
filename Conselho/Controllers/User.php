@@ -4,33 +4,11 @@ use Conselho\Controller;
 
 class User extends Controller
 {
-    private function get_filters() : array {
-        $filters = [
-            '_id' => $this->input_id('id'),
-            'updated_at' => []
-        ];
-        if ($this->input('search')) {
-            $filters['$text'] = [
-                'search' => $this->input('search'),
-                'language' => 'pt'
-            ];
-        }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
-            $filters['updated_at']['gte'] = $min_updated_at;
-        }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
-            $filters['updated_at']['lte'] = $max_updated_at;
-        }
-        return array_filter($filters);
-    }
-
     private function get_data() : array {
         return [
-            'name' => $this->input('name'),
-            'email' => $this->input('email'),
-            'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null,
-            'dev' => false,
-            'updated_at' => new UTCDateTime()
+            'name' => $this->input_string('name'),
+            'email' => $this->input_string('email'),
+            'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null
         ];
     }
 
@@ -38,9 +16,9 @@ class User extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'id' => ['optional', 'integer'],
+            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d H:i:s']],
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d H:i:s']],
             'search'  => ['optional', ['lengthMin', 3]],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
@@ -51,7 +29,7 @@ class User extends Controller
     private function validate_post() : bool {
         $rules = [
             'name'  => ['required', ['lengthBetween', 5, 100]],
-            'email' => ['required', 'email', ['lengthBetween', 5, 200], 'notInCollection'],
+            'email' => ['required', 'email', ['lengthBetween', 5, 200]],
             'password' => ['required', ['lengthBetween', 5, 32]]
         ];
 
@@ -106,10 +84,13 @@ class User extends Controller
         }
 
         $data = $this->get_data();
-        $default_model = $this->get_default_model();
+        $columns = implode(', ', array_keys($data));
+        $values = ':'.implode(', :', array_keys($data));
+        $sql = "INSERT INTO user ($columns) VALUES ($values)";
 
-        $entity = new $default_model($data);
-        if (!$entity->save()) {
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
@@ -124,19 +105,36 @@ class User extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
-        $entity = $default_model::one($criteria);
+        $data = array_filter($this->get_data());
+        if (!$data) {
+            http_response_code(400);
+            return json_encode(['error' => 'EMPTY_UPDATE'], $this->prettify());
+        }
 
-        $data = $this->get_data();
+        $fields = [];
+        foreach ($data as $column => $value) {
+            $fields[] = "`$column` = :$column";
+        }
+        $set = implode(', ', $fields);
+        $sql = "UPDATE `user` SET $set WHERE `id` = :user_id";
 
-        if (!$entity->update($data)) {
+        $data['user_id'] = $this->get_user()->id;
+
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
     }
 
     public function delete() {
-        $this->get_user()->delete();
+        $sql = "DELETE `user` WHERE `id` = :id";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute(['id' => $this->get_user()->id])) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_DELETE'], $this->prettify());
+        }
     }
 }
