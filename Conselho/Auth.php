@@ -22,9 +22,10 @@ final class Auth {
             INNER JOIN user_token ON
                 user_token.user_id = user.id AND
                 user_token.value = :token_value AND
-                user_token.expires_at < NOW()';
+                user_token.expires_at > NOW()';
         $statement = $db->prepare($sql);
         $statement->bindValue(':token_value', $token, PDO::PARAM_STR);
+        $statement->execute();
         if (!$statement->fetch(PDO::FETCH_OBJ)) {
             die('User token not found');
         }
