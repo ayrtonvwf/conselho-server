@@ -64,7 +64,7 @@ abstract class Controller {
         return !is_null($value) ? (int) $value : null;
     }
 
-    protected function get_user() : object {
+    protected function get_user() : ?object {
         $sql = '
             SELECT user.*
             FROM user
@@ -75,7 +75,8 @@ abstract class Controller {
         $pdo = $this->get_db_connection();
         $statement = $pdo->prepare($sql);
         $statement->bindValue(':token_value', $this->get_token(), PDO::PARAM_STR);
-        return $statement->fetch(PDO::FETCH_OBJ);
+        $user = $statement->fetch(PDO::FETCH_OBJ);
+        return $user ? $user : null;
     }
 
     protected function get_token() : ?string {
