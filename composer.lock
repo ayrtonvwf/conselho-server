@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "456d253702a25199847dd35b64daa5fc",
+    "content-hash": "39f3157309cc00ac64f2c65eb8e60e67",
     "packages": [
         {
             "name": "miladrahimi/phprouter",
