@@ -71,10 +71,11 @@ abstract class Controller {
             INNER JOIN user_token ON
                 user_token.user_id = user.id AND
                 user_token.value = :token_value AND
-                user_token.expires_at < NOW()';
+                user_token.expires_at > NOW()';
         $pdo = $this->get_db_connection();
         $statement = $pdo->prepare($sql);
         $statement->bindValue(':token_value', $this->get_token(), PDO::PARAM_STR);
+        $statement->execute();
         $user = $statement->fetch(PDO::FETCH_OBJ);
         return $user ? $user : null;
     }
