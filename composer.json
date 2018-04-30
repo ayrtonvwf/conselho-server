@@ -2,10 +2,10 @@
     "require": {
         "php": "^7.2",
         "ext-sodium": "*",
+        "ext-PDO": "^7.2",
         "vlucas/phpdotenv": "^2.4",
         "miladrahimi/phprouter": "^2.3",
-        "vlucas/valitron": "^1.4",
-        "purekid/mongodm": "^1.5"
+        "vlucas/valitron": "^1.4"
     },
     "autoload": {
         "psr-4": {
