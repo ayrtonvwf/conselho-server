@@ -1,6 +1,7 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use PDO;
 
 class User extends Controller
 {
@@ -70,39 +71,43 @@ class User extends Controller
 
         $where = [];
         if (isset($filters['id'])) {
-            $where[] = 'id = :id';
+            $where[] = '`id` = :id';
         }
         if (isset($filters['max_updated_at'])) {
-            $where[] = 'updated_at <= :max_updated_at';
+            $where[] = '`updated_at` <= :max_updated_at';
         }
         if (isset($filters['min_updated_at'])) {
-            $where[] = 'updated_at >= :min_updated_at';
+            $where[] = '`updated_at` >= :min_updated_at';
         }
         if (isset($filters['search'])) {
-            $where[] = '(name LIKE %:search% OR email LIKE %:search%)';
+            $where[] = '(`name` LIKE %:search% OR `email` LIKE %:search%)';
         }
 
-        $where = implode(' AND ', $where);
+        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
 
         $pagination = $this->get_pagination();
 
-        $sql = "SELECT * FROM user WHERE $where LIMIT :limit OFFSET :offset";
+        $sql = "SELECT `user`.* FROM `user` $where LIMIT :limit OFFSET :offset";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute($filters + $pagination)) {
+
+        $parameters = $filters + $pagination;
+        foreach ($parameters as $parameter_name => $parameter_value) {
+            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        if (!$statement->execute()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+            return json_encode(['error' => 'CANNOT_QUERY', 'query' => $statement->queryString, 'error' => $statement->errorInfo()], $this->prettify());
         }
 
         $results = $statement->fetchAll(PDO::FETCH_OBJ);
-        $results = array_filter($results, function($value, $key) {
-            return in_array($key, ['id', 'name', 'email', 'created_at', 'updated_at']);
-        });
+        // filter output columns
 
-        $sql = "SELECT COUNT(*) AS all_results FROM user WHERE $where";
+        $sql = "SELECT COUNT(*) AS all_results FROM user $where";
         $statement = $db->prepare($sql);
         $statement->execute($filters);
-        $all_results = $statement->fetchObject()->all_results;
+        $all_results = (int) $statement->fetchObject()->all_results;
 
         $return = [
             'results' => $results,
