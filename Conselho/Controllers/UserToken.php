@@ -2,14 +2,15 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\Models;
-use DateTime;
+use PDO;
 
 class UserToken extends Controller
 {
-    private function generate_token() : array {
+    private function generate_token(int $user_id) : array {
         return [
+            'user_id' => $user_id,
             'value' => sodium_bin2hex(random_bytes(32)),
-            'expires_at' => new DateTime(new DateTime('+1 day'))
+            'expires_at' => date('Y-m-d H:i:s', strtotime('+1 day'))
         ];
     }
 
@@ -45,7 +46,13 @@ class UserToken extends Controller
             ], $this->prettify());
         }
 
-        $user = Models\User::one(['email' => $this->input('email')]);
+        $db = $this->get_db_connection();
+        $sql = 'SELECT * FROM `user` WHERE `email` = :email';
+        $statement = $db->prepare($sql);
+        $email = $this->input_string('email');
+        $statement->bindValue('email', $email, PDO::PARAM_STR);
+        $statement->execute();
+        $user = $statement->fetch(PDO::FETCH_OBJ);
         if (!$user) {
             http_response_code(400);
             return json_encode(['error' => 'EMAIL_NOT_FOUND'], $this->prettify());
@@ -57,22 +64,19 @@ class UserToken extends Controller
         }
 
         if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
-            $user->password = password_hash($this->input('password'), PASSWORD_DEFAULT);
+            $user->password = password_hash($this->input_raw('password'), PASSWORD_DEFAULT);
             $user->save();
         }
 
-        $default_model = $this->get_default_model();
-        $token = $this->generate_token();
-        $token['user_id'] = $user->_id;
-        $entity = new $default_model($token);
-        $entity->save();
+        $token = $this->generate_token($user->id);
+        $sql = "INSERT INTO user_token (value, expires_at, user_id) VALUES (:value, :expires_at, :user_id)";
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($token)) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_SAVE_TOKEN'], $this->prettify());
+        }
 
-        $output = [
-            'value' => $token['value'],
-            'expires_at' => $token['expires_at']->format('Y-m-d H:i:s'),
-            'user_id' => (string) $token['user_id']
-        ];
-        return json_encode($output, $this->prettify());
+        return json_encode($token, $this->prettify());
     }
 
     public function delete() : void {
