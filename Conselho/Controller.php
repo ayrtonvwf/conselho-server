@@ -21,6 +21,10 @@ abstract class Controller {
     }
 
     private function get_input_data() : array {
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+            return $_GET;
+        }
+
         return json_decode(file_get_contents('php://input'), true) ?? [];
     }
 
@@ -37,8 +41,11 @@ abstract class Controller {
     }
 
     protected function get_pagination(int $limit = 50) : array {
-        $page = (int) $this->input_int('page');
-        $offset = $limit*$page-1;
+        $page = $this->input_int('page');
+        if (!$page) {
+            $page = 1;
+        }
+        $offset = $limit*($page-1);
         return [
             'limit' => $limit,
             'offset' => $offset
