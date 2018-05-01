@@ -9,6 +9,7 @@ use MiladRahimi\PHPRouter\Router;
 use MiladRahimi\PHPRouter\Exceptions\HttpError;
 
 date_default_timezone_set('UTC');
+header('Content-Type: application/json; charset=UTF-8');
 
 if (($_SERVER['HTTP_ACCEPT'] ?? '') != 'application/json') {
     http_response_code(406);
