@@ -87,7 +87,7 @@ class User extends Controller
 
         $pagination = $this->get_pagination();
 
-        $sql = "SELECT `user`.* FROM `user` $where LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM `user` $where LIMIT :limit OFFSET :offset";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
 
@@ -98,7 +98,7 @@ class User extends Controller
 
         if (!$statement->execute()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_QUERY', 'query' => $statement->queryString, 'error' => $statement->errorInfo()], $this->prettify());
+            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
         }
 
         $results = $statement->fetchAll(PDO::FETCH_OBJ);
