@@ -192,7 +192,7 @@ class MedicalReport extends Controller
             ], $this->prettify());
         }
 
-        $sql = "DELETE `medical_report` WHERE `id` = :id";
+        $sql = "DELETE FROM `medical_report` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->input_int('int')])) {

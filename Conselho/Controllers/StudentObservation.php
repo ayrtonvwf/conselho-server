@@ -223,7 +223,7 @@ class StudentObservation extends Controller
             ], $this->prettify());
         }
 
-        $sql = "DELETE `student_observation` WHERE `id` = :id";
+        $sql = "DELETE FROM `student_observation` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->input_int('int')])) {

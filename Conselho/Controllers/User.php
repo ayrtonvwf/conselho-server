@@ -172,7 +172,7 @@ class User extends Controller
     }
 
     public function delete() {
-        $sql = "DELETE `user` WHERE `id` = :id";
+        $sql = "DELETE FROM `user` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->get_user()->id])) {

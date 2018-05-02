@@ -211,7 +211,7 @@ class Role extends Controller
             ], $this->prettify());
         }
 
-        $sql = "DELETE `role` WHERE `id` = :id";
+        $sql = "DELETE FROM `role` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->input_int('int')])) {

@@ -191,7 +191,7 @@ class Subject extends Controller
             ], $this->prettify());
         }
 
-        $sql = "DELETE `subject` WHERE `id` = :id";
+        $sql = "DELETE FROM `subject` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->input_int('int')])) {
