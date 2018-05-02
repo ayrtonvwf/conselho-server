@@ -10,17 +10,12 @@ class GradeSubject extends Controller
             'grade_id' => $this->input_int('grade_id'),
             'subject_id' => $this->input_int('subject_id'),
             'user_id' => $this->input_int('user_id'),
-            'updated_at' => [],
+            'min_updated_at' => $this->input_string('min_updated_at'),
+            'max_updated_at' => $this->input_string('max_updated_at'),
         ];
-        if ($min_updated_at = $this->input_string('min_updated_at')) {
-            $filters['updated_at']['gte'] = $min_updated_at;
-        }
-        if ($max_updated_at = $this->input_string('max_updated_at')) {
-            $filters['updated_at']['lte'] = $max_updated_at;
-        }
         $filters = array_filter($filters);
-        if ($this->input('approved') !== null) {
-            $filters['approved'] = (bool) $this->input('approved');
+        if (!is_null($this->input_bool('approved'))) {
+            $filters['approved'] = $this->input_bool('approved');
         }
         return $filters;
     }
@@ -30,7 +25,7 @@ class GradeSubject extends Controller
             'grade_id' => $this->input_int('grade_id'),
             'subject_id' => $this->input_int('subject_id'),
             'user_id' => $this->input_int('user_id'),
-            'approved' => (bool) $this->input('approved')
+            'approved' => $this->input_bool('approved')
         ];
     }
 
@@ -38,10 +33,10 @@ class GradeSubject extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
-            'subject_id' => ['optional', 'objectId', ['inCollection', 'subject']],
-            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
+            'id' => ['optional', 'int'],
+            'grade_id' => ['optional', 'int'],
+            'subject_id' => ['optional', 'int'],
+            'user_id' => ['optional', 'int'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'approved' => ['optional', 'boolean'],
@@ -53,9 +48,9 @@ class GradeSubject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'grade_id' => ['required', 'objectId', ['inCollection', 'grade']],
-            'subject_id' => ['required', 'objectId', ['inCollection', 'subject']],
-            'user_id' => ['required', 'objectId', ['inCollection', 'user']],
+            'grade_id' => ['required', 'int'],
+            'subject_id' => ['required', 'int'],
+            'user_id' => ['required', 'int'],
             'approved' => ['required', 'boolean']
         ];
 
@@ -64,10 +59,10 @@ class GradeSubject extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection'],
-            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
-            'subject_id' => ['optional', 'objectId', ['inCollection', 'subject']],
-            'user_id' => ['optional', 'objectId', ['inCollection', 'user']],
+            'id' => ['required', 'int'],
+            'grade_id' => ['optional', 'int'],
+            'subject_id' => ['optional', 'int'],
+            'user_id' => ['optional', 'int'],
             'approved' => ['optional', 'boolean']
         ];
 
@@ -76,7 +71,7 @@ class GradeSubject extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection']
+            'id' => ['required', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -94,13 +89,59 @@ class GradeSubject extends Controller
         }
 
         $filters = $this->get_filters();
+
+        $where = [];
+        if (isset($filters['id'])) {
+            $where[] = '`id` = :id';
+        }
+        if (isset($filters['user_id'])) {
+            $where[] = '`user_id` = :user_id';
+        }
+        if (isset($filters['grade_id'])) {
+            $where[] = '`grade_id` = :grade_id';
+        }
+        if (isset($filters['subject_id'])) {
+            $where[] = '`subject_id` = :subject_id';
+        }
+        if (isset($filters['max_updated_at'])) {
+            $where[] = '`updated_at` <= :max_updated_at';
+        }
+        if (isset($filters['min_updated_at'])) {
+            $where[] = '`updated_at` >= :min_updated_at';
+        }
+        if (isset($filters['approved'])) {
+            $where[] = '`approved` = :approved';
+        }
+
+        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
+
         $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
+
+        $sql = "SELECT * FROM `grade_observation` $where LIMIT :limit OFFSET :offset";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+
+        $parameters = $filters + $pagination;
+        foreach ($parameters as $parameter_name => $parameter_value) {
+            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        if (!$statement->execute()) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+        }
+
+        $results = $statement->fetchAll(PDO::FETCH_OBJ);
+        // filter output columns
+
+        $sql = "SELECT COUNT(*) AS `all_results` FROM `grade_observation` $where";
+        $statement = $db->prepare($sql);
+        $statement->execute($filters);
+        $all_results = (int) $statement->fetchObject()->all_results;
+
         $return = [
             'results' => $results,
-            'all_results' => $default_model::count($filters),
+            'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -116,10 +157,13 @@ class GradeSubject extends Controller
         }
 
         $data = $this->get_data();
-        $default_model = $this->get_default_model();
+        $columns = implode(', ', array_keys($data));
+        $values = ':'.implode(', :', array_keys($data));
+        $sql = "INSERT INTO `grade_subject` ($columns) VALUES ($values)";
 
-        $entity = new $default_model($data);
-        if (!$entity->save()) {
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
@@ -134,13 +178,24 @@ class GradeSubject extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
+        $data = array_filter($this->get_data());
+        if (!$data) {
+            http_response_code(400);
+            return json_encode(['error' => 'EMPTY_UPDATE'], $this->prettify());
+        }
 
-        $data = $this->get_data();
+        $fields = [];
+        foreach ($data as $column => $value) {
+            $fields[] = "`$column` = :$column";
+        }
+        $set = implode(', ', $fields);
+        $sql = "UPDATE `grade_subject` SET $set WHERE `id` = :id";
 
-        if (!$entity->update($data)) {
+        $data['id'] = $this->input_int('id');
+
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
@@ -155,10 +210,13 @@ class GradeSubject extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
-        $entity->delete();
+        $sql = "DELETE `grade_subject` WHERE `id` = :id";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute(['id' => $this->input_int('int')])) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_DELETE'], $this->prettify());
+        }
     }
 
 }
