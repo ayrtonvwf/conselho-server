@@ -1,36 +1,22 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use PDO;
 
 class Council extends Controller
 {
     private function get_filters() : array {
         $filters = [
             'id' => $this->input_int('id'),
-            'start_date' => [],
-            'end_date' => [],
-            'updated_at' => [],
+            'min_start_date' => $this->input_string('min_start_date'),
+            'max_start_date' => $this->input_string('max_start_date'),
+            'min_end_date' => $this->input_string('min_end_date'),
+            'max_end_date' => $this->input_string('max_end_date'),
+            'min_updated_at' => $this->input_string('min_updated_at'),
+            'max_updated_at' => $this->input_string('max_updated_at'),
             'school_id' => $this->input_int('school_id'),
-            'search' => $this->input('search')
+            'search' => $this->input_string('search')
         ];
-        if ($min_start_date = $this->input_string('min_start_date')) {
-            $filters['start_date']['gte'] = $min_start_date;
-        }
-        if ($max_start_date = $this->input_string('max_start_date')) {
-            $filters['start_date']['lte'] = $max_start_date;
-        }
-        if ($min_end_date = $this->input_string('min_end_date')) {
-            $filters['end_date']['gte'] = $min_end_date;
-        }
-        if ($max_end_date = $this->input_string('max_end_date')) {
-            $filters['end_date']['lte'] = $max_end_date;
-        }
-        if ($min_updated_at = $this->input_string('min_updated_at')) {
-            $filters['updated_at']['gte'] = $min_updated_at;
-        }
-        if ($max_updated_at = $this->input_string('max_updated_at')) {
-            $filters['updated_at']['lte'] = $max_updated_at;
-        }
         return array_filter($filters);
     }
 
@@ -38,7 +24,7 @@ class Council extends Controller
         return [
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
-            'name' => $this->input('name'),
+            'name' => $this->input_string('name'),
             'school_id' => $this->input_int('school_id')
         ];
     }
@@ -47,8 +33,8 @@ class Council extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
+            'id' => ['optional', 'int'],
+            'school_id' => ['optional', 'int'],
             'max_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'max_end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
@@ -67,7 +53,7 @@ class Council extends Controller
             'start_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'objectId', ['inCollection', 'school']]
+            'school_id' => ['required', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -75,11 +61,11 @@ class Council extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection'],
+            'id' => ['required', 'int'],
             'start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']]
+            'school_id' => ['optional', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -87,7 +73,7 @@ class Council extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection']
+            'id' => ['required', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -105,13 +91,65 @@ class Council extends Controller
         }
 
         $filters = $this->get_filters();
+
+        $where = [];
+        if (isset($filters['id'])) {
+            $where[] = '`id` = :id';
+        }
+        if (isset($filters['school_id'])) {
+            $where[] = '`school_id` = :school_id';
+        }
+        if (isset($filters['max_start_date'])) {
+            $where[] = '`start_date` <= :max_start_date';
+        }
+        if (isset($filters['min_start_date'])) {
+            $where[] = '`start_date` >= :min_start_date';
+        }
+        if (isset($filters['max_end_date'])) {
+            $where[] = '`end_date` <= :max_end_date';
+        }
+        if (isset($filters['min_end_date'])) {
+            $where[] = '`end_date` >= :min_end_date';
+        }
+        if (isset($filters['max_updated_at'])) {
+            $where[] = '`updated_at` <= :max_updated_at';
+        }
+        if (isset($filters['min_updated_at'])) {
+            $where[] = '`updated_at` >= :min_updated_at';
+        }
+        if (isset($filters['search'])) {
+            $where[] = '`name` LIKE %:search%';
+        }
+
+        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
+
         $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
+
+        $sql = "SELECT * FROM `council` $where LIMIT :limit OFFSET :offset";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+
+        $parameters = $filters + $pagination;
+        foreach ($parameters as $parameter_name => $parameter_value) {
+            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        if (!$statement->execute()) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+        }
+
+        $results = $statement->fetchAll(PDO::FETCH_OBJ);
+        // filter output columns
+
+        $sql = "SELECT COUNT(*) AS `all_results` FROM `council` $where";
+        $statement = $db->prepare($sql);
+        $statement->execute($filters);
+        $all_results = (int) $statement->fetchObject()->all_results;
+
         $return = [
             'results' => $results,
-            'all_results' => $default_model::count($filters),
+            'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -127,10 +165,13 @@ class Council extends Controller
         }
 
         $data = $this->get_data();
-        $default_model = $this->get_default_model();
+        $columns = implode(', ', array_keys($data));
+        $values = ':'.implode(', :', array_keys($data));
+        $sql = "INSERT INTO `council` ($columns) VALUES ($values)";
 
-        $entity = new $default_model($data);
-        if (!$entity->save()) {
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
@@ -145,13 +186,24 @@ class Council extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
+        $data = array_filter($this->get_data());
+        if (!$data) {
+            http_response_code(400);
+            return json_encode(['error' => 'EMPTY_UPDATE'], $this->prettify());
+        }
 
-        $data = $this->get_data();
+        $fields = [];
+        foreach ($data as $column => $value) {
+            $fields[] = "`$column` = :$column";
+        }
+        $set = implode(', ', $fields);
+        $sql = "UPDATE `council` SET $set WHERE `id` = :id";
 
-        if (!$entity->update($data)) {
+        $data['id'] = $this->input_int('id');
+
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
@@ -166,9 +218,12 @@ class Council extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
-        $entity->delete();
+        $sql = "DELETE `council` WHERE `id` = :id";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute(['id' => $this->input_int('int')])) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_DELETE'], $this->prettify());
+        }
     }
 }
