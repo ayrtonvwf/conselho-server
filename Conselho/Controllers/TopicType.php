@@ -35,7 +35,7 @@ class TopicType extends Controller
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
-                'error' => 'INVALID_INPUT',
+                'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
@@ -71,7 +71,7 @@ class TopicType extends Controller
 
         if (!$statement->execute()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->prettify());
         }
 
         $results = $statement->fetchAll(PDO::FETCH_OBJ);

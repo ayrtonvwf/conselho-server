@@ -90,7 +90,7 @@ class StudentGrade extends Controller
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
-                'error' => 'INVALID_INPUT',
+                'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
@@ -147,7 +147,7 @@ class StudentGrade extends Controller
 
         if (!$statement->execute()) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->prettify());
         }
 
         $results = $statement->fetchAll(PDO::FETCH_OBJ);
@@ -170,7 +170,7 @@ class StudentGrade extends Controller
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
-                'error' => 'INVALID_INPUT',
+                'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
@@ -184,7 +184,7 @@ class StudentGrade extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute($data)) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->prettify());
         }
     }
 
@@ -192,7 +192,7 @@ class StudentGrade extends Controller
         if (!$this->validate_put()) {
             http_response_code(400);
             return json_encode([
-                'error' => 'INVALID_INPUT',
+                'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
@@ -200,7 +200,7 @@ class StudentGrade extends Controller
         $data = array_filter($this->get_data());
         if (!$data) {
             http_response_code(400);
-            return json_encode(['error' => 'EMPTY_UPDATE'], $this->prettify());
+            return json_encode(['error_code' => 'EMPTY_UPDATE'], $this->prettify());
         }
 
         $fields = [];
@@ -216,7 +216,7 @@ class StudentGrade extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute($data)) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->prettify());
         }
     }
 
@@ -224,7 +224,7 @@ class StudentGrade extends Controller
         if (!$this->validate_delete()) {
             http_response_code(400);
             return json_encode([
-                'error' => 'INVALID_INPUT',
+                'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
@@ -234,7 +234,7 @@ class StudentGrade extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->input_int('int')])) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_DELETE'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }
     }
 }

@@ -30,7 +30,7 @@ class UserToken extends Controller
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
-                'error' => 'INVALID_INPUT',
+                'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
             ], $this->prettify());
         }
@@ -44,12 +44,12 @@ class UserToken extends Controller
         $user = $statement->fetch(PDO::FETCH_OBJ);
         if (!$user) {
             http_response_code(400);
-            return json_encode(['error' => 'EMAIL_NOT_FOUND'], $this->prettify());
+            return json_encode(['error_code' => 'EMAIL_NOT_FOUND'], $this->prettify());
         }
         
         if (!password_verify($this->input_raw('password'), $user->password)) {
             http_response_code(400);
-            return json_encode(['error' => 'WRONG_PASSWORD'], $this->prettify());
+            return json_encode(['error_code' => 'WRONG_PASSWORD'], $this->prettify());
         }
 
         if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
@@ -62,7 +62,7 @@ class UserToken extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute($token)) {
             http_response_code(500);
-            return json_encode(['error' => 'CANNOT_SAVE_TOKEN'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_SAVE_TOKEN'], $this->prettify());
         }
 
         return json_encode($token, $this->prettify());

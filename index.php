@@ -13,12 +13,12 @@ header('Content-Type: application/json; charset=UTF-8');
 
 if (($_SERVER['HTTP_ACCEPT'] ?? '') != 'application/json') {
     http_response_code(406);
-    die(json_encode('WRONG_HTTP_ACCEPT'));
+    die(json_encode(['error_code' => 'WRONG_HTTP_ACCEPT']));
 }
 
 if (($_SERVER['CONTENT_TYPE'] ?? '') != 'application/json') {
     http_response_code(400);
-    die(json_encode('WRONG_CONTENT_TYPE'));
+    die(json_encode(['error_code' => 'WRONG_CONTENT_TYPE']));
 }
 
 $dotenv = new Dotenv(__DIR__);
@@ -106,15 +106,8 @@ $router->map('POST', '/user_token[/]*', 'Conselho\\Controllers\\UserToken@post')
 try {
     $router->dispatch();
 } catch(HttpError $error) {
-    if ($error->getMessage() == "404") {
-        $router->publish("Error 404! Not found!");
-    }
-    //...
-
+    $error_code = $error->getMessage() == '404' ? 'NOT_FOUND' : 'UNKNOWN_ERROR';
+    die(json_encode(['error_code' => $error_code]));
 } catch(Exception $e) {
-    // Log details...
-    $router->publish("Sorry, there is an internal error, we will fix it asap!\n\n");
-    if (getenv('ENV') == 'dev') {
-        print_r($e);
-    }
+    die(json_encode(['error_code' => 'INTERNAL_ERROR']));
 }
