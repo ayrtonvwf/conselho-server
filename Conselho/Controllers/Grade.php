@@ -1,41 +1,32 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use PDO;
 
 class Grade extends Controller
 {
     private function get_filters() : array {
         $filters = [
             'id' => $this->input_int('id'),
-            'level' => [],
-            'updated_at' => [],
-            'school_id' => $this->input_int('school_id')
+            'school_id' => $this->input_int('school_id'),
+            'min_updated_at' => $this->input_string('min_updated_at'),
+            'max_updated_at' => $this->input_string('max_updated_at'),
+            'search' => $this->input_string('search')
         ];
-        if ($this->input('search')) {
-            $filters['$text'] = [
-                'search' => $this->input('search'),
-                'language' => 'pt'
-            ];
+        $filters = array_filter($filters);
+        if (!is_null($this->input_int('min_level'))) {
+            $filters['min_level'] = $this->input_int('min_level');
         }
-        if ($this->input('min_level')) {
-            $filters['level']['gte'] = $this->input('min_level');
+        if (!is_null($this->input_int('max_level'))) {
+            $filters['max_level'] = $this->input_int('max_level');
         }
-        if ($this->input('max_level')) {
-            $filters['level']['lte'] = $this->input('max_level');
-        }
-        if ($min_updated_at = $this->input_string('min_updated_at')) {
-            $filters['updated_at']['gte'] = $min_updated_at;
-        }
-        if ($max_updated_at = $this->input_string('max_updated_at')) {
-            $filters['updated_at']['lte'] = $max_updated_at;
-        }
-        return array_filter($filters);
+        return $filters;
     }
 
     private function get_data() : array {
         return [
-            'name' => $this->input('name'),
-            'level' => (int) $this->input('level'),
+            'name' => $this->input_string('name'),
+            'level' => (int) $this->input_string('level'),
             'school_id' => $this->input_int('school_id')
         ];;
     }
@@ -44,8 +35,8 @@ class Grade extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']],
+            'id' => ['optional', 'int'],
+            'school_id' => ['optional', 'int'],
             'min_level' => ['optional', 'integer', ['min', 1]],
             'max_level' => ['optional', 'integer', ['min', 1]],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
@@ -61,7 +52,7 @@ class Grade extends Controller
         $rules = [
             'name'  => ['required', ['lengthBetween', 1, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['required', 'objectId', ['inCollection', 'school']]
+            'school_id' => ['required', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -69,10 +60,10 @@ class Grade extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection'],
+            'id' => ['required', 'int'],
             'name'  => ['optional', ['lengthBetween', 1, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['optional', 'objectId', ['inCollection', 'school']]
+            'school_id' => ['optional', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -80,7 +71,7 @@ class Grade extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection']
+            'id' => ['required', 'int']
         ];
 
         return $this->run_validation($rules);
@@ -98,13 +89,59 @@ class Grade extends Controller
         }
 
         $filters = $this->get_filters();
+
+        $where = [];
+        if (isset($filters['id'])) {
+            $where[] = '`id` = :id';
+        }
+        if (isset($filters['school_id'])) {
+            $where[] = '`school_id` = :school_id';
+        }
+        if (isset($filters['max_level'])) {
+            $where[] = '`level` <= :max_level';
+        }
+        if (isset($filters['min_level'])) {
+            $where[] = '`level` >= :min_level';
+        }
+        if (isset($filters['max_updated_at'])) {
+            $where[] = '`updated_at` <= :max_updated_at';
+        }
+        if (isset($filters['min_updated_at'])) {
+            $where[] = '`updated_at` >= :min_updated_at';
+        }
+        if (isset($filters['search'])) {
+            $where[] = '`name` LIKE %:search%';
+        }
+
+        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
+
         $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
+
+        $sql = "SELECT * FROM `grade` $where LIMIT :limit OFFSET :offset";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+
+        $parameters = $filters + $pagination;
+        foreach ($parameters as $parameter_name => $parameter_value) {
+            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        if (!$statement->execute()) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+        }
+
+        $results = $statement->fetchAll(PDO::FETCH_OBJ);
+        // filter output columns
+
+        $sql = "SELECT COUNT(*) AS `all_results` FROM `grade` $where";
+        $statement = $db->prepare($sql);
+        $statement->execute($filters);
+        $all_results = (int) $statement->fetchObject()->all_results;
+
         $return = [
             'results' => $results,
-            'all_results' => $default_model::count($filters),
+            'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -120,10 +157,13 @@ class Grade extends Controller
         }
 
         $data = $this->get_data();
-        $default_model = $this->get_default_model();
+        $columns = implode(', ', array_keys($data));
+        $values = ':'.implode(', :', array_keys($data));
+        $sql = "INSERT INTO `grade` ($columns) VALUES ($values)";
 
-        $entity = new $default_model($data);
-        if (!$entity->save()) {
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
@@ -138,13 +178,24 @@ class Grade extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
+        $data = array_filter($this->get_data());
+        if (!$data) {
+            http_response_code(400);
+            return json_encode(['error' => 'EMPTY_UPDATE'], $this->prettify());
+        }
 
-        $data = $this->get_data();
+        $fields = [];
+        foreach ($data as $column => $value) {
+            $fields[] = "`$column` = :$column";
+        }
+        $set = implode(', ', $fields);
+        $sql = "UPDATE `grade` SET $set WHERE `id` = :id";
 
-        if (!$entity->update($data)) {
+        $data['id'] = $this->input_int('id');
+
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
@@ -159,9 +210,13 @@ class Grade extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
-        $entity->delete();
+        $sql = "DELETE `grade` WHERE `id` = :id";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute(['id' => $this->input_int('int')])) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_DELETE'], $this->prettify());
+        }
     }
+
 }
