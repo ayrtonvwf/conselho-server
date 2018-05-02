@@ -77,7 +77,7 @@ class TopicType extends Controller
         $results = $statement->fetchAll(PDO::FETCH_OBJ);
         // filter output columns
 
-        $sql = "SELECT COUNT(*) AS all_results FROM `role` $where";
+        $sql = "SELECT COUNT(*) AS all_results FROM `topic_type` $where";
         $statement = $db->prepare($sql);
         $statement->execute($filters);
         $all_results = (int) $statement->fetchObject()->all_results;
