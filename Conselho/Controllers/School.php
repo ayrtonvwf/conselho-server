@@ -1,26 +1,17 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use PDO;
 
 class School extends Controller
 {
     private function get_filters() : array {
         $filters = [
             'id' => $this->input_int('id'),
-            'updated_at' => []
+            'search' => $this->input_string('search'),
+            'min_updated_at' => $this->input_string('min_updated_at'),
+            'max_updated_at' => $this->input_string('max_updated_at')
         ];
-        if ($this->input('search')) {
-            $filters['$text'] = [
-                'search' => $this->input('search'),
-                'language' => 'pt'
-            ];
-        }
-        if ($min_updated_at = $this->input_string('min_updated_at')) {
-            $filters['updated_at']['gte'] = $min_updated_at;
-        }
-        if ($max_updated_at = $this->input_string('max_updated_at')) {
-            $filters['updated_at']['lte'] = $max_updated_at;
-        }
         return array_filter($filters);
     }
 
@@ -28,7 +19,7 @@ class School extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
+            'id' => ['optional', 'int'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'search'  => ['optional', ['lengthMin', 3]],
@@ -50,15 +41,53 @@ class School extends Controller
         }
 
         $filters = $this->get_filters();
+
+        $where = [];
+        if (isset($filters['id'])) {
+            $where[] = '`id` = :id';
+        }
+        if (isset($filters['max_updated_at'])) {
+            $where[] = '`updated_at` <= :max_updated_at';
+        }
+        if (isset($filters['min_updated_at'])) {
+            $where[] = '`updated_at` >= :min_updated_at';
+        }
+        if (isset($filters['search'])) {
+            $where[] = '`name` LIKE %:search%';
+        }
+
+        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
+
         $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
+
+        $sql = "SELECT * FROM `school` $where LIMIT :limit OFFSET :offset";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+
+        $parameters = $filters + $pagination;
+        foreach ($parameters as $parameter_name => $parameter_value) {
+            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        if (!$statement->execute()) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+        }
+
+        $results = $statement->fetchAll(PDO::FETCH_OBJ);
+        // filter output columns
+
+        $sql = "SELECT COUNT(*) AS `all_results` FROM `school` $where";
+        $statement = $db->prepare($sql);
+        $statement->execute($filters);
+        $all_results = (int) $statement->fetchObject()->all_results;
+
         $return = [
             'results' => $results,
-            'all_results' => $default_model::count($filters),
+            'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
     }
+
 }
