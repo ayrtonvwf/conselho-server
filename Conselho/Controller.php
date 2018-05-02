@@ -72,6 +72,11 @@ abstract class Controller {
         return !is_null($value) ? (int) $value : null;
     }
 
+    protected function input_bool(string $key) : ?bool {
+        $value = $this->input_raw($key);
+        return !is_null($value) ? (bool) $value : null;
+    }
+
     protected function get_user() : ?object {
         $sql = '
             SELECT user.*
