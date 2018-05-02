@@ -36,6 +36,7 @@ abstract class Controller {
             $db_user = getenv('DB_USER');
             $db_pass = getenv('DB_PASS');
             $this->db = new PDO($db_dns, $db_user, $db_pass);
+            $this->db->query('SET time_zone =  \'+00:00\'');
         }
         return $this->db;
     }

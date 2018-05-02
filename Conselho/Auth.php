@@ -15,6 +15,7 @@ final class Auth {
         $db_user = getenv('DB_USER');
         $db_pass = getenv('DB_PASS');
         $db = new PDO($db_dns, $db_user, $db_pass);
+        $db->query('SET time_zone =  \'+00:00\'');
 
         $sql = '
             SELECT user.*
