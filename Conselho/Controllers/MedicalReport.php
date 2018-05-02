@@ -29,7 +29,6 @@ class MedicalReport extends Controller
         $rules = [
             'id' => ['optional', 'int'],
             'student_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'search'  => ['optional', ['lengthMin', 3]],
@@ -42,7 +41,6 @@ class MedicalReport extends Controller
     private function validate_post() : bool {
         $rules = [
             'student_id' => ['required', 'int'],
-            'subject_id' => ['required', 'int'],
             'description' => ['required', 'string', ['maxLength', 50]]
         ];
 
@@ -53,7 +51,6 @@ class MedicalReport extends Controller
         $rules = [
             'id' => ['required', 'int'],
             'student_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
             'description' => ['optional', 'string', ['maxLength', 50]]
         ];
 
