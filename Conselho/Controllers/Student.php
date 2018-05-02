@@ -6,8 +6,8 @@ class Student extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
-            'school_id' => $this->input_id('school_id'),
+            'id' => $this->input_int('id'),
+            'school_id' => $this->input_int('school_id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -28,7 +28,7 @@ class Student extends Controller
     private function get_data() : array {
         return     [
             'name' => $this->input('name'),
-            'school_id' => $this->input_id('school_id')
+            'school_id' => $this->input_int('school_id')
         ];
     }
 
@@ -127,7 +127,7 @@ class Student extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -148,7 +148,7 @@ class Student extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

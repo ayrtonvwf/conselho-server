@@ -6,16 +6,16 @@ class Role extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
-            'user_id' => $this->input_id('user_id'),
-            'role_type_id' => $this->input_id('role_type_id'),
-            'school_id' => $this->input_id('school_id'),
+            'id' => $this->input_int('id'),
+            'user_id' => $this->input_int('user_id'),
+            'role_type_id' => $this->input_int('role_type_id'),
+            'school_id' => $this->input_int('school_id'),
             'updated_at' => [],
         ];
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         $filters = array_filter($filters);
@@ -27,9 +27,9 @@ class Role extends Controller
 
     private function get_data() : array {
         return [
-            'user_id' => $this->input_id('user_id'),
-            'role_type_id' => $this->input_id('role_type_id'),
-            'school_id' => $this->input_id('school_id'),
+            'user_id' => $this->input_int('user_id'),
+            'role_type_id' => $this->input_int('role_type_id'),
+            'school_id' => $this->input_int('school_id'),
             'approved' => (bool) $this->input('approved')
         ];
     }
@@ -135,7 +135,7 @@ class Role extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -156,7 +156,7 @@ class Role extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

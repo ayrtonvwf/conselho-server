@@ -7,8 +7,8 @@ class StudentMedicalReport extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
-            'student_id' => $this->input_id('student_id'),
+            'id' => $this->input_int('id'),
+            'student_id' => $this->input_int('student_id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -17,7 +17,7 @@ class StudentMedicalReport extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($subject_id = $this->input_id('subject_id')) {
+        if ($subject_id = $this->input_int('subject_id')) {
             $filters['subject_ids']['$in'] = [$subject_id];
         }
         if ($min_updated_at = $this->input('min_updated_at')) {
@@ -31,7 +31,7 @@ class StudentMedicalReport extends Controller
 
     private function get_data() : array {
         return [
-            'student_id' => $this->input_id('student_id'),
+            'student_id' => $this->input_int('student_id'),
             'subject_ids' => array_map(function ($subject_id) { return new ObjectId($subject_id); }, $this->input('subject_ids')),
             'description' => $this->input('description')
         ];
@@ -135,7 +135,7 @@ class StudentMedicalReport extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -156,7 +156,7 @@ class StudentMedicalReport extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

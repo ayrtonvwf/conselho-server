@@ -6,8 +6,8 @@ class Subject extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
-            'school_id' => $this->input_id('school_id'),
+            'id' => $this->input_int('id'),
+            'school_id' => $this->input_int('school_id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -16,10 +16,10 @@ class Subject extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
@@ -28,7 +28,7 @@ class Subject extends Controller
     private function get_data() : array {
         return [
             'name' => $this->input('name'),
-            'school_id' => $this->input_id('school_id')
+            'school_id' => $this->input_int('school_id')
         ];
     }
 
@@ -127,7 +127,7 @@ class Subject extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -148,7 +148,7 @@ class Subject extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

@@ -6,12 +6,12 @@ class GradeObservation extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
+            'id' => $this->input_int('id'),
             'updated_at' => [],
-            'council_id' => $this->input_id('council_id'),
-            'user_id' => $this->input_id('user_id'),
-            'grade_id' => $this->input_id('grade_id'),
-            'subject_id' => $this->input_id('subject_id')
+            'council_id' => $this->input_int('council_id'),
+            'user_id' => $this->input_int('user_id'),
+            'grade_id' => $this->input_int('grade_id'),
+            'subject_id' => $this->input_int('subject_id')
         ];
         if ($this->input('search')) {
             $filters['$text'] = [
@@ -19,10 +19,10 @@ class GradeObservation extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
@@ -30,10 +30,10 @@ class GradeObservation extends Controller
 
     private function get_data() : array {
         return [
-            'council_id' => $this->input_id('council_id'),
-            'user_id' => $this->input_id('user_id'),
-            'grade_id' => $this->input_id('grade_id'),
-            'subject_id' => $this->input_id('subject_id'),
+            'council_id' => $this->input_int('council_id'),
+            'user_id' => $this->input_int('user_id'),
+            'grade_id' => $this->input_int('grade_id'),
+            'subject_id' => $this->input_int('subject_id'),
             'description' => $this->input('description')
         ];
     }
@@ -142,7 +142,7 @@ class GradeObservation extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -163,7 +163,7 @@ class GradeObservation extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

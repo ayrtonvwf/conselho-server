@@ -6,10 +6,10 @@ class Grade extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
+            'id' => $this->input_int('id'),
             'level' => [],
             'updated_at' => [],
-            'school_id' => $this->input_id('school_id')
+            'school_id' => $this->input_int('school_id')
         ];
         if ($this->input('search')) {
             $filters['$text'] = [
@@ -23,10 +23,10 @@ class Grade extends Controller
         if ($this->input('max_level')) {
             $filters['level']['lte'] = $this->input('max_level');
         }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
@@ -36,7 +36,7 @@ class Grade extends Controller
         return [
             'name' => $this->input('name'),
             'level' => (int) $this->input('level'),
-            'school_id' => $this->input_id('school_id')
+            'school_id' => $this->input_int('school_id')
         ];;
     }
 
@@ -139,7 +139,7 @@ class Grade extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -160,7 +160,7 @@ class Grade extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

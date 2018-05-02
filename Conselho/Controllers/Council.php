@@ -6,29 +6,29 @@ class Council extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
+            'id' => $this->input_int('id'),
             'start_date' => [],
             'end_date' => [],
             'updated_at' => [],
-            'school_id' => $this->input_id('school_id'),
+            'school_id' => $this->input_int('school_id'),
             'search' => $this->input('search')
         ];
-        if ($min_start_date = $this->input_date('min_start_date')) {
+        if ($min_start_date = $this->input_string('min_start_date')) {
             $filters['start_date']['gte'] = $min_start_date;
         }
-        if ($max_start_date = $this->input_date('max_start_date')) {
+        if ($max_start_date = $this->input_string('max_start_date')) {
             $filters['start_date']['lte'] = $max_start_date;
         }
-        if ($min_end_date = $this->input_date('min_end_date')) {
+        if ($min_end_date = $this->input_string('min_end_date')) {
             $filters['end_date']['gte'] = $min_end_date;
         }
-        if ($max_end_date = $this->input_date('max_end_date')) {
+        if ($max_end_date = $this->input_string('max_end_date')) {
             $filters['end_date']['lte'] = $max_end_date;
         }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
@@ -36,10 +36,10 @@ class Council extends Controller
 
     private function get_data() : array {
         return [
-            'start_date' => $this->input_date('start_date'),
-            'end_date' => $this->input_date('end_date'),
+            'start_date' => $this->input_string('start_date'),
+            'end_date' => $this->input_string('end_date'),
             'name' => $this->input('name'),
-            'school_id' => $this->input_id('school_id')
+            'school_id' => $this->input_int('school_id')
         ];
     }
 
@@ -146,7 +146,7 @@ class Council extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -167,7 +167,7 @@ class Council extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

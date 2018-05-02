@@ -6,7 +6,7 @@ class RoleType extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
+            'id' => $this->input_int('id'),
             'updated_at' => []
         ];
         if ($this->input('search')) {
@@ -15,10 +15,10 @@ class RoleType extends Controller
                 'language' => 'pt'
             ];
         }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);

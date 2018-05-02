@@ -6,15 +6,15 @@ class Evaluation extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
+            'id' => $this->input_int('id'),
             'value' => [],
             'updated_at' => [],
-            'user_id' => $this->input_id('user_id'),
-            'student_id' => $this->input_id('student_id'),
-            'grade_id' => $this->input_id('grade_id'),
-            'subject_id' => $this->input_id('subject_id'),
-            'council_id' => $this->input_id('council_id'),
-            'topic_id' => $this->input_id('topic_id')
+            'user_id' => $this->input_int('user_id'),
+            'student_id' => $this->input_int('student_id'),
+            'grade_id' => $this->input_int('grade_id'),
+            'subject_id' => $this->input_int('subject_id'),
+            'council_id' => $this->input_int('council_id'),
+            'topic_id' => $this->input_int('topic_id')
         ];
         if ($this->input('min_value')) {
             $filters['value']['gte'] = $this->input('min_value');
@@ -22,10 +22,10 @@ class Evaluation extends Controller
         if ($this->input('max_value')) {
             $filters['value']['lte'] = $this->input('max_value');
         }
-        if ($min_updated_at = $this->input_date('min_updated_at')) {
+        if ($min_updated_at = $this->input_string('min_updated_at')) {
             $filters['updated_at']['gte'] = $min_updated_at;
         }
-        if ($max_updated_at = $this->input_date('max_updated_at')) {
+        if ($max_updated_at = $this->input_string('max_updated_at')) {
             $filters['updated_at']['lte'] = $max_updated_at;
         }
         return array_filter($filters);
@@ -33,12 +33,12 @@ class Evaluation extends Controller
 
     private function get_data() : array {
         return [
-            'user_id' => $this->input_id('user_id'),
-            'student_id' => $this->input_id('student_id'),
-            'grade_id' => $this->input_id('grade_id'),
-            'subject_id' => $this->input_id('subject_id'),
-            'council_id' => $this->input_id('council_id'),
-            'topic_id' => $this->input_id('topic_id'),
+            'user_id' => $this->input_int('user_id'),
+            'student_id' => $this->input_int('student_id'),
+            'grade_id' => $this->input_int('grade_id'),
+            'subject_id' => $this->input_int('subject_id'),
+            'council_id' => $this->input_int('council_id'),
+            'topic_id' => $this->input_int('topic_id'),
             'value' => $this->input('value')
         ];
     }
@@ -154,7 +154,7 @@ class Evaluation extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -175,7 +175,7 @@ class Evaluation extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }

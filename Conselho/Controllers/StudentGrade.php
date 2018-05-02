@@ -6,9 +6,9 @@ class StudentGrade extends Controller
 {
     private function get_filters() : array {
         $filters = [
-            '_id' => $this->input_id('id'),
-            'grade_id' => $this->input_id('grade_id'),
-            'student_id' => $this->input_id('student_id'),
+            'id' => $this->input_int('id'),
+            'grade_id' => $this->input_int('grade_id'),
+            'student_id' => $this->input_int('student_id'),
             'number' => [],
             'start' => [],
             'updated_at' => []
@@ -19,10 +19,10 @@ class StudentGrade extends Controller
         if ($max_number = $this->input('max_number')) {
             $filters['number']['lte'] = $max_number;
         }
-        if ($min_start = $this->input_date('min_start')) {
+        if ($min_start = $this->input_string('min_start')) {
             $filters['start']['gte'] = $min_start;
         }
-        if ($max_start = $this->input_date('max_start')) {
+        if ($max_start = $this->input_string('max_start')) {
             $filters['start']['lte'] = $max_start;
         }
         if ($min_updated_at = $this->input('min_updated_at')) {
@@ -36,10 +36,10 @@ class StudentGrade extends Controller
 
     private function get_data() : array {
         return     [
-            'grade_id' => $this->input_id('grade_id'),
+            'grade_id' => $this->input_int('grade_id'),
             'number' => (int) $this->input('number'),
-            'student_id' => $this->input_id('student_id'),
-            'start' => $this->input_date('start')
+            'student_id' => $this->input_int('student_id'),
+            'start' => $this->input_string('start')
         ];
     }
 
@@ -146,7 +146,7 @@ class StudentGrade extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
 
         $data = $this->get_data();
@@ -167,7 +167,7 @@ class StudentGrade extends Controller
         }
 
         $default_model = $this->get_default_model();
-        $criteria = ['_id' => $this->input_id('id')];
+        $criteria = ['id' => $this->input_int('id')];
         $entity = $default_model::one($criteria);
         $entity->delete();
     }
