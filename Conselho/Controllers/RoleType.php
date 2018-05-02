@@ -31,7 +31,7 @@ class RoleType extends Controller
 
     // METHODS
 
-    public function get() {
+    public function get() : string {
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([

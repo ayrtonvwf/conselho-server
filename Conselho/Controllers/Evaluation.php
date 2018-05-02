@@ -99,7 +99,7 @@ class Evaluation extends Controller
 
     // METHODS
 
-    public function get() {
+    public function get() : string {
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
@@ -179,7 +179,7 @@ class Evaluation extends Controller
         return json_encode($return, $this->prettify());
     }
 
-    public function post() {
+    public function post() : string {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
@@ -199,9 +199,10 @@ class Evaluation extends Controller
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_INSERT'], $this->prettify());
         }
+        return json_encode(['error_code' => null], $this->prettify());
     }
 
-    public function put() {
+    public function put() : string {
         if (!$this->validate_put()) {
             http_response_code(400);
             return json_encode([
@@ -231,9 +232,10 @@ class Evaluation extends Controller
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->prettify());
         }
+        return json_encode(['error_code' => null], $this->prettify());
     }
 
-    public function delete() {
+    public function delete() : string {
         if (!$this->validate_delete()) {
             http_response_code(400);
             return json_encode([
@@ -249,6 +251,7 @@ class Evaluation extends Controller
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }
+        return json_encode(['error_code' => null], $this->prettify());
     }
 
 }

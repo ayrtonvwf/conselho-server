@@ -1,14 +1,19 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use PDO;
+use PDO, Exception;
 
 class UserToken extends Controller
 {
-    private function generate_token(int $user_id) : array {
+    private function generate_token(int $user_id) : ?array {
+        try {
+            $token_value = sodium_bin2hex(random_bytes(32));
+        } catch (Exception $exception) {
+            return null;
+        }
         return [
             'user_id' => $user_id,
-            'value' => sodium_bin2hex(random_bytes(32)),
+            'value' => $token_value,
             'expires_at' => date('Y-m-d H:i:s', strtotime('+1 day'))
         ];
     }
@@ -58,6 +63,11 @@ class UserToken extends Controller
         }
 
         $token = $this->generate_token($user->id);
+        if (!$token) {
+            http_response_code(500);
+            return json_encode(['error_code' => 'CANNOT_GENERATE_TOKEN'], $this->prettify());
+        }
+
         $sql = "INSERT INTO user_token (value, expires_at, user_id) VALUES (:value, :expires_at, :user_id)";
         $statement = $db->prepare($sql);
         if (!$statement->execute($token)) {
