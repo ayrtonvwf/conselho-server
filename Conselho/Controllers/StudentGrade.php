@@ -1,6 +1,7 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use PDO;
 
 class StudentGrade extends Controller
 {
@@ -9,37 +10,25 @@ class StudentGrade extends Controller
             'id' => $this->input_int('id'),
             'grade_id' => $this->input_int('grade_id'),
             'student_id' => $this->input_int('student_id'),
-            'number' => [],
-            'start' => [],
-            'updated_at' => []
+            'min_number' => $this->input_int('min_number'),
+            'max_number' => $this->input_int('max_number'),
+            'min_start_date' => $this->input_string('min_start_date'),
+            'max_start_date' => $this->input_string('max_start_date'),
+            'min_end_date' => $this->input_string('min_end_date'),
+            'max_end_date' => $this->input_string('max_end_date'),
+            'min_updated_at' => $this->input_string('min_updated_at'),
+            'max_updated_at' => $this->input_string('max_updated_at')
         ];
-        if ($min_number = $this->input('min_number')) {
-            $filters['number']['gte'] = $min_number;
-        }
-        if ($max_number = $this->input('max_number')) {
-            $filters['number']['lte'] = $max_number;
-        }
-        if ($min_start = $this->input_string('min_start')) {
-            $filters['start']['gte'] = $min_start;
-        }
-        if ($max_start = $this->input_string('max_start')) {
-            $filters['start']['lte'] = $max_start;
-        }
-        if ($min_updated_at = $this->input('min_updated_at')) {
-            $filters['updated_at']['gte'] = $min_updated_at;
-        }
-        if ($max_updated_at = $this->input('max_updated_at')) {
-            $filters['updated_at']['lte'] = $max_updated_at;
-        }
         return array_filter($filters);
     }
 
     private function get_data() : array {
         return     [
             'grade_id' => $this->input_int('grade_id'),
-            'number' => (int) $this->input('number'),
+            'number' => $this->input_int('number'),
             'student_id' => $this->input_int('student_id'),
-            'start' => $this->input_string('start')
+            'start_date' => $this->input_string('start_date'),
+            'end_date' => $this->input_string('end_date')
         ];
     }
 
@@ -47,9 +36,9 @@ class StudentGrade extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId', 'inCollection'],
-            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
-            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
+            'id' => ['optional', 'int'],
+            'grade_id' => ['optional', 'int'],
+            'student_id' => ['optional', 'int'],
             'min_number' => ['optional', 'integer', ['min', 1]],
             'max_number' => ['optional', 'integer', ['min', 1]],
             'max_start'  => ['optional', ['dateFormat', 'Y-m-d']],
@@ -64,10 +53,11 @@ class StudentGrade extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'grade_id' => ['required', 'objectId', ['inCollection', 'grade']],
+            'grade_id' => ['required', 'int'],
             'number' => ['required', 'integer', ['min', 1]],
-            'student_id' => ['required', 'objectId', ['inCollection', 'student']],
-            'start' => ['required', ['dateFormat', 'Y-m-d']]
+            'student_id' => ['required', 'int'],
+            'start_date' => ['required', ['dateFormat', 'Y-m-d']],
+            'end_date' => ['required', ['dateFormat', 'Y-m-d']]
         ];
 
         return $this->run_validation($rules);
@@ -75,11 +65,12 @@ class StudentGrade extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'objectId', 'inCollection'],
-            'grade_id' => ['optional', 'objectId', ['inCollection', 'grade']],
+            'id' => ['required', 'int'],
+            'grade_id' => ['optional', 'int'],
             'number' => ['optional', 'integer', ['min', 1]],
-            'student_id' => ['optional', 'objectId', ['inCollection', 'student']],
-            'start' => ['optional', ['dateFormat', 'Y-m-d']]
+            'student_id' => ['optional', 'int'],
+            'start_date' => ['optional', ['dateFormat', 'Y-m-d']],
+            'end_date' => ['optional', ['dateFormat', 'Y-m-d']]
         ];
 
         return $this->run_validation($rules);
@@ -105,13 +96,71 @@ class StudentGrade extends Controller
         }
 
         $filters = $this->get_filters();
+
+        $where = [];
+        if (isset($filters['id'])) {
+            $where[] = '`id` = :id';
+        }
+        if (isset($filters['grade_id'])) {
+            $where[] = '`grade_id` = :grade_id';
+        }
+        if (isset($filters['student_id'])) {
+            $where[] = '`student_id` = :student_id';
+        }
+        if (isset($filters['max_number'])) {
+            $where[] = '`number` <= :max_number';
+        }
+        if (isset($filters['min_number'])) {
+            $where[] = '`number` >= :min_number';
+        }
+        if (isset($filters['max_start_date'])) {
+            $where[] = '`start_date` <= :max_start_date';
+        }
+        if (isset($filters['min_start_date'])) {
+            $where[] = '`start_date` >= :min_start_date';
+        }
+        if (isset($filters['max_end_date'])) {
+            $where[] = '`end_date` <= :max_end_date';
+        }
+        if (isset($filters['min_end_date'])) {
+            $where[] = '`end_date` >= :min_end_date';
+        }
+        if (isset($filters['max_updated_at'])) {
+            $where[] = '`updated_at` <= :max_updated_at';
+        }
+        if (isset($filters['min_updated_at'])) {
+            $where[] = '`updated_at` >= :min_updated_at';
+        }
+
+        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
+
         $pagination = $this->get_pagination();
-        $default_model = $this->get_default_model();
-        $results = $default_model::find($filters, $pagination)->toArray();
-        $results = $this->sanitize_output($results);
+
+        $sql = "SELECT * FROM `student_grade` $where LIMIT :limit OFFSET :offset";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+
+        $parameters = $filters + $pagination;
+        foreach ($parameters as $parameter_name => $parameter_value) {
+            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        if (!$statement->execute()) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_QUERY'], $this->prettify());
+        }
+
+        $results = $statement->fetchAll(PDO::FETCH_OBJ);
+        // filter output columns
+
+        $sql = "SELECT COUNT(*) AS `all_results` FROM `student_grade` $where";
+        $statement = $db->prepare($sql);
+        $statement->execute($filters);
+        $all_results = (int) $statement->fetchObject()->all_results;
+
         $return = [
             'results' => $results,
-            'all_results' => $default_model::count($filters),
+            'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
         return json_encode($return, $this->prettify());
@@ -127,10 +176,13 @@ class StudentGrade extends Controller
         }
 
         $data = $this->get_data();
-        $default_model = $this->get_default_model();
+        $columns = implode(', ', array_keys($data));
+        $values = ':'.implode(', :', array_keys($data));
+        $sql = "INSERT INTO `student_grade` ($columns) VALUES ($values)";
 
-        $entity = new $default_model($data);
-        if (!$entity->save()) {
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_INSERT'], $this->prettify());
         }
@@ -145,13 +197,24 @@ class StudentGrade extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
+        $data = array_filter($this->get_data());
+        if (!$data) {
+            http_response_code(400);
+            return json_encode(['error' => 'EMPTY_UPDATE'], $this->prettify());
+        }
 
-        $data = $this->get_data();
+        $fields = [];
+        foreach ($data as $column => $value) {
+            $fields[] = "`$column` = :$column";
+        }
+        $set = implode(', ', $fields);
+        $sql = "UPDATE `student_grade` SET $set WHERE `id` = :id";
 
-        if (!$entity->update($data)) {
+        $data['id'] = $this->input_int('id');
+
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute($data)) {
             http_response_code(500);
             return json_encode(['error' => 'CANNOT_UPDATE'], $this->prettify());
         }
@@ -166,9 +229,12 @@ class StudentGrade extends Controller
             ], $this->prettify());
         }
 
-        $default_model = $this->get_default_model();
-        $criteria = ['id' => $this->input_int('id')];
-        $entity = $default_model::one($criteria);
-        $entity->delete();
+        $sql = "DELETE `student_grade` WHERE `id` = :id";
+        $db = $this->get_db_connection();
+        $statement = $db->prepare($sql);
+        if (!$statement->execute(['id' => $this->input_int('int')])) {
+            http_response_code(500);
+            return json_encode(['error' => 'CANNOT_DELETE'], $this->prettify());
+        }
     }
 }
