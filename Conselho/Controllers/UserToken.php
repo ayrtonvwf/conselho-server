@@ -1,7 +1,6 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use Conselho\Models;
 use PDO;
 
 class UserToken extends Controller
@@ -26,16 +25,6 @@ class UserToken extends Controller
     }
 
     // METHODS
-
-    public function get() {
-        $default_model = $this->get_default_model();
-        $results = $default_model::find()->toArray();
-        $results = $this->sanitize_output($results);
-        $return = [
-            'results' => $results
-        ];
-        return json_encode($return, $this->prettify());
-    }
 
     public function post() : string {
         if (!$this->validate_post()) {
@@ -77,10 +66,5 @@ class UserToken extends Controller
         }
 
         return json_encode($token, $this->prettify());
-    }
-
-    public function delete() : void {
-        $current_token = $this->get_token();
-        UserToken::one(['value' => $current_token])->delete();
     }
 }
