@@ -35,8 +35,8 @@ class Grade extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
-            'school_id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
+            'school_id' => ['optional', 'integer'],
             'min_level' => ['optional', 'integer', ['min', 1]],
             'max_level' => ['optional', 'integer', ['min', 1]],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
@@ -52,7 +52,7 @@ class Grade extends Controller
         $rules = [
             'name'  => ['required', ['lengthBetween', 1, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['required', 'int']
+            'school_id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -60,10 +60,10 @@ class Grade extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'int'],
+            'id' => ['required', 'integer'],
             'name'  => ['optional', ['lengthBetween', 1, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['optional', 'int']
+            'school_id' => ['optional', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -71,7 +71,7 @@ class Grade extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'int']
+            'id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -215,7 +215,7 @@ class Grade extends Controller
         $sql = "DELETE FROM `grade` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }

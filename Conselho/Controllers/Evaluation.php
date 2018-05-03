@@ -43,13 +43,13 @@ class Evaluation extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
-            'user_id' => ['optional', 'int'],
-            'student_id' => ['optional', 'int'],
-            'grade_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
-            'council_id' => ['optional', 'int'],
-            'topic_id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
+            'user_id' => ['optional', 'integer'],
+            'student_id' => ['optional', 'integer'],
+            'grade_id' => ['optional', 'integer'],
+            'subject_id' => ['optional', 'integer'],
+            'council_id' => ['optional', 'integer'],
+            'topic_id' => ['optional', 'integer'],
             'min_value' => ['optional'],
             'max_value' => ['optional'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
@@ -62,12 +62,12 @@ class Evaluation extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'user_id' => ['required', 'int'],
-            'student_id' => ['required', 'int'],
-            'grade_id' => ['required', 'int'],
-            'subject_id' => ['required', 'int'],
-            'council_id' => ['required', 'int'],
-            'topic_id' => ['required', 'int'],
+            'user_id' => ['required', 'integer'],
+            'student_id' => ['required', 'integer'],
+            'grade_id' => ['required', 'integer'],
+            'subject_id' => ['required', 'integer'],
+            'council_id' => ['required', 'integer'],
+            'topic_id' => ['required', 'integer'],
             'value' => ['required']
         ];
 
@@ -76,13 +76,13 @@ class Evaluation extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'int'],
-            'user_id' => ['optional', 'int'],
-            'student_id' => ['optional', 'int'],
-            'grade_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
-            'council_id' => ['optional', 'int'],
-            'topic_id' => ['optional', 'int'],
+            'id' => ['required', 'integer'],
+            'user_id' => ['optional', 'integer'],
+            'student_id' => ['optional', 'integer'],
+            'grade_id' => ['optional', 'integer'],
+            'subject_id' => ['optional', 'integer'],
+            'council_id' => ['optional', 'integer'],
+            'topic_id' => ['optional', 'integer'],
             'value' => ['optional']
         ];
 
@@ -91,7 +91,7 @@ class Evaluation extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'int']
+            'id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -247,7 +247,7 @@ class Evaluation extends Controller
         $sql = "DELETE FROM `evaluation` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }

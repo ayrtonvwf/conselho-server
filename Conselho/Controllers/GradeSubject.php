@@ -34,10 +34,10 @@ class GradeSubject extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
-            'grade_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
-            'user_id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
+            'grade_id' => ['optional', 'integer'],
+            'subject_id' => ['optional', 'integer'],
+            'user_id' => ['optional', 'integer'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'approved' => ['optional', 'boolean'],
@@ -49,9 +49,9 @@ class GradeSubject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'grade_id' => ['required', 'int'],
-            'subject_id' => ['required', 'int'],
-            'user_id' => ['required', 'int'],
+            'grade_id' => ['required', 'integer'],
+            'subject_id' => ['required', 'integer'],
+            'user_id' => ['required', 'integer'],
             'approved' => ['required', 'boolean']
         ];
 
@@ -60,10 +60,10 @@ class GradeSubject extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'int'],
-            'grade_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
-            'user_id' => ['optional', 'int'],
+            'id' => ['required', 'integer'],
+            'grade_id' => ['optional', 'integer'],
+            'subject_id' => ['optional', 'integer'],
+            'user_id' => ['optional', 'integer'],
             'approved' => ['optional', 'boolean']
         ];
 
@@ -72,7 +72,7 @@ class GradeSubject extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'int']
+            'id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -216,7 +216,7 @@ class GradeSubject extends Controller
         $sql = "DELETE FROM `grade_subject` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }

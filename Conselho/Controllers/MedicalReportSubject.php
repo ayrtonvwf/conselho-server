@@ -27,9 +27,9 @@ class MedicalReportSubject extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
-            'medical_report_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
+            'medical_report_id' => ['optional', 'integer'],
+            'subject_id' => ['optional', 'integer'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'page' => ['optional', 'integer', ['min', 1]]
@@ -40,8 +40,8 @@ class MedicalReportSubject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'medical_report_id' => ['required', 'int'],
-            'subject_id' => ['required', 'int'],
+            'medical_report_id' => ['required', 'integer'],
+            'subject_id' => ['required', 'integer'],
             'description' => ['required', 'string', ['maxLength', 50]]
         ];
 
@@ -50,9 +50,9 @@ class MedicalReportSubject extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'int'],
-            'medical_report_id' => ['optional', 'int'],
-            'subject_id' => ['optional', 'int'],
+            'id' => ['required', 'integer'],
+            'medical_report_id' => ['optional', 'integer'],
+            'subject_id' => ['optional', 'integer'],
             'description' => ['optional', 'string', ['maxLength', 50]]
         ];
 
@@ -61,7 +61,7 @@ class MedicalReportSubject extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'int']
+            'id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -202,7 +202,7 @@ class MedicalReportSubject extends Controller
         $sql = "DELETE FROM `medical_report_subject` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }

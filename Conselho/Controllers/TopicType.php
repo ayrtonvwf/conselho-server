@@ -19,7 +19,7 @@ class TopicType extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'search'  => ['optional', ['lengthMin', 3]],

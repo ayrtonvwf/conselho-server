@@ -27,8 +27,8 @@ class MedicalReport extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
-            'student_id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
+            'student_id' => ['optional', 'integer'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'search'  => ['optional', ['lengthMin', 3]],
@@ -40,7 +40,7 @@ class MedicalReport extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'student_id' => ['required', 'int'],
+            'student_id' => ['required', 'integer'],
             'description' => ['required', 'string', ['maxLength', 50]]
         ];
 
@@ -49,8 +49,8 @@ class MedicalReport extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'int'],
-            'student_id' => ['optional', 'int'],
+            'id' => ['required', 'integer'],
+            'student_id' => ['optional', 'integer'],
             'description' => ['optional', 'string', ['maxLength', 50]]
         ];
 
@@ -59,7 +59,7 @@ class MedicalReport extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'int']
+            'id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -197,7 +197,7 @@ class MedicalReport extends Controller
         $sql = "DELETE FROM `medical_report` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }

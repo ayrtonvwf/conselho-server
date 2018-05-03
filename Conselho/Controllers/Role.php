@@ -34,10 +34,10 @@ class Role extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'objectId'],
-            'user_id' => ['optional', 'objectId'],
-            'role_type_id' => ['optional', 'objectId'],
-            'school_id' => ['optional', 'objectId'],
+            'id' => ['optional', 'integer'],
+            'user_id' => ['optional', 'integer'],
+            'role_type_id' => ['optional', 'integer'],
+            'school_id' => ['optional', 'integer'],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'approved'  => ['optional', 'boolean'],
@@ -49,9 +49,9 @@ class Role extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'user_id' => ['required', 'objectId'],
-            'role_type_id' => ['required', 'objectId'],
-            'school_id' => ['required', 'objectId'],
+            'user_id' => ['required', 'integer'],
+            'role_type_id' => ['required', 'integer'],
+            'school_id' => ['required', 'integer'],
             'approved' => ['required', 'boolean']
         ];
 
@@ -60,10 +60,10 @@ class Role extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'objectId'],
-            'user_id' => ['optional', 'objectId'],
-            'role_type_id' => ['optional', 'objectId'],
-            'school_id' => ['optional', 'objectId'],
+            'id' => ['required', 'integer'],
+            'user_id' => ['optional', 'integer'],
+            'role_type_id' => ['optional', 'integer'],
+            'school_id' => ['optional', 'integer'],
             'approved' => ['optional', 'boolean']
         ];
 
@@ -216,7 +216,7 @@ class Role extends Controller
         $sql = "DELETE FROM `role` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }
