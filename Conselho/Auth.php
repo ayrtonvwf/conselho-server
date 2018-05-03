@@ -18,17 +18,17 @@ final class Auth {
         $db->query('SET time_zone =  \'+00:00\'');
 
         $sql = '
-            SELECT user.*
-            FROM user
-            INNER JOIN user_token ON
-                user_token.user_id = user.id AND
-                user_token.value = :token_value AND
-                user_token.expires_at > NOW()';
+            SELECT *
+            FROM user_token
+            WHERE value = :token_value';
         $statement = $db->prepare($sql);
         $statement->bindValue(':token_value', $token, PDO::PARAM_STR);
         $statement->execute();
-        if (!$statement->fetch(PDO::FETCH_OBJ)) {
+        if (!$token = $statement->fetchObject()) {
             die('User token not found');
+        }
+        if ($token->expires_at < date('Y-m-d H:i:s')) {
+            die('Expired token');
         }
     }
 }
