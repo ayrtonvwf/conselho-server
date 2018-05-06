@@ -49,31 +49,11 @@ class Council extends Controller
     }
 
     private function validate_post() : bool {
-        $user_id = $this->get_user()->id;
-        $db = $this->get_db_connection();
-        $is_school_supervisor = function(string $field_name, int $school_id) use ($user_id, $db) : bool {
-            $sql = "
-                SELECT EXISTS (
-                    SELECT *
-                    FROM `role`
-                    INNER JOIN `role_type` ON
-                        `role_type`.`reference` = 'super' AND 
-                        `role_type`.`id` = `role`.`role_type_id` AND 
-                        `role`.`user_id` = :user_id AND 
-                        `role`.`school_id` = :school_id
-                ) AS is_school_supervisor
-            ";
-            $statement = $db->prepare($sql);
-            $statement->bindValue(':user_id', $user_id);
-            $statement->bindValue(':school_id', $school_id);
-            $statement->execute();
-            return (bool) $statement->fetchObject()->is_school_supervisor;
-        };
         $rules = [
             'start_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'integer', [$is_school_supervisor, 'message' => 'The user needs to be supervisor to create a council']]
+            'school_id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
