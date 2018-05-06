@@ -53,7 +53,8 @@ class Council extends Controller
             'start_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'integer']
+            'school_id' => ['required', 'integer'],
+            'topic_ids' => ['required', 'array']
         ];
 
         return $this->run_validation($rules);
@@ -65,7 +66,8 @@ class Council extends Controller
             'start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'school_id' => ['optional', 'integer']
+            'school_id' => ['optional', 'integer'],
+            'topic_ids' => ['optional', 'array']
         ];
 
         return $this->run_validation($rules);
@@ -164,17 +166,38 @@ class Council extends Controller
             ], $this->prettify());
         }
 
-        $data = $this->get_data();
-        $columns = implode(', ', array_keys($data));
-        $values = ':'.implode(', :', array_keys($data));
-        $sql = "INSERT INTO `council` ($columns) VALUES ($values)";
-
+        $sql = "INSERT INTO `council` (name, start_date, end_date, school_id) VALUES (:name, :start_date, :end_date, :school_id)";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $statement->bindValue(':name', $this->input_string('name'), PDO::PARAM_STR);
+        $statement->bindValue(':start_date', $this->input_string('start_date'), PDO::PARAM_STR);
+        $statement->bindValue(':end_date', $this->input_string('end_date'), PDO::PARAM_STR);
+        $statement->bindValue(':school_id', $this->input_string('school_id'), PDO::PARAM_INT);
+
+        if (!$statement->execute()) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_INSERT'], $this->prettify());
         }
+
+        $council_id = $db->lastInsertId();
+        $values = [];
+        $topic_ids = $this->input_raw('topic_ids');
+        foreach ($topic_ids as $k => $topic_id) {
+            $values[] = "(:council_id_$k, :topic_id_$k)";
+        }
+        $values = implode(', ', $values);
+        $sql = "INSERT INTO `council_topic` (council_id, topic_id) VALUES $values";
+        $statement = $db->prepare($sql);
+        foreach ($topic_ids as $k => $topic_id) {
+            $statement->bindValue(":council_id_$k", $council_id, PDO::PARAM_INT);
+            $statement->bindValue(":topic_id_$k", $topic_id, PDO::PARAM_INT);
+        }
+
+        if (!$statement->execute()) {
+            http_response_code(500);
+            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->prettify());
+        }
+
         return json_encode(['error_code' => null], $this->prettify());
     }
 
