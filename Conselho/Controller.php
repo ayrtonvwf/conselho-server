@@ -1,7 +1,7 @@
 <?php
 namespace Conselho;
 use Valitron\Validator;
-use PDO;
+use PDO, PDOStatement;
 
 abstract class Controller {
     private $input_data = [];
@@ -24,7 +24,6 @@ abstract class Controller {
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             return $_GET;
         }
-
         return json_decode(file_get_contents('php://input'), true) ?? [];
     }
 
@@ -57,7 +56,7 @@ abstract class Controller {
         return !empty($_SERVER['HTTP_PRETTIFY']) ? JSON_PRETTY_PRINT : null;
     }
     
-    protected function input_raw(string $key) : ?string {
+    protected function input_raw(string $key) {
         return $this->input_data[$key] ?? null;
     }
 
@@ -98,8 +97,10 @@ abstract class Controller {
     }
 
     protected function run_validation(array $rules) : bool {
-        $data = array_map('strip_tags', $this->input_data);
-        $data = array_map('trim', $data);
+        $data = [];
+        foreach ($this->input_data as $key => $value) {
+            $data[$key] = is_string($value) ? trim(strip_tags($value)) : $value;
+        }
 
         $validator = new Validator($data);
         $validator->mapFieldsRules($rules);
@@ -111,5 +112,29 @@ abstract class Controller {
 
     protected function get_validation_errors() : array {
         return $this->validation_errors;
+    }
+
+    protected function bind_values(PDOStatement $statement, array $values) : PDOStatement {
+        foreach ($values as $parameter => $value) {
+            $parameter_type = $this->get_pdo_parameter_type($value);
+            $statement->bindValue(":$parameter", $value, $parameter_type);
+        }
+        return $statement;
+    }
+
+    private function get_pdo_parameter_type($value) : ?int {
+        if (is_int($value)) {
+            return PDO::PARAM_INT;
+        }
+        if (is_bool($value)) {
+            return PDO::PARAM_BOOL;
+        }
+        if (is_string($value)) {
+            return PDO::PARAM_STR;
+        }
+        if (is_null($value)) {
+            return PDO::PARAM_NULL;
+        }
+        return null;
     }
 }
