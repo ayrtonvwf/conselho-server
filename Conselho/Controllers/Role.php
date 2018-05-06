@@ -118,7 +118,7 @@ class Role extends Controller
 
         $pagination = $this->get_pagination();
 
-        $sql = "SELECT * FROM `user` $where LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM `role` $where LIMIT :limit OFFSET :offset";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
 
@@ -164,7 +164,8 @@ class Role extends Controller
 
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $statement = $this->bind_values($statement, $data);
+        if (!$statement->execute()) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_INSERT'], $this->prettify());
         }
