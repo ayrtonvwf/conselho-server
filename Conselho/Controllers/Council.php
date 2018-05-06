@@ -33,8 +33,8 @@ class Council extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'int'],
-            'school_id' => ['optional', 'int'],
+            'id' => ['optional', 'integer'],
+            'school_id' => ['optional', 'integer'],
             'max_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'min_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'max_end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
@@ -49,11 +49,31 @@ class Council extends Controller
     }
 
     private function validate_post() : bool {
+        $user_id = $this->get_user()->id;
+        $db = $this->get_db_connection();
+        $is_school_supervisor = function(string $field_name, int $school_id) use ($user_id, $db) : bool {
+            $sql = "
+                SELECT EXISTS (
+                    SELECT *
+                    FROM `role`
+                    INNER JOIN `role_type` ON
+                        `role_type`.`reference` = 'super' AND 
+                        `role_type`.`id` = `role`.`role_type_id` AND 
+                        `role`.`user_id` = :user_id AND 
+                        `role`.`school_id` = :school_id
+                ) AS is_school_supervisor
+            ";
+            $statement = $db->prepare($sql);
+            $statement->bindValue(':user_id', $user_id);
+            $statement->bindValue(':school_id', $school_id);
+            $statement->execute();
+            return (bool) $statement->fetchObject()->is_school_supervisor;
+        };
         $rules = [
             'start_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['required', ['dateFormat', 'Y-m-d']],
             'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'int']
+            'school_id' => ['required', 'integer', [$is_school_supervisor, 'message' => 'The user needs to be supervisor to create a council']]
         ];
 
         return $this->run_validation($rules);
@@ -61,11 +81,11 @@ class Council extends Controller
 
     private function validate_put() : bool {
         $rules = [
-            'id' => ['required', 'int'],
+            'id' => ['required', 'integer'],
             'start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
             'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'school_id' => ['optional', 'int']
+            'school_id' => ['optional', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -73,7 +93,7 @@ class Council extends Controller
 
     private function validate_delete() : bool {
         $rules = [
-            'id' => ['required', 'int']
+            'id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -223,7 +243,7 @@ class Council extends Controller
         $sql = "DELETE FROM `council` WHERE `id` = :id";
         $db = $this->get_db_connection();
         $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('int')])) {
+        if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
             return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
         }
