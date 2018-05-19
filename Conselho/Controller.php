@@ -1,12 +1,39 @@
 <?php
 namespace Conselho;
+use Atlas\Orm\AtlasContainer;
 use Valitron\Validator;
 use PDO, PDOStatement;
 
 abstract class Controller {
     private $input_data = [];
     private $validation_errors = [];
-    private $db;
+    private $atlas;
+    private const ATLAS_MAPPERS = [
+        DataSource\Council\CouncilMapper::CLASS,
+        DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
+        DataSource\CouncilTopic\CouncilTopicMapper::CLASS,
+        DataSource\Evaluation\EvaluationMapper::CLASS,
+        DataSource\Grade\GradeMapper::CLASS,
+        DataSource\GradeObservation\GradeObservationMapper::CLASS,
+        DataSource\GradeSubject\GradeSubjectMapper::CLASS,
+        DataSource\MedicalReport\MedicalReportMapper::CLASS,
+        DataSource\MedicalReportSubject\MedicalReportSubjectMapper::CLASS,
+        DataSource\Permission\PermissionMapper::CLASS,
+        DataSource\Role\RoleMapper::CLASS,
+        DataSource\RoleType\RoleTypeMapper::CLASS,
+        DataSource\RoleTypePermission\RoleTypePermissionMapper::CLASS,
+        DataSource\School\SchoolMapper::CLASS,
+        DataSource\Student\StudentMapper::CLASS,
+        DataSource\StudentGrade\StudentGradeMapper::CLASS,
+        DataSource\StudentObservation\StudentObservationMapper::CLASS,
+        DataSource\Subject\SubjectMapper::CLASS,
+        DataSource\Teacher\TeacherMapper::CLASS,
+        DataSource\TeacherRequest\TeacherRequestMapper::CLASS,
+        DataSource\Topic\TopicMapper::CLASS,
+        DataSource\TopicOption\TopicOptionMapper::CLASS,
+        DataSource\User\UserMapper::CLASS,
+        DataSource\UserToken\UserTokenMapper::CLASS
+    ];
     
     public function __construct(bool $needs_auth = true)
     {
@@ -38,17 +65,20 @@ abstract class Controller {
         return $data ?? [];
     }
 
-    protected function get_db_connection() : PDO {
-        if (!$this->db) {
+    protected function atlas() : PDO {
+        if (!$this->atlas) {
             $db_host = getenv('DB_HOST');
             $db_name = getenv('DB_NAME');
             $db_dns = "mysql:host=$db_host;dbname=$db_name;charset=UTF8";
             $db_user = getenv('DB_USER');
             $db_pass = getenv('DB_PASS');
-            $this->db = new PDO($db_dns, $db_user, $db_pass);
-            $this->db->query('SET time_zone =  \'+00:00\'');
+            $pdo = new PDO($db_dns, $db_user, $db_pass);
+            $pdo->query('SET time_zone =  \'+00:00\'');
+            $atlas_container = new AtlasContainer($pdo);
+            $atlas_container->setMappers(self::ATLAS_MAPPERS);
+            $this->atlas = $atlas_container->getAtlas();
         }
-        return $this->db;
+        return $this->atlas;
     }
 
     protected function get_pagination(int $limit = 50) : array {
