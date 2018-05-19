@@ -13,7 +13,7 @@ header('Content-Type: application/json; charset=UTF-8');
 
 if (($_SERVER['HTTP_ACCEPT'] ?? '') != 'application/json') {
     http_response_code(406);
-    die(json_encode(['error_code' => 'WRONG_HTTP_ACCEPT']));
+    exit;
 }
 
 $dotenv = new Dotenv(__DIR__);
