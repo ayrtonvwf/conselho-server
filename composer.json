@@ -5,11 +5,15 @@
         "ext-PDO": "^7.2",
         "vlucas/phpdotenv": "^2.4",
         "miladrahimi/phprouter": "^2.3",
-        "vlucas/valitron": "^1.4"
+        "vlucas/valitron": "^1.4",
+        "atlas/orm": "^2.3"
     },
     "autoload": {
         "psr-4": {
             "Conselho\\": "Conselho/"
         }
+    },
+    "require-dev": {
+        "atlas/cli": "^1.1"
     }
 }
