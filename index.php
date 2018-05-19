@@ -16,92 +16,121 @@ if (($_SERVER['HTTP_ACCEPT'] ?? '') != 'application/json') {
     die(json_encode(['error_code' => 'WRONG_HTTP_ACCEPT']));
 }
 
-if (($_SERVER['CONTENT_TYPE'] ?? '') != 'application/json') {
-    http_response_code(400);
-    die(json_encode(['error_code' => 'WRONG_CONTENT_TYPE']));
-}
-
 $dotenv = new Dotenv(__DIR__);
 $dotenv->load();
+
+$controller_prefix = 'Conselho\\Controllers\\';
 $router = new Router(getenv('BASE_PATH'));
+$router->define('id', Router::NUMERIC);
+$router->group('Conselho\\Auth@check', function(Router $router) use ($controller_prefix) {
+    $router->map('GET', '/council', "{$controller_prefix}Council@get");
+    $router->map('POST', '/council', "{$controller_prefix}Council@post");
+    $router->map('PATCH', '/council/{id}', "{$controller_prefix}Council@patch");
+    $router->map('DELETE', '/council/{id}', "{$controller_prefix}Council@delete");
+    
+    $router->map('GET', '/council_grade', "{$controller_prefix}CouncilGrade@get");
+    $router->map('POST', '/council_grade', "{$controller_prefix}CouncilGrade@post");
+    $router->map('DELETE', '/council_grade/{id}', "{$controller_prefix}CouncilGrade@delete");
+    
+    $router->map('GET', '/council_topic', "{$controller_prefix}CouncilTopic@get");
+    $router->map('POST', '/council_topic', "{$controller_prefix}CouncilTopic@post");
+    $router->map('DELETE', '/council_topic/{id}', "{$controller_prefix}CouncilTopic@delete");
+    
+    $router->map('GET', '/evaluation', "{$controller_prefix}Evaluation@get");
+    $router->map('POST', '/evaluation', "{$controller_prefix}Evaluation@post");
+    $router->map('PATCH', '/evaluation/{id}', "{$controller_prefix}Evaluation@patch");
+    $router->map('DELETE', '/evaluation/{id}', "{$controller_prefix}Evaluation@delete");
+    
+    $router->map('GET', '/grade', "{$controller_prefix}Grade@get");
+    $router->map('POST', '/grade', "{$controller_prefix}Grade@post");
+    $router->map('PATCH', '/grade/{id}', "{$controller_prefix}Grade@patch");
+    $router->map('DELETE', '/grade/{id}', "{$controller_prefix}Grade@delete");
+    
+    $router->map('GET', '/grade_observation', "{$controller_prefix}GradeObservation@get");
+    $router->map('POST', '/grade_observation', "{$controller_prefix}GradeObservation@post");
+    $router->map('PATCH', '/grade_observation/{id}', "{$controller_prefix}GradeObservation@patch");
+    $router->map('DELETE', '/grade_observation/{id}', "{$controller_prefix}GradeObservation@delete");
+    
+    $router->map('GET', '/grade_subject', "{$controller_prefix}GradeSubject@get");
+    $router->map('POST', '/grade_subject', "{$controller_prefix}GradeSubject@post");
+    $router->map('DELETE', '/grade_subject/{id}', "{$controller_prefix}GradeSubject@delete");
+    
+    $router->map('GET', '/medical_report', "{$controller_prefix}MedicalReport@get");
+    $router->map('POST', '/medical_report', "{$controller_prefix}MedicalReport@post");
+    $router->map('PATCH', '/medical_report/{id}', "{$controller_prefix}MedicalReport@patch");
+    $router->map('DELETE', '/medical_report/{id}', "{$controller_prefix}MedicalReport@delete");
+    
+    $router->map('GET', '/medical_report_subject', "{$controller_prefix}MedicalReportSubject@get");
+    $router->map('POST', '/medical_report_subject', "{$controller_prefix}MedicalReportSubject@post");
+    $router->map('DELETE', '/medical_report_subject/{id}', "{$controller_prefix}MedicalReportSubject@delete");
+    
+    $router->map('GET', '/permission', "{$controller_prefix}Permission@get");
 
-$router->map('GET', '/council[/]*', 'Conselho\\Controllers\\Council@get', 'Conselho\\Auth@check');
-$router->map('POST', '/council[/]*', 'Conselho\\Controllers\\Council@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/council[/]*', 'Conselho\\Controllers\\Council@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/council[/]*', 'Conselho\\Controllers\\Council@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/role', "{$controller_prefix}Role@get");
+    $router->map('POST', '/role', "{$controller_prefix}Role@post");
+    $router->map('PATCH', '/role/{id}', "{$controller_prefix}Role@patch");
+    $router->map('DELETE', '/role/{id}', "{$controller_prefix}Role@delete");
 
-$router->map('GET', '/evaluation[/]*', 'Conselho\\Controllers\\Evaluation@get', 'Conselho\\Auth@check');
-$router->map('POST', '/evaluation[/]*', 'Conselho\\Controllers\\Evaluation@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/evaluation[/]*', 'Conselho\\Controllers\\Evaluation@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/evaluation[/]*', 'Conselho\\Controllers\\Evaluation@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/role_type', "{$controller_prefix}RoleType@get");
+    $router->map('POST', '/role_type', "{$controller_prefix}RoleType@post");
+    $router->map('PATCH', '/role_type/{id}', "{$controller_prefix}RoleType@patch");
+    $router->map('DELETE', '/role_type/{id}', "{$controller_prefix}RoleType@delete");
 
-$router->map('GET', '/grade[/]*', 'Conselho\\Controllers\\Grade@get', 'Conselho\\Auth@check');
-$router->map('POST', '/grade[/]*', 'Conselho\\Controllers\\Grade@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/grade[/]*', 'Conselho\\Controllers\\Grade@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/grade[/]*', 'Conselho\\Controllers\\Grade@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/role_type_permission', "{$controller_prefix}RoleTypePermission@get");
+    $router->map('POST', '/role_type_permission', "{$controller_prefix}RoleTypePermission@post");
+    $router->map('DELETE', '/role_type_permission/{id}', "{$controller_prefix}RoleTypePermission@delete");
 
-$router->map('GET', '/grade_observation[/]*', 'Conselho\\Controllers\\GradeObservation@get', 'Conselho\\Auth@check');
-$router->map('POST', '/grade_observation[/]*', 'Conselho\\Controllers\\GradeObservation@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/grade_observation[/]*', 'Conselho\\Controllers\\GradeObservation@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/grade_observation[/]*', 'Conselho\\Controllers\\GradeObservation@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/school', "{$controller_prefix}School@get");
+    
+    $router->map('GET', '/student', "{$controller_prefix}Student@get");
+    $router->map('POST', '/student', "{$controller_prefix}Student@post");
+    $router->map('PATCH', '/student/{id}', "{$controller_prefix}Student@patch");
+    $router->map('DELETE', '/student/{id}', "{$controller_prefix}Student@delete");
+    
+    $router->map('GET', '/student_grade', "{$controller_prefix}StudentGrade@get");
+    $router->map('POST', '/student_grade', "{$controller_prefix}StudentGrade@post");
+    $router->map('PATCH', '/student_grade/{id}', "{$controller_prefix}StudentGrade@patch");
+    $router->map('DELETE', '/student_grade/{id}', "{$controller_prefix}StudentGrade@delete");
+    
+    $router->map('GET', '/student_observation', "{$controller_prefix}StudentObservation@get");
+    $router->map('POST', '/student_observation', "{$controller_prefix}StudentObservation@post");
+    $router->map('PATCH', '/student_observation/{id}', "{$controller_prefix}StudentObservation@patch");
+    $router->map('DELETE', '/student_observation/{id}', "{$controller_prefix}StudentObservation@delete");
 
-$router->map('GET', '/grade_subject[/]*', 'Conselho\\Controllers\\GradeSubject@get', 'Conselho\\Auth@check');
-$router->map('POST', '/grade_subject[/]*', 'Conselho\\Controllers\\GradeSubject@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/grade_subject[/]*', 'Conselho\\Controllers\\GradeSubject@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/grade_subject[/]*', 'Conselho\\Controllers\\GradeSubject@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/subject', "{$controller_prefix}Subject@get");
+    $router->map('POST', '/subject', "{$controller_prefix}Subject@post");
+    $router->map('PATCH', '/subject/{id}', "{$controller_prefix}Subject@patch");
+    $router->map('DELETE', '/subject/{id}', "{$controller_prefix}Subject@delete");
 
-$router->map('GET', '/medical_report[/]*', 'Conselho\\Controllers\\MedicalReport@get', 'Conselho\\Auth@check');
-$router->map('POST', '/medical_report[/]*', 'Conselho\\Controllers\\MedicalReport@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/medical_report[/]*', 'Conselho\\Controllers\\MedicalReport@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/medical_report[/]*', 'Conselho\\Controllers\\MedicalReport@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/teacher', "{$controller_prefix}Teacher@get");
+    $router->map('POST', '/teacher', "{$controller_prefix}Teacher@post");
+    $router->map('PATCH', '/teacher/{id}', "{$controller_prefix}Teacher@patch");
+    $router->map('DELETE', '/teacher/{id}', "{$controller_prefix}Teacher@delete");
 
-$router->map('GET', '/medical_report_subject[/]*', 'Conselho\\Controllers\\MedicalReportSubject@get', 'Conselho\\Auth@check');
-$router->map('POST', '/medical_report_subject[/]*', 'Conselho\\Controllers\\MedicalReportSubject@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/medical_report_subject[/]*', 'Conselho\\Controllers\\MedicalReportSubject@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/medical_report_subject[/]*', 'Conselho\\Controllers\\MedicalReportSubject@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/teacher_request', "{$controller_prefix}TeacherRequest@get");
+    $router->map('POST', '/teacher_request', "{$controller_prefix}TeacherRequest@post");
+    $router->map('DELETE', '/teacher_request/{id}', "{$controller_prefix}TeacherRequest@delete");
 
-$router->map('GET', '/role[/]*', 'Conselho\\Controllers\\Role@get', 'Conselho\\Auth@check');
-$router->map('POST', '/role[/]*', 'Conselho\\Controllers\\Role@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/role[/]*', 'Conselho\\Controllers\\Role@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/role[/]*', 'Conselho\\Controllers\\Role@delete', 'Conselho\\Auth@check');
+    $router->map('GET', '/topic', "{$controller_prefix}Topic@get");
+    $router->map('POST', '/topic', "{$controller_prefix}Topic@post");
+    $router->map('PATCH', '/topic/{id}', "{$controller_prefix}Topic@patch");
+    $router->map('DELETE', '/topic/{id}', "{$controller_prefix}Topic@delete");
 
-$router->map('GET', '/role_type[/]*', 'Conselho\\Controllers\\RoleType@get', 'Conselho\\Auth@check');
+    $router->map('GET', '/topic_option', "{$controller_prefix}TopicOption@get");
+    $router->map('POST', '/topic_option', "{$controller_prefix}TopicOption@post");
+    $router->map('PATCH', '/topic_option/{id}', "{$controller_prefix}TopicOption@patch");
+    $router->map('DELETE', '/topic_option/{id}', "{$controller_prefix}TopicOption@delete");
 
-$router->map('GET', '/school[/]*', 'Conselho\\Controllers\\School@get', 'Conselho\\Auth@check');
+    $router->map('GET', '/user', "{$controller_prefix}User@get");
+    $router->map('PATCH', '/user', "{$controller_prefix}User@patch");
+    $router->map('DELETE', '/user', "{$controller_prefix}User@delete");
 
-$router->map('GET', '/student[/]*', 'Conselho\\Controllers\\Student@get', 'Conselho\\Auth@check');
-$router->map('POST', '/student[/]*', 'Conselho\\Controllers\\Student@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/student[/]*', 'Conselho\\Controllers\\Student@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/student[/]*', 'Conselho\\Controllers\\Student@delete', 'Conselho\\Auth@check');
-
-$router->map('GET', '/student_grade[/]*', 'Conselho\\Controllers\\StudentGrade@get', 'Conselho\\Auth@check');
-$router->map('POST', '/student_grade[/]*', 'Conselho\\Controllers\\StudentGrade@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/student_grade[/]*', 'Conselho\\Controllers\\StudentGrade@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/student_grade[/]*', 'Conselho\\Controllers\\StudentGrade@delete', 'Conselho\\Auth@check');
-
-$router->map('GET', '/student_observation[/]*', 'Conselho\\Controllers\\StudentObservation@get', 'Conselho\\Auth@check');
-$router->map('POST', '/student_observation[/]*', 'Conselho\\Controllers\\StudentObservation@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/student_observation[/]*', 'Conselho\\Controllers\\StudentObservation@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/student_observation[/]*', 'Conselho\\Controllers\\StudentObservation@delete', 'Conselho\\Auth@check');
-
-$router->map('GET', '/subject[/]*', 'Conselho\\Controllers\\Subject@get', 'Conselho\\Auth@check');
-$router->map('POST', '/subject[/]*', 'Conselho\\Controllers\\Subject@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/subject[/]*', 'Conselho\\Controllers\\Subject@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/subject[/]*', 'Conselho\\Controllers\\Subject@delete', 'Conselho\\Auth@check');
-
-$router->map('GET', '/topic[/]*', 'Conselho\\Controllers\\Topic@get', 'Conselho\\Auth@check');
-$router->map('POST', '/topic[/]*', 'Conselho\\Controllers\\Topic@post', 'Conselho\\Auth@check');
-$router->map('PUT', '/topic[/]*', 'Conselho\\Controllers\\Topic@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/topic[/]*', 'Conselho\\Controllers\\Topic@delete', 'Conselho\\Auth@check');
-
-$router->map('GET', '/topic_type[/]*', 'Conselho\\Controllers\\TopicType@get', 'Conselho\\Auth@check');
-
-$router->map('GET', '/user[/]*', 'Conselho\\Controllers\\User@get', 'Conselho\\Auth@check');
-$router->map('POST', '/user[/]*', 'Conselho\\Controllers\\User@post');
-$router->map('PUT', '/user[/]*', 'Conselho\\Controllers\\User@put', 'Conselho\\Auth@check');
-$router->map('DELETE', '/user[/]*', 'Conselho\\Controllers\\User@delete', 'Conselho\\Auth@check');
-
-$router->map('POST', '/user_token[/]*', 'Conselho\\Controllers\\UserToken@post');
+    $router->map('GET', '/user_token', "{$controller_prefix}UserToken@get");
+    $router->map('PATCH', '/user_token', "{$controller_prefix}UserToken@patch");
+    $router->map('DELETE', '/user_token', "{$controller_prefix}UserToken@delete");
+});
+$router->map('POST', '/user[/]*', "{$controller_prefix}User@post");
+$router->map('POST', '/user_token[/]*', "{$controller_prefix}UserToken@post");
 
 try {
     $router->dispatch();
