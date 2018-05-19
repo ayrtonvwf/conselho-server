@@ -85,7 +85,7 @@ class Grade extends Controller
             return json_encode([
                 'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
+            ], $this->pretty());
         }
 
         $filters = $this->get_filters();
@@ -128,7 +128,7 @@ class Grade extends Controller
 
         if (!$statement->execute()) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
         }
 
         $results = $statement->fetchAll(PDO::FETCH_OBJ);
@@ -144,7 +144,7 @@ class Grade extends Controller
             'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
-        return json_encode($return, $this->prettify());
+        return json_encode($return, $this->pretty());
     }
 
     public function post() : string {
@@ -153,7 +153,7 @@ class Grade extends Controller
             return json_encode([
                 'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
+            ], $this->pretty());
         }
 
         $data = $this->get_data();
@@ -165,9 +165,9 @@ class Grade extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute($data)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->pretty());
         }
-        return json_encode(['error_code' => null], $this->prettify());
+        return json_encode(['error_code' => null], $this->pretty());
     }
 
     public function put() : string {
@@ -176,13 +176,13 @@ class Grade extends Controller
             return json_encode([
                 'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
+            ], $this->pretty());
         }
 
         $data = array_filter($this->get_data());
         if (!$data) {
             http_response_code(400);
-            return json_encode(['error_code' => 'EMPTY_UPDATE'], $this->prettify());
+            return json_encode(['error_code' => 'EMPTY_UPDATE'], $this->pretty());
         }
 
         $fields = [];
@@ -198,9 +198,9 @@ class Grade extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute($data)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->pretty());
         }
-        return json_encode(['error_code' => null], $this->prettify());
+        return json_encode(['error_code' => null], $this->pretty());
     }
 
     public function delete() : string {
@@ -209,7 +209,7 @@ class Grade extends Controller
             return json_encode([
                 'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
+            ], $this->pretty());
         }
 
         $sql = "DELETE FROM `grade` WHERE `id` = :id";
@@ -217,9 +217,9 @@ class Grade extends Controller
         $statement = $db->prepare($sql);
         if (!$statement->execute(['id' => $this->input_int('integer')])) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_DELETE'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_DELETE'], $this->pretty());
         }
-        return json_encode(['error_code' => null], $this->prettify());
+        return json_encode(['error_code' => null], $this->pretty());
     }
 
 }

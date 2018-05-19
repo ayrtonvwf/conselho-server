@@ -21,10 +21,21 @@ abstract class Controller {
     }
 
     private function get_input_data() : array {
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PATCH'])) {
             return $_GET;
         }
-        return json_decode(file_get_contents('php://input'), true) ?? [];
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (json_last_error()) {
+            http_response_code(422); // Unprocessable Entity
+            exit;
+        }
+
+        if ($data && ($_SERVER['HTTP_CONTENT_TYPE'] ?? '') !== 'application/json') {
+            http_response_code(415); // Unsupported Media Type
+        }
+
+        return $data ?? [];
     }
 
     protected function get_db_connection() : PDO {
@@ -52,8 +63,8 @@ abstract class Controller {
         ];
     }
 
-    protected function prettify() : ?int {
-        return !empty($_SERVER['HTTP_PRETTIFY']) ? JSON_PRETTY_PRINT : null;
+    protected function pretty() : ?int {
+        return !empty($_SERVER['HTTP_PRETTY_OUTPUT']) ? JSON_PRETTY_PRINT : null;
     }
     
     protected function input_raw(string $key) {

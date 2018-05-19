@@ -37,7 +37,7 @@ class School extends Controller
             return json_encode([
                 'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
+            ], $this->pretty());
         }
 
         $filters = $this->get_filters();
@@ -71,7 +71,7 @@ class School extends Controller
 
         if (!$statement->execute()) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
         }
 
         $results = $statement->fetchAll(PDO::FETCH_OBJ);
@@ -87,7 +87,7 @@ class School extends Controller
             'all_results' => $all_results,
             'per_page' => $pagination['limit']
         ];
-        return json_encode($return, $this->prettify());
+        return json_encode($return, $this->pretty());
     }
 
 }

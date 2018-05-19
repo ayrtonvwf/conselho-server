@@ -37,7 +37,7 @@ class UserToken extends Controller
             return json_encode([
                 'error_code' => 'INVALID_INPUT',
                 'error_messages' => $this->get_validation_errors()
-            ], $this->prettify());
+            ], $this->pretty());
         }
 
         $db = $this->get_db_connection();
@@ -49,12 +49,12 @@ class UserToken extends Controller
         $user = $statement->fetch(PDO::FETCH_OBJ);
         if (!$user) {
             http_response_code(400);
-            return json_encode(['error_code' => 'EMAIL_NOT_FOUND'], $this->prettify());
+            return json_encode(['error_code' => 'EMAIL_NOT_FOUND'], $this->pretty());
         }
         
         if (!password_verify($this->input_raw('password'), $user->password)) {
             http_response_code(400);
-            return json_encode(['error_code' => 'WRONG_PASSWORD'], $this->prettify());
+            return json_encode(['error_code' => 'WRONG_PASSWORD'], $this->pretty());
         }
 
         if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
@@ -65,16 +65,16 @@ class UserToken extends Controller
         $token = $this->generate_token($user->id);
         if (!$token) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_GENERATE_TOKEN'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_GENERATE_TOKEN'], $this->pretty());
         }
 
         $sql = "INSERT INTO user_token (value, expires_at, user_id) VALUES (:value, :expires_at, :user_id)";
         $statement = $db->prepare($sql);
         if (!$statement->execute($token)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_SAVE_TOKEN'], $this->prettify());
+            return json_encode(['error_code' => 'CANNOT_SAVE_TOKEN'], $this->pretty());
         }
 
-        return json_encode($token, $this->prettify());
+        return json_encode($token, $this->pretty());
     }
 }
