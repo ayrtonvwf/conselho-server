@@ -1,5 +1,6 @@
 <?php
 namespace Conselho;
+use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Valitron\Validator;
 use PDO, PDOStatement;
@@ -35,11 +36,8 @@ abstract class Controller {
         DataSource\UserToken\UserTokenMapper::CLASS
     ];
     
-    public function __construct(bool $needs_auth = true)
+    public function __construct()
     {
-        if ($needs_auth) {
-            $this->check_auth();
-        }
         $this->input_data = $this->get_input_data();
     }
 
@@ -52,20 +50,25 @@ abstract class Controller {
             return $_GET;
         }
 
+        if (!$_SERVER['CONTENT_LENGTH']) {
+            return [];
+        }
+
+        if (($_SERVER['CONTENT_TYPE'] ?? '') !== 'application/json') {
+            http_response_code(415); // Unsupported Media Type
+        }
+
         $data = json_decode(file_get_contents('php://input'), true);
+
         if (json_last_error()) {
             http_response_code(422); // Unprocessable Entity
             exit;
         }
 
-        if ($data && ($_SERVER['HTTP_CONTENT_TYPE'] ?? '') !== 'application/json') {
-            http_response_code(415); // Unsupported Media Type
-        }
-
         return $data ?? [];
     }
 
-    protected function atlas() : PDO {
+    protected function atlas() : Atlas {
         if (!$this->atlas) {
             $db_host = getenv('DB_HOST');
             $db_name = getenv('DB_NAME');
