@@ -2,6 +2,7 @@
 namespace Conselho\DataSource\UserToken;
 
 use Atlas\Orm\Mapper\AbstractMapper;
+use Conselho\DataSource\User\UserMapper;
 
 /**
  * @inheritdoc
@@ -13,6 +14,6 @@ class UserTokenMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        // no related fields
+        $this->manyToOne('user', UserMapper::CLASS);
     }
 }

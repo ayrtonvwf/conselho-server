@@ -2,6 +2,8 @@
 namespace Conselho\DataSource\CouncilTopic;
 
 use Atlas\Orm\Mapper\AbstractMapper;
+use Conselho\DataSource\Council\CouncilMapper;
+use Conselho\DataSource\Topic\TopicMapper;
 
 /**
  * @inheritdoc
@@ -13,6 +15,7 @@ class CouncilTopicMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        // no related fields
+        $this->manyToOne('councils', CouncilMapper::CLASS);
+        $this->manyToOne('topics', TopicMapper::CLASS);
     }
 }

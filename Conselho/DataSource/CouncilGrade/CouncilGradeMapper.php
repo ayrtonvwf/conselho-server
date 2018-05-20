@@ -2,6 +2,8 @@
 namespace Conselho\DataSource\CouncilGrade;
 
 use Atlas\Orm\Mapper\AbstractMapper;
+use Conselho\DataSource\Council\CouncilMapper;
+use Conselho\DataSource\Grade\GradeMapper;
 
 /**
  * @inheritdoc
@@ -13,6 +15,7 @@ class CouncilGradeMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        // no related fields
+        $this->manyToOne('councils', CouncilMapper::CLASS);
+        $this->manyToOne('grades', GradeMapper::CLASS);
     }
 }

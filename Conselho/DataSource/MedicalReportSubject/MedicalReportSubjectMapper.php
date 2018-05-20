@@ -2,6 +2,8 @@
 namespace Conselho\DataSource\MedicalReportSubject;
 
 use Atlas\Orm\Mapper\AbstractMapper;
+use Conselho\DataSource\MedicalReport\MedicalReportMapper;
+use Conselho\DataSource\Subject\SubjectMapper;
 
 /**
  * @inheritdoc
@@ -13,6 +15,7 @@ class MedicalReportSubjectMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        // no related fields
+        $this->manyToOne('medical_report', MedicalReportMapper::CLASS);
+        $this->manyToOne('subject', SubjectMapper::CLASS);
     }
 }

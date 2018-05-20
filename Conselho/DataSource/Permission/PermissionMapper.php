@@ -2,6 +2,7 @@
 namespace Conselho\DataSource\Permission;
 
 use Atlas\Orm\Mapper\AbstractMapper;
+use Conselho\DataSource\RoleType\RoleTypeMapper;
 
 /**
  * @inheritdoc
@@ -13,6 +14,6 @@ class PermissionMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        // no related fields
+        $this->oneToMany('role_types', RoleTypeMapper::CLASS);
     }
 }
