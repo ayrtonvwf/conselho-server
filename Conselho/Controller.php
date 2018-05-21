@@ -3,12 +3,13 @@ namespace Conselho;
 use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Valitron\Validator;
-use PDO, PDOStatement;
+use PDO, PDOStatement, DateTime, DateTimeZone;
 
 abstract class Controller {
     private $input_data = [];
     private $validation_errors = [];
     private $atlas;
+    private $timezone = '+00:00';
     private const ATLAS_MAPPERS = [
         DataSource\Council\CouncilMapper::CLASS,
         DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
@@ -35,10 +36,21 @@ abstract class Controller {
         DataSource\User\UserMapper::CLASS,
         DataSource\UserToken\UserTokenMapper::CLASS
     ];
-    
+
     public function __construct()
     {
         $this->input_data = $this->get_input_data();
+        $timezone = ($_SERVER['HTTP_TIMEZONE'] ?? '+00:00');
+        if (preg_match('#^[+-]\d\d:\d\d$#', $timezone)) {
+            $this->timezone = $timezone;
+        }
+    }
+
+    public function output_datetime(string $date) : string {
+        $date = new DateTime($date);
+        $timezone = new DateTimeZone($this->timezone);
+        $date->setTimezone($timezone);
+        return $date->format('Y-m-d\TH:i:sP');
     }
 
     private function check_auth() : bool {
