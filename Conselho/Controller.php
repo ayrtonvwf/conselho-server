@@ -2,6 +2,9 @@
 namespace Conselho;
 use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
+use Atlas\Orm\Mapper\Record;
+use Conselho\DataSource\User\UserMapper;
+use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
 use PDO, PDOStatement, DateTime, DateTimeZone;
 
@@ -128,20 +131,10 @@ abstract class Controller {
         return !is_null($value) ? (bool) $value : null;
     }
 
-    protected function get_user() : ?object {
-        $sql = '
-            SELECT user.*
-            FROM user
-            INNER JOIN user_token ON
-                user_token.user_id = user.id AND
-                user_token.value = :token_value AND
-                user_token.expires_at > NOW()';
-        $pdo = $this->get_db_connection();
-        $statement = $pdo->prepare($sql);
-        $statement->bindValue(':token_value', $this->get_token(), PDO::PARAM_STR);
-        $statement->execute();
-        $user = $statement->fetch(PDO::FETCH_OBJ);
-        return $user ? $user : null;
+    protected function get_user() : ?Record {
+        $atlas = $this->atlas();
+        $user_token = $atlas->fetchRecordBy(UserTokenMapper::CLASS, ['value' => $this->get_token()], ['user']);
+        return $user_token->user;
     }
 
     protected function get_token() : ?string {
