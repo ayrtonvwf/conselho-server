@@ -110,7 +110,17 @@ abstract class Controller {
     protected function pretty() : ?int {
         return !empty($_SERVER['HTTP_PRETTY_OUTPUT']) ? JSON_PRETTY_PRINT : null;
     }
-    
+
+    protected function input_datetime(string $key) : ?string {
+        if (is_null($datetime = $this->input_raw($key))) {
+            return null;
+        }
+        $datetime = new DateTime($datetime);
+        $timezone = new DateTimeZone($this->timezone);
+        $datetime->setTimezone($timezone);
+        return $datetime->format('Y-m-d H:i:s');
+    }
+
     protected function input_raw(string $key) {
         return $this->input_data[$key] ?? null;
     }
