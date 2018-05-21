@@ -6,15 +6,6 @@ use PDO;
 
 class User extends Controller
 {
-    private function get_filters() : array {
-        return array_filter([
-            'id' => $this->input_int('id'),
-            'search' => $this->input_string('search'),
-            'max_updated_at' => $this->input_string('max_updated_at'),
-            'min_updated_at' => $this->input_string('min_updated_at')
-        ]);
-    }
-
     private function get_patch_data() : array {
         return array_filter([
             'name' => $this->input_string('name'),
