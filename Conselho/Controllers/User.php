@@ -12,12 +12,12 @@ class User extends Controller
             'name' => $this->input_string('name'),
             'email' => $this->input_string('email'),
             'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null,
-            'updated_at' => date('Y-m-d H:i:s')
+            'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ]);
     }
 
     private function get_post_data() : array {
-        $now = date('Y-m-d H:i:s');
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
             'name' => $this->input_string('name'),
             'email' => $this->input_string('email'),
@@ -33,10 +33,10 @@ class User extends Controller
         $rules = [
             'id' => ['optional', 'integer'],
             'active'  => ['optional', 'integer', ['in', [0, 1]]],
-            'min_created_at' => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
-            'max_created_at' => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
+            'min_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'search'  => ['optional', ['lengthMin', 3]],
             'page' => ['optional', 'integer', ['min', 1]]
         ];

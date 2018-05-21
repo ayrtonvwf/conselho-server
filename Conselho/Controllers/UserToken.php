@@ -16,7 +16,7 @@ class UserToken extends Controller
         return [
             'user_id' => $user_id,
             'value' => $token_value,
-            'expires_at' => date('Y-m-d H:i:s', strtotime('+1 day'))
+            'expires_at' => date(self::DATETIME_INTERNAL_FORMAT, strtotime('+1 day'))
         ];
     }
 
@@ -65,7 +65,7 @@ class UserToken extends Controller
             return null;
         }
         $user_token = $atlas->newRecord(UserTokenMapper::CLASS, $token_data);
-        $now = date('Y-m-d H:i:s');
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
         $user_token->set([
             'created_at' => $now,
             'updated_at' => $now
@@ -94,7 +94,7 @@ class UserToken extends Controller
         $transaction = $atlas->newTransaction();
         $transaction->delete($user_token);
         $user_token = $atlas->newRecord(UserTokenMapper::CLASS, $token_data);
-        $now = date('Y-m-d H:i:s');
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
         $user_token->set([
             'created_at' => $now,
             'updated_at' => $now

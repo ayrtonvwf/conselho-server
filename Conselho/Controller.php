@@ -3,7 +3,6 @@ namespace Conselho;
 use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Atlas\Orm\Mapper\Record;
-use Conselho\DataSource\User\UserMapper;
 use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
 use PDO, PDOStatement, DateTime, DateTimeZone;
@@ -13,6 +12,8 @@ abstract class Controller {
     private $validation_errors = [];
     private $atlas;
     private $timezone = '+00:00';
+    protected const DATETIME_EXTERNAL_FORMAT = 'Y-m-d\TH:i:sP';
+    protected const DATETIME_INTERNAL_FORMAT = 'Y-m-d\TH:i:s';
     private const ATLAS_MAPPERS = [
         DataSource\Council\CouncilMapper::CLASS,
         DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
@@ -53,7 +54,7 @@ abstract class Controller {
         $date = new DateTime($date);
         $timezone = new DateTimeZone($this->timezone);
         $date->setTimezone($timezone);
-        return $date->format('Y-m-d\TH:i:sP');
+        return $date->format(self::DATETIME_EXTERNAL_FORMAT);
     }
 
     private function get_input_data() : array {
@@ -119,7 +120,7 @@ abstract class Controller {
         $datetime = new DateTime($datetime);
         $timezone = new DateTimeZone($this->timezone);
         $datetime->setTimezone($timezone);
-        return $datetime->format('Y-m-d H:i:s');
+        return $datetime->format(self::DATETIME_INTERNAL_FORMAT);
     }
 
     protected function input_raw(string $key) {
