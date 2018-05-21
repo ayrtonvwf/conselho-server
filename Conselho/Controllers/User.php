@@ -16,7 +16,7 @@ class User extends Controller
         ]);
     }
 
-    private function get_put_data() : array {
+    private function get_patch_data() : array {
         return array_filter([
             'name' => $this->input_string('name'),
             'email' => $this->input_string('email'),
@@ -65,11 +65,14 @@ class User extends Controller
         return $this->run_validation($rules);
     }
 
-    private function validate_put($id) : bool {
+    private function validate_patch($user) : bool {
         $atlas = $this->atlas();
-        $email_exists = function($field, $email) use ($atlas, $id) : bool {
+        $email_exists = function($field, $email) use ($atlas, $user) : bool {
+            if ($email == $user->email) {
+                return true;
+            }
             $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
-            return !$user || $user->id == $id;
+            return !$user;
         };
         $rules = [
             'name'  => ['optional', ['lengthBetween', 5, 100]],
@@ -163,23 +166,19 @@ class User extends Controller
         return json_encode($output, $this->pretty());
     }
 
-    public function put() : ?string {
-        $atlas = $this->atlas();
-        $user = $atlas->fetchRecord(UserMapper::CLASS, $id);
-        if (!$user) {
-            http_response_code(404);
-            return null;
-        }
+    public function patch() : ?string {
+        $user = $this->get_user();
 
-        if (!$this->validate_put($id)) {
+        if (!$this->validate_patch($user)) {
             http_response_code(400);
             return json_encode([
                 'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $data = $this->get_put_data();
+        $data = $this->get_patch_data();
         $user->set($data);
+        $atlas = $this->atlas();
         if (!$atlas->update($user)) {
             http_response_code(500);
             return null;
