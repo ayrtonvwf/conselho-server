@@ -6,6 +6,7 @@ use PDO;
 
 class User extends Controller
 {
+
     private function get_patch_data() : array {
         return array_filter([
             'name' => $this->input_string('name'),
@@ -31,6 +32,7 @@ class User extends Controller
     private function validate_get() : bool {
         $rules = [
             'id' => ['optional', 'integer'],
+            'active'  => ['optional', 'integer', ['in', [0, 1]]],
             'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d H:i:s']],
             'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d H:i:s']],
             'search'  => ['optional', ['lengthMin', 3]],
