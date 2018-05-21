@@ -25,10 +25,12 @@ final class Auth {
         $statement->bindValue(':token_value', $token, PDO::PARAM_STR);
         $statement->execute();
         if (!$token = $statement->fetchObject()) {
-            die('User token not found');
+            http_response_code(401);
+            exit;
         }
         if ($token->expires_at < date('Y-m-d H:i:s')) {
-            die('Expired token');
+            http_response_code(401);
+            exit;
         }
     }
 }
