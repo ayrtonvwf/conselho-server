@@ -134,9 +134,7 @@ $router->map('POST', '/user_token[/]*', "{$controller_prefix}UserToken@post");
 
 try {
     $router->dispatch();
-} catch(HttpError $error) {
-    $error_code = $error->getMessage() == '404' ? 'NOT_FOUND' : 'UNKNOWN_ERROR';
-    die(json_encode(['error_code' => $error_code]));
 } catch(Exception $e) {
-    die(json_encode(['error_code' => 'INTERNAL_ERROR']));
+    $error_code = $e->getMessage() == '404' ? 404 : 500;
+    http_response_code($error_code);
 }
