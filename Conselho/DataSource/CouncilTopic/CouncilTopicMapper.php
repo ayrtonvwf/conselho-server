@@ -15,7 +15,7 @@ class CouncilTopicMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('councils', CouncilMapper::CLASS);
-        $this->manyToOne('topics', TopicMapper::CLASS);
+        $this->manyToOne('council', CouncilMapper::CLASS)->on(['council_id' => 'id']);
+        $this->manyToOne('topic', TopicMapper::CLASS)->on(['topic_id' => 'id']);
     }
 }

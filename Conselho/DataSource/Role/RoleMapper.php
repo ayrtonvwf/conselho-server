@@ -15,7 +15,7 @@ class RoleMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('role_type', RoleTypeMapper::CLASS);
-        $this->manyToOne('user', UserMapper::CLASS);
+        $this->manyToOne('role_type', RoleTypeMapper::CLASS)->on(['role_type_id' => 'id']);
+        $this->manyToOne('user', UserMapper::CLASS)->on(['user_id' => 'id']);
     }
 }

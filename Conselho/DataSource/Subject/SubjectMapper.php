@@ -21,13 +21,13 @@ class SubjectMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('school', SchoolMapper::CLASS);
-        $this->oneToMany('grade_subjects', GradeSubjectMapper::CLASS);
-        $this->oneToMany('evaluations', EvaluationMapper::CLASS);
-        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS);
-        $this->oneToMany('student_observations', StudentObservationMapper::CLASS);
-        $this->oneToMany('medical_report_subjects', MedicalReportMapper::CLASS);
-        $this->oneToMany('teachers', TeacherMapper::CLASS);
-        $this->oneToMany('teacher_requests', TeacherRequestMapper::CLASS);
+        $this->manyToOne('school', SchoolMapper::CLASS)->on(['school_id' => 'id']);
+        $this->oneToMany('grade_subjects', GradeSubjectMapper::CLASS)->on(['id' => 'subject_id']);
+        $this->oneToMany('evaluations', EvaluationMapper::CLASS)->on(['id' => 'subject_id']);
+        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS)->on(['id' => 'subject_id']);
+        $this->oneToMany('student_observations', StudentObservationMapper::CLASS)->on(['id' => 'subject_id']);
+        $this->oneToMany('medical_report_subjects', MedicalReportMapper::CLASS)->on(['id' => 'subject_id']);
+        $this->oneToMany('teachers', TeacherMapper::CLASS)->on(['id' => 'subject_id']);
+        $this->oneToMany('teacher_requests', TeacherRequestMapper::CLASS)->on(['id' => 'subject_id']);
     }
 }

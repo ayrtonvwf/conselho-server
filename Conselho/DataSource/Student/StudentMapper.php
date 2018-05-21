@@ -17,10 +17,10 @@ class StudentMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('school', StudentMapper::CLASS);
-        $this->oneToMany('evaluations', EvaluationMapper::CLASS);
-        $this->oneToMany('student_observations', StudentObservationMapper::CLASS);
-        $this->oneToMany('student_grades', StudentGradeMapper::CLASS);
-        $this->oneToMany('medical_reports', MedicalReportMapper::CLASS);
+        $this->manyToOne('school', StudentMapper::CLASS)->on(['school_id' => 'id']);
+        $this->oneToMany('evaluations', EvaluationMapper::CLASS)->on(['id' => 'student_id']);
+        $this->oneToMany('student_observations', StudentObservationMapper::CLASS)->on(['id' => 'student_id']);
+        $this->oneToMany('student_grades', StudentGradeMapper::CLASS)->on(['id' => 'student_id']);
+        $this->oneToMany('medical_reports', MedicalReportMapper::CLASS)->on(['id' => 'student_id']);
     }
 }

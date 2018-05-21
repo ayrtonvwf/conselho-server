@@ -14,6 +14,6 @@ class PermissionMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->oneToMany('role_types', RoleTypeMapper::CLASS);
+        $this->oneToMany('role_types', RoleTypeMapper::CLASS)->on(['id' => 'permission_id']);
     }
 }

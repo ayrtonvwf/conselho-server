@@ -20,12 +20,12 @@ class UserMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->oneToMany('evaluations', EvaluationMapper::CLASS);
-        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS);
-        $this->oneToMany('student_observations', StudentObservationMapper::CLASS);
-        $this->oneToMany('roles', RoleMapper::CLASS);
-        $this->oneToMany('user_tokens', UserTokenMapper::CLASS);
-        $this->oneToMany('teachers', TeacherMapper::CLASS);
-        $this->oneToMany('teacher_requests', TeacherRequestMapper::CLASS);
+        $this->oneToMany('evaluations', EvaluationMapper::CLASS)->on(['id' => 'user_id']);
+        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS)->on(['id' => 'user_id']);
+        $this->oneToMany('student_observations', StudentObservationMapper::CLASS)->on(['id' => 'user_id']);
+        $this->oneToMany('roles', RoleMapper::CLASS)->on(['id' => 'user_id']);
+        $this->oneToMany('user_tokens', UserTokenMapper::CLASS)->on(['id' => 'user_id']);
+        $this->oneToMany('teachers', TeacherMapper::CLASS)->on(['id' => 'user_id']);
+        $this->oneToMany('teacher_requests', TeacherRequestMapper::CLASS)->on(['id' => 'user_id']);
     }
 }

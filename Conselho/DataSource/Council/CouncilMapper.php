@@ -19,11 +19,11 @@ class CouncilMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('school', SchoolMapper::CLASS);
-        $this->oneToMany('council_topics', CouncilTopicMapper::CLASS);
-        $this->oneToMany('council_grades', CouncilGradeMapper::CLASS);
-        $this->oneToMany('student_observations', StudentObservationMapper::CLASS);
-        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS);
-        $this->oneToMany('evaluations', EvaluationMapper::CLASS);
+        $this->manyToOne('school', SchoolMapper::CLASS)->on(['school_id' => 'id']);
+        $this->oneToMany('council_topics', CouncilTopicMapper::CLASS)->on(['id' => 'council_id']);
+        $this->oneToMany('council_grades', CouncilGradeMapper::CLASS)->on(['id' => 'council_id']);
+        $this->oneToMany('student_observations', StudentObservationMapper::CLASS)->on(['id' => 'council_id']);
+        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS)->on(['id' => 'council_id']);
+        $this->oneToMany('evaluations', EvaluationMapper::CLASS)->on(['id' => 'council_id']);
     }
 }

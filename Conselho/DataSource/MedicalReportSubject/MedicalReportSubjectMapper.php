@@ -15,7 +15,7 @@ class MedicalReportSubjectMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('medical_report', MedicalReportMapper::CLASS);
-        $this->manyToOne('subject', SubjectMapper::CLASS);
+        $this->manyToOne('medical_report', MedicalReportMapper::CLASS)->on(['medical_report_id' => 'id']);
+        $this->manyToOne('subject', SubjectMapper::CLASS)->on(['subject_id' => 'id']);
     }
 }

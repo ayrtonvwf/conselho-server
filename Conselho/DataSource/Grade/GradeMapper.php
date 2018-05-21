@@ -22,14 +22,14 @@ class GradeMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('school', SchoolMapper::CLASS);
-        $this->oneToMany('grade_subjects', GradeSubjectMapper::CLASS);
-        $this->oneToMany('evaluations', EvaluationMapper::CLASS);
-        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS);
-        $this->oneToMany('student_observations', StudentObservationMapper::CLASS);
-        $this->oneToMany('student_grades', StudentGradeMapper::CLASS);
-        $this->oneToMany('teachers', TeacherMapper::CLASS);
-        $this->oneToMany('teacher_requests', TeacherRequestMapper::CLASS);
-        $this->oneToMany('council_grades', CouncilGradeMapper::CLASS);
+        $this->manyToOne('school', SchoolMapper::CLASS)->on(['school_id' => 'id']);
+        $this->oneToMany('grade_subjects', GradeSubjectMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('evaluations', EvaluationMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('grade_observations', GradeObservationMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('student_observations', StudentObservationMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('student_grades', StudentGradeMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('teachers', TeacherMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('teacher_requests', TeacherRequestMapper::CLASS)->on(['id' => 'grade_id']);
+        $this->oneToMany('council_grades', CouncilGradeMapper::CLASS)->on(['id' => 'grade_id']);
     }
 }

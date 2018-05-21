@@ -17,9 +17,9 @@ class GradeObservationMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('council', CouncilMapper::CLASS);
-        $this->manyToOne('grade', GradeMapper::CLASS);
-        $this->manyToOne('subject', SubjectMapper::CLASS);
-        $this->manyToOne('user', UserMapper::CLASS);
+        $this->manyToOne('council', CouncilMapper::CLASS)->on(['council_id' => 'id']);
+        $this->manyToOne('grade', GradeMapper::CLASS)->on(['grade_id' => 'id']);
+        $this->manyToOne('subject', SubjectMapper::CLASS)->on(['subject_id' => 'id']);
+        $this->manyToOne('user', UserMapper::CLASS)->on(['user_id' => 'id']);
     }
 }

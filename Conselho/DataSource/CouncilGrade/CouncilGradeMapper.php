@@ -15,7 +15,7 @@ class CouncilGradeMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('councils', CouncilMapper::CLASS);
-        $this->manyToOne('grades', GradeMapper::CLASS);
+        $this->manyToOne('council', CouncilMapper::CLASS)->on(['council_id' => 'id']);
+        $this->manyToOne('grade', GradeMapper::CLASS)->on(['grade_id' => 'id']);
     }
 }

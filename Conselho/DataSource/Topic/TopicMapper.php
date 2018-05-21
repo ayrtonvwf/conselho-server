@@ -16,9 +16,9 @@ class TopicMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('school', SchoolMapper::CLASS);
-        $this->manyToOne('topic_option', TopicOptionMapper::CLASS);
-        $this->oneToMany('council_topics', CouncilTopicMapper::CLASS);
-        $this->oneToMany('topic_options', TopicOptionMapper::CLASS);
+        $this->manyToOne('school', SchoolMapper::CLASS)->on(['school_id' => 'id']);
+        $this->manyToOne('topic_option', TopicOptionMapper::CLASS)->on(['topic_option_id' => 'id']);
+        $this->oneToMany('council_topics', CouncilTopicMapper::CLASS)->on(['id' => 'topic_id']);
+        $this->oneToMany('topic_options', TopicOptionMapper::CLASS)->on(['id' => 'topic_id']);
     }
 }

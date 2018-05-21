@@ -16,8 +16,8 @@ class TeacherRequestMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('grade', GradeMapper::CLASS);
-        $this->oneToMany('subject', SubjectMapper::CLASS);
-        $this->oneToMany('user', UserMapper::CLASS);
+        $this->manyToOne('grade', GradeMapper::CLASS)->on(['grade_id' => 'id']);
+        $this->manyToOne('subject', SubjectMapper::CLASS)->on(['subject_id' => 'id']);
+        $this->manyToOne('user', UserMapper::CLASS)->on(['user_id' => 'id']);
     }
 }

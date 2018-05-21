@@ -14,6 +14,6 @@ class UserTokenMapper extends AbstractMapper
      */
     protected function setRelated()
     {
-        $this->manyToOne('user', UserMapper::CLASS);
+        $this->manyToOne('user', UserMapper::CLASS)->on(['user_id' => 'id']);
     }
 }
