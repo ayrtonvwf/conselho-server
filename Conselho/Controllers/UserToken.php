@@ -1,6 +1,8 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\User\UserMapper;
+use Conselho\DataSource\UserToken\UserTokenMapper;
 use PDO, Exception;
 
 class UserToken extends Controller
@@ -21,8 +23,13 @@ class UserToken extends Controller
     // VALIDATION
 
     private function validate_post() : bool {
+        $atlas = $this->atlas();
+        $exists_email = function($field, $email) use ($atlas) {
+            $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
+            return (bool) $user;
+        };
         $rules = [
-            'email' => ['required', 'email', ['lengthBetween', 5, 200]],
+            'email' => ['required', 'email', ['lengthBetween', 5, 200], [$exists_email, 'This email is not registered']],
             'password' => ['required', ['lengthBetween', 5, 32]]
         ];
 
@@ -31,50 +38,45 @@ class UserToken extends Controller
 
     // METHODS
 
-    public function post() : string {
+    public function post() : ?string {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $db = $this->get_db_connection();
-        $sql = 'SELECT * FROM `user` WHERE `email` = :email';
-        $statement = $db->prepare($sql);
-        $email = $this->input_string('email');
-        $statement->bindValue('email', $email, PDO::PARAM_STR);
-        $statement->execute();
-        $user = $statement->fetch(PDO::FETCH_OBJ);
-        if (!$user) {
-            http_response_code(400);
-            return json_encode(['error_code' => 'EMAIL_NOT_FOUND'], $this->pretty());
-        }
+        $atlas = $this->atlas();
+        $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $this->input_string('email')]);
         
         if (!password_verify($this->input_raw('password'), $user->password)) {
-            http_response_code(400);
-            return json_encode(['error_code' => 'WRONG_PASSWORD'], $this->pretty());
+            http_response_code(401);
+            return null;
         }
 
         if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
             $user->password = password_hash($this->input_raw('password'), PASSWORD_DEFAULT);
-            $user->save();
+            $atlas->update($user);
         }
 
-        $token = $this->generate_token($user->id);
-        if (!$token) {
+        $token_data = $this->generate_token($user->id);
+        if (!$token_data) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_GENERATE_TOKEN'], $this->pretty());
+            return null;
         }
-
-        $sql = "INSERT INTO user_token (value, expires_at, user_id) VALUES (:value, :expires_at, :user_id)";
-        $statement = $db->prepare($sql);
-        if (!$statement->execute($token)) {
+        $user_token = $atlas->newRecord(UserTokenMapper::CLASS, $token_data);
+        $now = date('Y-m-d H:i:s');
+        $user_token->set([
+            'created_at' => $now,
+            'updated_at' => $now
+        ]);
+        if (!$atlas->insert($user_token)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_SAVE_TOKEN'], $this->pretty());
+            return null;
         }
 
-        return json_encode($token, $this->pretty());
+        $output = $token_data;
+        $output['expires_at'] = $this->output_datetime($output['expires_at']);
+        return json_encode($output, $this->pretty());
     }
 }
