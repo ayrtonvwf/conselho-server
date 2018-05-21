@@ -79,4 +79,15 @@ class UserToken extends Controller
         $output['expires_at'] = $this->output_datetime($output['expires_at']);
         return json_encode($output, $this->pretty());
     }
+
+    public function delete() : void {
+        $atlas = $this->atlas();
+        $value = $this->get_token();
+        $user_token = $atlas->fetchRecordBy(UserTokenMapper::CLASS, ['value' => $value]);
+        if (!$atlas->delete($user_token)) {
+            http_response_code(500);
+            return;
+        }
+        http_response_code(204);
+    }
 }
