@@ -80,6 +80,37 @@ class UserToken extends Controller
         return json_encode($output, $this->pretty());
     }
 
+    public function get() : ?string {
+        $atlas = $this->atlas();
+        $value = $this->get_token();
+        $user_token = $atlas->fetchRecordBy(UserTokenMapper::CLASS, ['value' => $value]);
+
+        $token_data = $this->generate_token($user_token->user_id);
+        if (!$token_data) {
+            http_response_code(500);
+            return null;
+        }
+
+        $transaction = $atlas->newTransaction();
+        $transaction->delete($user_token);
+        $user_token = $atlas->newRecord(UserTokenMapper::CLASS, $token_data);
+        $now = date('Y-m-d H:i:s');
+        $user_token->set([
+            'created_at' => $now,
+            'updated_at' => $now
+        ]);
+        $transaction->insert($user_token);
+
+        if (!$transaction->exec()) {
+            http_response_code(500);
+            return null;
+        }
+
+        $output = $token_data;
+        $output['expires_at'] = $this->output_datetime($output['expires_at']);
+        return json_encode($output, $this->pretty());
+    }
+
     public function delete() : void {
         $atlas = $this->atlas();
         $value = $this->get_token();
