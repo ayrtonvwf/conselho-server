@@ -33,8 +33,10 @@ class User extends Controller
         $rules = [
             'id' => ['optional', 'integer'],
             'active'  => ['optional', 'integer', ['in', [0, 1]]],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d H:i:s']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d H:i:s']],
+            'min_created_at' => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
+            'max_created_at' => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
+            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
+            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d\TH:i:sP']],
             'search'  => ['optional', ['lengthMin', 3]],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
@@ -113,7 +115,11 @@ class User extends Controller
         $select->offset($pagination['offset']);
         $select->cols(['id', 'name', 'email', 'active', 'created_at', 'updated_at']);
 
-        $results = $select->fetchAll();
+        $results = array_map(function($result) {
+            $result['created_at'] = $this->output_datetime($result['created_at']);
+            $result['updated_at'] = $this->output_datetime($result['updated_at']);
+            return $result;
+        }, $select->fetchAll());
 
         $return = [
             'total_results' => $select->fetchCount(),
