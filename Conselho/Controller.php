@@ -53,10 +53,6 @@ abstract class Controller {
         return $date->format('Y-m-d\TH:i:sP');
     }
 
-    private function check_auth() : bool {
-        return (bool) $this->get_user();
-    }
-
     private function get_input_data() : array {
         if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PATCH'])) {
             return $_GET;

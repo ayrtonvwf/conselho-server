@@ -163,7 +163,7 @@ class User extends Controller
         return json_encode($output, $this->pretty());
     }
 
-    public function put(int $id) : ?string {
+    public function put() : ?string {
         $atlas = $this->atlas();
         $user = $atlas->fetchRecord(UserMapper::CLASS, $id);
         if (!$user) {
