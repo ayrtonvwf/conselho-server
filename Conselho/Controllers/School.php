@@ -1,27 +1,20 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\School\SchoolMapper;
 use PDO;
 
 class School extends Controller
 {
-    private function get_filters() : array {
-        $filters = [
-            'id' => $this->input_int('id'),
-            'search' => $this->input_string('search'),
-            'min_updated_at' => $this->input_string('min_updated_at'),
-            'max_updated_at' => $this->input_string('max_updated_at')
-        ];
-        return array_filter($filters);
-    }
-
     // VALIDATION
 
     private function validate_get() : bool {
         $rules = [
             'id' => ['optional', 'integer'],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'min_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'search'  => ['optional', ['lengthMin', 3]],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
@@ -35,57 +28,45 @@ class School extends Controller
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $filters = $this->get_filters();
-
-        $where = [];
-        if (isset($filters['id'])) {
-            $where[] = '`id` = :id';
+        $atlas = $this->atlas();
+        $select = $atlas->select(SchoolMapper::CLASS);
+        if ($id = $this->input_int('id')) {
+            $select->where('id = ?', $id);
         }
-        if (isset($filters['max_updated_at'])) {
-            $where[] = '`updated_at` <= :max_updated_at';
+        if ($min_created_at = $this->input_datetime('min_created_at')) {
+            $select->where('created_at >= ?', $min_created_at);
         }
-        if (isset($filters['min_updated_at'])) {
-            $where[] = '`updated_at` >= :min_updated_at';
+        if ($max_created_at = $this->input_datetime('max_created_at')) {
+            $select->where('created_at <= ?', $max_created_at);
         }
-        if (isset($filters['search'])) {
-            $where[] = '`name` LIKE %:search%';
+        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
+            $select->where('updated_at >= ?', $min_updated_at);
         }
-
-        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
-
+        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
+            $select->where('updated_at <= ?', $max_updated_at);
+        }
+        if ($search = $this->input_string('search')) {
+            $select->where('name LIKE ?', "%$search%");
+        }
         $pagination = $this->get_pagination();
-
-        $sql = "SELECT * FROM `school` $where LIMIT :limit OFFSET :offset";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-
-        $parameters = $filters + $pagination;
-        foreach ($parameters as $parameter_name => $parameter_value) {
-            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-
-        if (!$statement->execute()) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
-        }
-
-        $results = $statement->fetchAll(PDO::FETCH_OBJ);
-        // filter output columns
-
-        $sql = "SELECT COUNT(*) AS `all_results` FROM `school` $where";
-        $statement = $db->prepare($sql);
-        $statement->execute($filters);
-        $all_results = (int) $statement->fetchObject()->all_results;
+        $select->limit($pagination['limit']);
+        $select->offset($pagination['offset']);
+        $select->cols(['*']);
+        $results = array_map(function($result) {
+            $result['created_at'] = $this->output_datetime($result['created_at']);
+            $result['updated_at'] = $this->output_datetime($result['updated_at']);
+            return $result;
+        }, $select->fetchAll());
 
         $return = [
-            'results' => $results,
-            'all_results' => $all_results,
-            'per_page' => $pagination['limit']
+            'total_results' => $select->fetchCount(),
+            'current_page' => $pagination['page'],
+            'max_results_per_page' => $pagination['limit'],
+            'results' => $results
         ];
         return json_encode($return, $this->pretty());
     }
