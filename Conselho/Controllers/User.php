@@ -1,6 +1,8 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Permission\PermissionMapper;
+use Conselho\DataSource\User\UserMapper;
 use PDO;
 
 class User extends Controller
@@ -14,11 +16,23 @@ class User extends Controller
         ]);
     }
 
-    private function get_data() : array {
+    private function get_put_data() : array {
+        return array_filter([
+            'name' => $this->input_string('name'),
+            'email' => $this->input_string('email'),
+            'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    private function get_post_data() : array {
+        $now = date('Y-m-d H:i:s');
         return [
             'name' => $this->input_string('name'),
             'email' => $this->input_string('email'),
-            'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null
+            'password' => password_hash($this->input_raw('password'), PASSWORD_DEFAULT),
+            'created_at' => $now,
+            'updated_at' => $now
         ];
     }
 
@@ -37,19 +51,29 @@ class User extends Controller
     }
 
     private function validate_post() : bool {
+        $atlas = $this->atlas();
+        $email_exists = function($field, $email) use ($atlas) : bool {
+            $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
+            return !$user;
+        };
         $rules = [
             'name'  => ['required', ['lengthBetween', 5, 100]],
-            'email' => ['required', 'email', ['lengthBetween', 5, 200]],
+            'email' => ['required', 'email', ['lengthBetween', 5, 200], [$email_exists, 'message' => 'This email is already registered']],
             'password' => ['required', ['lengthBetween', 5, 32]]
         ];
 
         return $this->run_validation($rules);
     }
 
-    private function validate_put() : bool {
+    private function validate_put($id) : bool {
+        $atlas = $this->atlas();
+        $email_exists = function($field, $email) use ($atlas, $id) : bool {
+            $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
+            return !$user || $user->id == $id;
+        };
         $rules = [
             'name'  => ['optional', ['lengthBetween', 5, 100]],
-            'email' => ['optional', 'email', ['lengthBetween', 5, 200]],
+            'email' => ['optional', 'email', ['lengthBetween', 5, 200], [$email_exists, 'message' => 'This email is already registered']],
             'password' => ['optional', ['lengthBetween', 5, 32]]
         ];
 
@@ -117,60 +141,50 @@ class User extends Controller
         return json_encode($return, $this->pretty());
     }
 
-    public function post() : string {
+    public function post() : ?string {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $data = $this->get_data();
-        $columns = implode(', ', array_keys($data));
-        $values = ':'.implode(', :', array_keys($data));
-        $sql = "INSERT INTO user ($columns) VALUES ($values)";
-
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $data = $this->get_post_data();
+        $atlas = $this->atlas();
+        $user = $atlas->newRecord(UserMapper::CLASS, $data);
+        if (!$atlas->insert($user)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->pretty());
+            return null;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+        $output = [
+            'id' => $user->id,
+            'created_at' => $this->output_datetime($user->created_at)
+        ];
+        return json_encode($output, $this->pretty());
     }
 
-    public function put() : string {
-        if (!$this->validate_put()) {
+    public function put(int $id) : ?string {
+        $atlas = $this->atlas();
+        $user = $atlas->fetchRecord(UserMapper::CLASS, $id);
+        if (!$user) {
+            http_response_code(404);
+            return null;
+        }
+
+        if (!$this->validate_put($id)) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $data = array_filter($this->get_data());
-        if (!$data) {
-            http_response_code(400);
-            return json_encode(['error_code' => 'EMPTY_UPDATE'], $this->pretty());
-        }
-
-        $fields = [];
-        foreach ($data as $column => $value) {
-            $fields[] = "`$column` = :$column";
-        }
-        $set = implode(', ', $fields);
-        $sql = "UPDATE `user` SET $set WHERE `id` = :user_id";
-
-        $data['user_id'] = $this->get_user()->id;
-
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $data = $this->get_put_data();
+        $user->set($data);
+        if (!$atlas->update($user)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->pretty());
+            return null;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+        return json_encode(['updated_at' => $this->output_datetime($user->updated_at)], $this->pretty());
     }
 
     public function delete() : string {
