@@ -1,8 +1,11 @@
 <?php
 namespace Conselho\Controllers;
+use Atlas\Orm\Mapper\Record;
+use Atlas\Orm\Transaction;
 use Conselho\Controller;
 use Conselho\DataSource\Permission\PermissionMapper;
 use Conselho\DataSource\User\UserMapper;
+use Conselho\DataSource\UserToken\UserTokenMapper;
 use PDO;
 
 class User extends Controller
@@ -186,14 +189,36 @@ class User extends Controller
         return json_encode(['updated_at' => $this->output_datetime($user->updated_at)], $this->pretty());
     }
 
-    public function delete() : string {
-        $sql = "DELETE FROM `user` WHERE `id` = :id";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->get_user()->id])) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_DELETE'], $this->pretty());
+    public function delete() : void {
+        $user = $this->get_user();
+        $atlas = $this->atlas();
+        $blocking_dependencies = ['evaluations', 'grade_observations', 'student_observations', 'teachers'];
+
+        $user = $atlas->fetchRecord(UserMapper::CLASS, $user->id, $blocking_dependencies);
+        $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($user) {
+            return (bool) $user->$dependency;
+        });
+        if ($has_blocking_dependency) {
+            http_response_code(409);
+            return;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+
+        $full_dependencies = array_merge($blocking_dependencies, ['roles', 'user_tokens', 'teacher_requests']);
+        $user = $atlas->fetchRecord(UserMapper::CLASS, $user->id, $full_dependencies);
+        $transaction = $atlas->newTransaction();
+        foreach ($full_dependencies as $dependency_name) {
+            foreach ($user->$dependency_name as $dependency) {
+                $transaction->delete($dependency);
+            }
+        }
+        $transaction->delete($user);
+        if (!$transaction->exec()) {
+            http_response_code(500);
+            echo json_encode($transaction->getException(), $this->pretty());
+            return;
+        }
+
+        http_response_code(204);
+        return;
     }
 }
