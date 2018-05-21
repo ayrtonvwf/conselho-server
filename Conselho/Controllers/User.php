@@ -1,11 +1,7 @@
 <?php
 namespace Conselho\Controllers;
-use Atlas\Orm\Mapper\Record;
-use Atlas\Orm\Transaction;
 use Conselho\Controller;
-use Conselho\DataSource\Permission\PermissionMapper;
 use Conselho\DataSource\User\UserMapper;
-use Conselho\DataSource\UserToken\UserTokenMapper;
 use PDO;
 
 class User extends Controller
@@ -92,57 +88,45 @@ class User extends Controller
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $filters = $this->get_filters();
-
-        $where = [];
-        if (isset($filters['id'])) {
-            $where[] = '`id` = :id';
+        $atlas = $this->atlas();
+        $select = $atlas->select(UserMapper::CLASS);
+        if ($id = $this->input_int('id')) {
+            $select->where('id = ?', $id);
         }
-        if (isset($filters['max_updated_at'])) {
-            $where[] = '`updated_at` <= :max_updated_at';
+        if ($min_created_at = $this->input_datetime('min_created_at')) {
+            $select->where('created_at >= ?', $min_created_at);
         }
-        if (isset($filters['min_updated_at'])) {
-            $where[] = '`updated_at` >= :min_updated_at';
+        if ($max_created_at = $this->input_datetime('max_created_at')) {
+            $select->where('created_at <= ?', $max_created_at);
         }
-        if (isset($filters['search'])) {
-            $where[] = '(`name` LIKE %:search% OR `email` LIKE %:search%)';
+        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
+            $select->where('updated_at >= ?', $min_updated_at);
         }
-
-        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
-
+        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
+            $select->where('updated_at <= ?', $max_updated_at);
+        }
+        if ($search = $this->input_string('search')) {
+            $select->where('(name LIKE %?% OR email LIKE %?%)', $search);
+        }
+        if (!is_null($active = $this->input_bool('active'))) {
+            $select->where('active = ?', $active);
+        }
         $pagination = $this->get_pagination();
+        $select->limit($pagination['limit']);
+        $select->offset($pagination['offset']);
+        $select->cols(['id', 'name', 'email', 'active', 'created_at', 'updated_at']);
 
-        $sql = "SELECT * FROM `user` $where LIMIT :limit OFFSET :offset";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-
-        $parameters = $filters + $pagination;
-        foreach ($parameters as $parameter_name => $parameter_value) {
-            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-
-        if (!$statement->execute()) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
-        }
-
-        $results = $statement->fetchAll(PDO::FETCH_OBJ);
-        // filter output columns
-
-        $sql = "SELECT COUNT(*) AS all_results FROM user $where";
-        $statement = $db->prepare($sql);
-        $statement->execute($filters);
-        $all_results = (int) $statement->fetchObject()->all_results;
+        $results = $select->fetchAll();
 
         $return = [
-            'results' => $results,
-            'all_results' => $all_results,
-            'per_page' => $pagination['limit']
+            'total_results' => $select->fetchCount(),
+            'current_page' => $pagination['page'],
+            'max_results_per_page' => $pagination['limit'],
+            'results' => $results
         ];
         return json_encode($return, $this->pretty());
     }
