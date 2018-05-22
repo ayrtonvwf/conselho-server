@@ -143,10 +143,9 @@ class Evaluation extends Controller
 
         return $this->post_output($record);
     }
+
     public function patch(int $id) : ?string {
-        $atlas = $this->atlas();
-        $evaluation = $atlas->fetchRecord($this->mapper_class_name, $id);
-        if (!$evaluation) {
+        if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return null;
         }
@@ -159,13 +158,13 @@ class Evaluation extends Controller
         }
 
         $data = $this->get_patch_data();
-        $evaluation->set($data);
-        if (!$atlas->update($evaluation)) {
+        $record->set($data);
+        if (!$this->atlas()->update($record)) {
             http_response_code(500);
             return null;
         }
 
-        return json_encode(['id' => $evaluation->id, 'created_at' => $evaluation->created_at], $this->pretty());
+        return $this->patch_output($record);
     }
 
     public function delete(int $id) : void {
