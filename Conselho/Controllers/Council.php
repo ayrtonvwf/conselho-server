@@ -1,31 +1,51 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Council\CouncilMapper;
 use PDO;
 
 class Council extends Controller
 {
     private function get_filters() : array {
-        $filters = [
+        $filters = array_filter([
             'id' => $this->input_int('id'),
+            'school_id' => $this->input_int('school_id'),
+            'search' => $this->input_string('search'),
             'min_start_date' => $this->input_string('min_start_date'),
             'max_start_date' => $this->input_string('max_start_date'),
             'min_end_date' => $this->input_string('min_end_date'),
             'max_end_date' => $this->input_string('max_end_date'),
-            'min_updated_at' => $this->input_string('min_updated_at'),
-            'max_updated_at' => $this->input_string('max_updated_at'),
-            'school_id' => $this->input_int('school_id'),
-            'search' => $this->input_string('search')
-        ];
-        return array_filter($filters);
+            'min_created_at' => $this->input_datetime('min_created_at'),
+            'max_created_at' => $this->input_datetime('max_created_at'),
+            'min_updated_at' => $this->input_datetime('min_updated_at'),
+            'max_updated_at' => $this->input_datetime('max_updated_at'),
+        ]);
+        if (!is_null($active = $this->input_bool('active'))) {
+            $filters['active'] = $active;
+        }
+        return $filters;
     }
 
-    private function get_data() : array {
+    private function get_post_data() : array {
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
+            'name' => $this->input_string('name'),
+            'active' => $this->input_bool('active'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
+            'school_id' => $this->input_int('school_id'),
+            'created_at' => $now,
+            'updated_at' => $now
+        ];
+    }
+    private function get_patch_data() : array {
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
+        return [
             'name' => $this->input_string('name'),
-            'school_id' => $this->input_int('school_id')
+            'active' => $this->input_bool('active'),
+            'start_date' => $this->input_string('start_date'),
+            'end_date' => $this->input_string('end_date'),
+            'updated_at' => $now
         ];
     }
 
@@ -34,15 +54,18 @@ class Council extends Controller
     private function validate_get() : bool {
         $rules = [
             'id' => ['optional', 'integer'],
+            'page' => ['optional', 'integer', ['min', 1]],
             'school_id' => ['optional', 'integer'],
-            'max_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'max_end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'active' => ['optional', 'integer', ['in', [0, 1]]],
             'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'min_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
+            'max_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
+            'min_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
+            'max_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
+            'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
         ];
 
         return $this->run_validation($rules);
@@ -50,32 +73,22 @@ class Council extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'start_date'  => ['required', ['dateFormat', 'Y-m-d']],
-            'end_date'  => ['required', ['dateFormat', 'Y-m-d']],
+            'active' => ['required', 'boolean'],
             'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'integer'],
-            'topic_ids' => ['required', 'array']
+            'start_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
+            'end_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
+            'school_id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
     }
 
-    private function validate_put() : bool {
+    private function validate_patch() : bool {
         $rules = [
-            'id' => ['required', 'integer'],
-            'start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'active' => ['optional', 'boolean'],
             'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'school_id' => ['optional', 'integer'],
-            'topic_ids' => ['optional', 'array']
-        ];
-
-        return $this->run_validation($rules);
-    }
-
-    private function validate_delete() : bool {
-        $rules = [
-            'id' => ['required', 'integer']
+            'start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
+            'end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
         ];
 
         return $this->run_validation($rules);
@@ -87,169 +100,144 @@ class Council extends Controller
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $filters = $this->get_filters();
-
-        $where = [];
-        if (isset($filters['id'])) {
-            $where[] = '`id` = :id';
+        $atlas = $this->atlas();
+        $select = $atlas->select(CouncilMapper::CLASS);
+        if ($id = $this->input_int('id')) {
+            $select->where('id = ?', $id);
         }
-        if (isset($filters['school_id'])) {
-            $where[] = '`school_id` = :school_id';
+        if ($school_id = $this->input_int('school_id')) {
+            $select->where('school_id = ?', $school_id);
         }
-        if (isset($filters['max_start_date'])) {
-            $where[] = '`start_date` <= :max_start_date';
+        if (!is_null($active = $this->input_bool('active'))) {
+            $select->where('active = ?', $active);
         }
-        if (isset($filters['min_start_date'])) {
-            $where[] = '`start_date` >= :min_start_date';
+        if ($search = $this->input_string('search')) {
+            $select->where('name LIKE ?', "%$search%");
         }
-        if (isset($filters['max_end_date'])) {
-            $where[] = '`end_date` <= :max_end_date';
+        if ($min_start_date = $this->input_string('min_start_date')) {
+            $select->where('start_date >= ?', $min_start_date);
         }
-        if (isset($filters['min_end_date'])) {
-            $where[] = '`end_date` >= :min_end_date';
+        if ($max_start_date = $this->input_string('max_start_date')) {
+            $select->where('start_date <= ?', $max_start_date);
         }
-        if (isset($filters['max_updated_at'])) {
-            $where[] = '`updated_at` <= :max_updated_at';
+        if ($min_end_date = $this->input_string('min_end_date')) {
+            $select->where('end_date >= ?', $min_end_date);
         }
-        if (isset($filters['min_updated_at'])) {
-            $where[] = '`updated_at` >= :min_updated_at';
+        if ($max_end_date = $this->input_string('max_end_date')) {
+            $select->where('end_date <= ?', $max_end_date);
         }
-        if (isset($filters['search'])) {
-            $where[] = '`name` LIKE %:search%';
+        if ($min_created_at = $this->input_datetime('min_created_at')) {
+            $select->where('created_at >= ?', $min_created_at);
         }
-
-        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
-
+        if ($max_created_at = $this->input_datetime('max_created_at')) {
+            $select->where('created_at <= ?', $max_created_at);
+        }
+        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
+            $select->where('updated_at >= ?', $min_updated_at);
+        }
+        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
+            $select->where('updated_at <= ?', $max_updated_at);
+        }
         $pagination = $this->get_pagination();
+        $select->limit($pagination['limit']);
+        $select->offset($pagination['offset']);
+        $select->cols(['*']);
 
-        $sql = "SELECT * FROM `council` $where LIMIT :limit OFFSET :offset";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-
-        $parameters = $filters + $pagination;
-        foreach ($parameters as $parameter_name => $parameter_value) {
-            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-
-        if (!$statement->execute()) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
-        }
-
-        $results = $statement->fetchAll(PDO::FETCH_OBJ);
-        // filter output columns
-
-        $sql = "SELECT COUNT(*) AS `all_results` FROM `council` $where";
-        $statement = $db->prepare($sql);
-        $statement->execute($filters);
-        $all_results = (int) $statement->fetchObject()->all_results;
+        $results = array_map(function($result) {
+            $result['created_at'] = $this->output_datetime($result['created_at']);
+            $result['updated_at'] = $this->output_datetime($result['updated_at']);
+            return $result;
+        }, $select->fetchAll());
 
         $return = [
-            'results' => $results,
-            'all_results' => $all_results,
-            'per_page' => $pagination['limit']
+            'total_results' => $select->fetchCount(),
+            'current_page' => $pagination['page'],
+            'max_results_per_page' => $pagination['limit'],
+            'results' => $results
         ];
         return json_encode($return, $this->pretty());
     }
 
-    public function post() : string {
+    public function post() : ?string {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $sql = "INSERT INTO `council` (name, start_date, end_date, school_id) VALUES (:name, :start_date, :end_date, :school_id)";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        $statement->bindValue(':name', $this->input_string('name'), PDO::PARAM_STR);
-        $statement->bindValue(':start_date', $this->input_string('start_date'), PDO::PARAM_STR);
-        $statement->bindValue(':end_date', $this->input_string('end_date'), PDO::PARAM_STR);
-        $statement->bindValue(':school_id', $this->input_string('school_id'), PDO::PARAM_INT);
-
-        if (!$statement->execute()) {
+        $atlas = $this->atlas();
+        $data = $this->get_post_data();
+        $council = $atlas->newRecord(CouncilMapper::CLASS, $data);
+        if (!$atlas->insert($council)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->pretty());
+            return null;
         }
 
-        $council_id = $db->lastInsertId();
-        $values = [];
-        $topic_ids = $this->input_raw('topic_ids');
-        foreach ($topic_ids as $k => $topic_id) {
-            $values[] = "(:council_id_$k, :topic_id_$k)";
-        }
-        $values = implode(', ', $values);
-        $sql = "INSERT INTO `council_topic` (council_id, topic_id) VALUES $values";
-        $statement = $db->prepare($sql);
-        foreach ($topic_ids as $k => $topic_id) {
-            $statement->bindValue(":council_id_$k", $council_id, PDO::PARAM_INT);
-            $statement->bindValue(":topic_id_$k", $topic_id, PDO::PARAM_INT);
-        }
-
-        if (!$statement->execute()) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->pretty());
-        }
-
-        return json_encode(['error_code' => null], $this->pretty());
+        return json_encode(['id' => $council->id, 'created_at' => $council->created_at], $this->pretty());
     }
 
-    public function put() : string {
-        if (!$this->validate_put()) {
+    public function patch(int $id) : ?string {
+        $atlas = $this->atlas();
+        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $id);
+        if (!$council) {
+            http_response_code(404);
+            return null;
+        }
+
+        if (!$this->validate_patch()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $data = array_filter($this->get_data());
-        if (!$data) {
-            http_response_code(400);
-            return json_encode(['error_code' => 'EMPTY_UPDATE'], $this->pretty());
-        }
-
-        $fields = [];
-        foreach ($data as $column => $value) {
-            $fields[] = "`$column` = :$column";
-        }
-        $set = implode(', ', $fields);
-        $sql = "UPDATE `council` SET $set WHERE `id` = :id";
-
-        $data['id'] = $this->input_int('id');
-
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $data = $this->get_patch_data();
+        $council->set($data);
+        if (!$atlas->update($council)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->pretty());
+            return null;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+        return json_encode(['updated_at' => $council->updated_at], $this->pretty());
     }
 
-    public function delete() : string {
-        if (!$this->validate_delete()) {
-            http_response_code(400);
-            return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
-            ], $this->pretty());
+    public function delete(int $id) : ?string {
+        $atlas = $this->atlas();
+        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $id);
+        if (!$council) {
+            http_response_code(404);
+            return null;
         }
 
-        $sql = "DELETE FROM `council` WHERE `id` = :id";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('integer')])) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_DELETE'], $this->pretty());
+        $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations'];
+        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $council->id, $blocking_dependencies);
+        $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($council) {
+            return (bool) $council->$dependency;
+        });
+        if ($has_blocking_dependency) {
+            http_response_code(409);
+            return null;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+
+        $full_dependencies = array_merge($blocking_dependencies, ['council_topics', 'council_grades']);
+        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $council->id, $full_dependencies);
+        $transaction = $atlas->newTransaction();
+        foreach ($full_dependencies as $dependency_name) {
+            foreach ($council->$dependency_name as $dependency) {
+                $transaction->delete($dependency);
+            }
+        }
+        $transaction->delete($council);
+        if (!$transaction->exec()) {
+            http_response_code(500);
+            echo json_encode($transaction->getException(), $this->pretty());
+            return null;
+        }
+        http_response_code(204);
+        return null;
     }
 }
