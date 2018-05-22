@@ -5,6 +5,11 @@ use Conselho\DataSource\Council\CouncilMapper;
 
 class Council extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct(CouncilMapper::class);
+    }
+
     private function get_post_data() : array {
         $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
@@ -84,7 +89,7 @@ class Council extends Controller
         }
 
         $atlas = $this->atlas();
-        $select = $atlas->select(CouncilMapper::CLASS);
+        $select = $atlas->select($this->mapper_class_name);
         if ($id = $this->input_int('id')) {
             $select->where('id = ?', $id);
         }
@@ -149,21 +154,17 @@ class Council extends Controller
             ], $this->pretty());
         }
 
-        $atlas = $this->atlas();
         $data = $this->get_post_data();
-        $council = $atlas->newRecord(CouncilMapper::CLASS, $data);
-        if (!$atlas->insert($council)) {
+        if (!$record = $this->insert($data)) {
             http_response_code(500);
             return null;
         }
 
-        return json_encode(['id' => $council->id, 'created_at' => $council->created_at], $this->pretty());
+        return $this->post_output($record);
     }
 
     public function patch(int $id) : ?string {
-        $atlas = $this->atlas();
-        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $id);
-        if (!$council) {
+        if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return null;
         }
@@ -176,26 +177,27 @@ class Council extends Controller
         }
 
         $data = $this->get_patch_data();
-        $council->set($data);
-        if (!$atlas->update($council)) {
+        $record->set($data);
+        if (!$this->atlas()->update($record)) {
             http_response_code(500);
             return null;
         }
-        return json_encode(['updated_at' => $council->updated_at], $this->pretty());
+
+        return $this->patch_output($record);
     }
 
     public function delete(int $id) : void {
-        $atlas = $this->atlas();
-        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $id);
-        if (!$council) {
+        if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
         }
 
+        $atlas = $this->atlas();
+
         $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations'];
-        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $council->id, $blocking_dependencies);
-        $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($council) {
-            return (bool) $council->$dependency;
+        $record = $atlas->fetchRecord($this->mapper_class_name, $record->id, $blocking_dependencies);
+        $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($record) {
+            return (bool) $record->$dependency;
         });
         if ($has_blocking_dependency) {
             http_response_code(409);
@@ -203,19 +205,19 @@ class Council extends Controller
         }
 
         $full_dependencies = array_merge($blocking_dependencies, ['council_topics', 'council_grades']);
-        $council = $atlas->fetchRecord(CouncilMapper::CLASS, $council->id, $full_dependencies);
+        $record = $atlas->fetchRecord($this->mapper_class_name, $record->id, $full_dependencies);
         $transaction = $atlas->newTransaction();
         foreach ($full_dependencies as $dependency_name) {
-            foreach ($council->$dependency_name as $dependency) {
+            foreach ($record->$dependency_name as $dependency) {
                 $transaction->delete($dependency);
             }
         }
-        $transaction->delete($council);
+        $transaction->delete($record);
         if (!$transaction->exec()) {
             http_response_code(500);
             return;
         }
+
         http_response_code(204);
-        return;
     }
 }

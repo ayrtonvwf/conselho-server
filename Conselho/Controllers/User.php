@@ -5,6 +5,10 @@ use Conselho\DataSource\User\UserMapper;
 
 class User extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct(UserMapper::class);
+    }
 
     private function get_patch_data() : array {
         $data = array_filter([
@@ -50,7 +54,7 @@ class User extends Controller
     private function validate_post() : bool {
         $atlas = $this->atlas();
         $email_exists = function($field, $email) use ($atlas) : bool {
-            $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
+            $user = $atlas->fetchRecordBy($this->mapper_class_name, ['email' => $email]);
             return !$user;
         };
         $rules = [
@@ -68,7 +72,7 @@ class User extends Controller
             if ($email == $user->email) {
                 return true;
             }
-            $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
+            $user = $atlas->fetchRecordBy($this->mapper_class_name, ['email' => $email]);
             return !$user;
         };
         $rules = [
@@ -91,7 +95,7 @@ class User extends Controller
         }
 
         $atlas = $this->atlas();
-        $select = $atlas->select(UserMapper::CLASS);
+        $select = $atlas->select($this->mapper_class_name);
         if ($id = $this->input_int('id')) {
             $select->where('id = ?', $id);
         }
@@ -143,23 +147,18 @@ class User extends Controller
         }
 
         $data = $this->get_post_data();
-        $atlas = $this->atlas();
-        $user = $atlas->newRecord(UserMapper::CLASS, $data);
-        if (!$atlas->insert($user)) {
+        if (!$record = $this->insert($data)) {
             http_response_code(500);
             return null;
         }
-        $output = [
-            'id' => $user->id,
-            'created_at' => $this->output_datetime($user->created_at)
-        ];
-        return json_encode($output, $this->pretty());
+
+        return $this->post_output($record);
     }
 
     public function patch() : ?string {
-        $user = $this->get_user();
+        $record = $this->get_user();
 
-        if (!$this->validate_patch($user)) {
+        if (!$this->validate_patch($record)) {
             http_response_code(400);
             return json_encode([
                 'input_errors' => $this->get_validation_errors()
@@ -167,13 +166,13 @@ class User extends Controller
         }
 
         $data = $this->get_patch_data();
-        $user->set($data);
-        $atlas = $this->atlas();
-        if (!$atlas->update($user)) {
+        $record->set($data);
+        if (!$this->atlas()->update($record)) {
             http_response_code(500);
             return null;
         }
-        return json_encode(['updated_at' => $this->output_datetime($user->updated_at)], $this->pretty());
+
+        return $this->patch_output($record);
     }
 
     public function delete() : void {
@@ -181,7 +180,7 @@ class User extends Controller
         $atlas = $this->atlas();
         $blocking_dependencies = ['evaluations', 'grade_observations', 'student_observations', 'teachers'];
 
-        $user = $atlas->fetchRecord(UserMapper::CLASS, $user->id, $blocking_dependencies);
+        $user = $atlas->fetchRecord($this->mapper_class_name, $user->id, $blocking_dependencies);
         $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($user) {
             return (bool) $user->$dependency;
         });
@@ -191,7 +190,7 @@ class User extends Controller
         }
 
         $full_dependencies = array_merge($blocking_dependencies, ['roles', 'user_tokens', 'teacher_requests']);
-        $user = $atlas->fetchRecord(UserMapper::CLASS, $user->id, $full_dependencies);
+        $user = $atlas->fetchRecord($this->mapper_class_name, $user->id, $full_dependencies);
         $transaction = $atlas->newTransaction();
         foreach ($full_dependencies as $dependency_name) {
             foreach ($user->$dependency_name as $dependency) {

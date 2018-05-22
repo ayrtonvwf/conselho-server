@@ -5,6 +5,11 @@ use Conselho\DataSource\CouncilTopic\CouncilTopicMapper;
 
 class CouncilTopic extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct(CouncilTopicMapper::class);
+    }
+
     private function get_post_data() : array {
         return [
             'council_id' => $this->input_int('council_id'),
@@ -49,7 +54,7 @@ class CouncilTopic extends Controller
         }
 
         $atlas = $this->atlas();
-        $select = $atlas->select(CouncilTopicMapper::CLASS);
+        $select = $atlas->select($this->mapper_class_name);
         if ($id = $this->input_int('id')) {
             $select->where('id = ?', $id);
         }
@@ -99,30 +104,26 @@ class CouncilTopic extends Controller
             ], $this->pretty());
         }
 
-        $atlas = $this->atlas();
         $data = $this->get_post_data();
-        $council_topic = $atlas->newRecord(CouncilTopicMapper::CLASS, $data);
-        if (!$atlas->insert($council_topic)) {
+        if (!$record = $this->insert($data)) {
             http_response_code(500);
             return null;
         }
 
-        return json_encode(['id' => $council_topic->id, 'created_at' => $council_topic->created_at], $this->pretty());
+        return $this->post_output($record);
     }
 
     public function delete(int $id) : void {
-        $atlas = $this->atlas();
-        $council_topic = $atlas->fetchRecord(CouncilTopicMapper::CLASS, $id);
-        if (!$council_topic) {
+        if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
         }
 
-        if (!$atlas->delete($council_topic)) {
+        if (!$this->atlas()->delete($record)) {
             http_response_code(500);
             return;
         }
+
         http_response_code(204);
-        return;
     }
 }

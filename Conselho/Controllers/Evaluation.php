@@ -5,6 +5,11 @@ use Conselho\DataSource\Evaluation\EvaluationMapper;
 
 class Evaluation extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct(EvaluationMapper::class);
+    }
+
     private function get_post_data() : array {
         $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
@@ -77,7 +82,7 @@ class Evaluation extends Controller
         }
 
         $atlas = $this->atlas();
-        $select = $atlas->select(EvaluationMapper::CLASS);
+        $select = $atlas->select($this->mapper_class_name);
         if ($id = $this->input_int('id')) {
             $select->where('id = ?', $id);
         }
@@ -136,19 +141,17 @@ class Evaluation extends Controller
             ], $this->pretty());
         }
 
-        $atlas = $this->atlas();
         $data = $this->get_post_data();
-        $evaluation = $atlas->newRecord(EvaluationMapper::CLASS, $data);
-        if (!$atlas->insert($evaluation)) {
+        if (!$record = $this->insert($data)) {
             http_response_code(500);
             return null;
         }
 
-        return json_encode(['id' => $evaluation->id, 'created_at' => $evaluation->created_at], $this->pretty());
+        return $this->post_output($record);
     }
     public function patch(int $id) : ?string {
         $atlas = $this->atlas();
-        $evaluation = $atlas->fetchRecord(EvaluationMapper::CLASS, $id);
+        $evaluation = $atlas->fetchRecord($this->mapper_class_name, $id);
         if (!$evaluation) {
             http_response_code(404);
             return null;
@@ -172,18 +175,16 @@ class Evaluation extends Controller
     }
 
     public function delete(int $id) : void {
-        $atlas = $this->atlas();
-        $evaluation = $atlas->fetchRecord(EvaluationMapper::CLASS, $id);
-        if (!$evaluation) {
+        if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
         }
 
-        if (!$atlas->delete($evaluation)) {
+        if (!$this->atlas()->delete($record)) {
             http_response_code(500);
             return;
         }
+
         http_response_code(204);
-        return;
     }
 }

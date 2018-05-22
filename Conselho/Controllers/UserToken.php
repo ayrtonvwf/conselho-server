@@ -7,6 +7,11 @@ use Exception;
 
 class UserToken extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct(UserTokenMapper::class);
+    }
+
     private function generate_token(int $user_id) : ?array {
         try {
             $token_value = sodium_bin2hex(random_bytes(32));
@@ -25,7 +30,7 @@ class UserToken extends Controller
     private function validate_post() : bool {
         $atlas = $this->atlas();
         $exists_email = function($field, $email) use ($atlas) {
-            $user = $atlas->fetchRecordBy(UserMapper::CLASS, ['email' => $email]);
+            $user = $atlas->fetchRecordBy(UserMapper::class, ['email' => $email]);
             return (bool) $user;
         };
         $rules = [
