@@ -184,12 +184,12 @@ class Council extends Controller
         return json_encode(['updated_at' => $council->updated_at], $this->pretty());
     }
 
-    public function delete(int $id) : ?string {
+    public function delete(int $id) : void {
         $atlas = $this->atlas();
         $council = $atlas->fetchRecord(CouncilMapper::CLASS, $id);
         if (!$council) {
             http_response_code(404);
-            return null;
+            return;
         }
 
         $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations'];
@@ -199,7 +199,7 @@ class Council extends Controller
         });
         if ($has_blocking_dependency) {
             http_response_code(409);
-            return null;
+            return;
         }
 
         $full_dependencies = array_merge($blocking_dependencies, ['council_topics', 'council_grades']);
@@ -213,10 +213,9 @@ class Council extends Controller
         $transaction->delete($council);
         if (!$transaction->exec()) {
             http_response_code(500);
-            echo json_encode($transaction->getException(), $this->pretty());
-            return null;
+            return;
         }
         http_response_code(204);
-        return null;
+        return;
     }
 }
