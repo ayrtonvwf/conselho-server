@@ -65,6 +65,21 @@ abstract class Controller {
         return $atlas->fetchRecord($this->mapper_class_name, $id);
     }
 
+    public function post_output(RecordInterface $record) : string {
+        $data = [
+            'id' => (int) $record->id,
+            'created_at' => $this->output_datetime($record->created_at)
+        ];
+        return json_encode($data, $this->pretty());
+    }
+
+    public function patch_output(RecordInterface $record) : string {
+        $data = [
+            'updated_at' => $this->output_datetime($record->updated_at)
+        ];
+        return json_encode($data, $this->pretty());
+    }
+
     public function output_datetime(string $date) : string {
         $date = new DateTime($date);
         $timezone = new DateTimeZone($this->timezone);
