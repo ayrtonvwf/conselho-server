@@ -5,26 +5,6 @@ use Conselho\DataSource\Council\CouncilMapper;
 
 class Council extends Controller
 {
-    private function get_filters() : array {
-        $filters = array_filter([
-            'id' => $this->input_int('id'),
-            'school_id' => $this->input_int('school_id'),
-            'search' => $this->input_string('search'),
-            'min_start_date' => $this->input_string('min_start_date'),
-            'max_start_date' => $this->input_string('max_start_date'),
-            'min_end_date' => $this->input_string('min_end_date'),
-            'max_end_date' => $this->input_string('max_end_date'),
-            'min_created_at' => $this->input_datetime('min_created_at'),
-            'max_created_at' => $this->input_datetime('max_created_at'),
-            'min_updated_at' => $this->input_datetime('min_updated_at'),
-            'max_updated_at' => $this->input_datetime('max_updated_at'),
-        ]);
-        if (!is_null($active = $this->input_bool('active'))) {
-            $filters['active'] = $active;
-        }
-        return $filters;
-    }
-
     private function get_post_data() : array {
         $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
