@@ -50,8 +50,7 @@ class Permission extends Controller
             $select->where('updated_at <= ?', $max_updated_at);
         }
         if ($search = $this->input_string('search')) {
-            $select->where('(name LIKE ?', "%$search%");
-            $select->orWhere('reference LIKE ?)', "%$search%");
+            $select->where('(name LIKE ? OR reference LIKE ?)', "%$search%");
         }
         if ($reference = $this->input_string('reference')) {
             $select->where('reference = ?', $search);

@@ -106,8 +106,7 @@ class User extends Controller
             $select->where('updated_at <= ?', $max_updated_at);
         }
         if ($search = $this->input_string('search')) {
-            $select->where('(name LIKE ?', "%$search%");
-            $select->orWhere('email LIKE ?)', "%$search%");
+            $select->where('(name LIKE ? OR email like ?)', "%$search%");
         }
         if (!is_null($active = $this->input_bool('active'))) {
             $select->where('active = ?', $active);
