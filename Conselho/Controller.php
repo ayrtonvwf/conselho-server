@@ -17,6 +17,15 @@ abstract class Controller {
     protected const DATETIME_INTERNAL_FORMAT = 'Y-m-d\TH:i:s';
     protected const DATE_FORMAT = 'Y-m-d';
     protected $mapper_class_name;
+
+    protected const DEFAULT_GET_RULES = [
+        'id' => ['optional', 'integer', ['min', 1]],
+        'page' => ['optional', 'integer', ['min', 1]],
+        'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+        'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+        'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+        'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]]
+    ];
     private const ATLAS_MAPPERS = [
         DataSource\Council\CouncilMapper::CLASS,
         DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
