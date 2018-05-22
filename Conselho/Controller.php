@@ -3,6 +3,7 @@ namespace Conselho;
 use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Atlas\Orm\Mapper\Record;
+use Atlas\Orm\Mapper\RecordInterface;
 use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
 use PDO, PDOStatement, DateTime, DateTimeZone;
@@ -15,6 +16,7 @@ abstract class Controller {
     protected const DATETIME_EXTERNAL_FORMAT = 'Y-m-d\TH:i:sP';
     protected const DATETIME_INTERNAL_FORMAT = 'Y-m-d\TH:i:s';
     protected const DATE_FORMAT = 'Y-m-d';
+    protected $mapper_class_name;
     private const ATLAS_MAPPERS = [
         DataSource\Council\CouncilMapper::CLASS,
         DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
@@ -42,13 +44,25 @@ abstract class Controller {
         DataSource\UserToken\UserTokenMapper::CLASS
     ];
 
-    public function __construct()
+    public function __construct(string $mapper_class_name)
     {
+        $this->mapper_class_name = $mapper_class_name;
         $this->input_data = $this->get_input_data();
         $timezone = ($_SERVER['HTTP_TIMEZONE'] ?? '+00:00');
         if (preg_match('#^[+-]\d\d:\d\d$#', $timezone)) {
             $this->timezone = $timezone;
         }
+    }
+
+    public function insert(array $data) : ?RecordInterface {
+        $atlas = $this->atlas();
+        $record = $atlas->newRecord($this->mapper_class_name, $data);
+        return $atlas->insert($record) ? $record : null;
+    }
+
+    public function fetch(int $id) : ?RecordInterface {
+        $atlas = $this->atlas();
+        return $atlas->fetchRecord($this->mapper_class_name, $id);
     }
 
     public function output_datetime(string $date) : string {
