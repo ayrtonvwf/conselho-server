@@ -5,18 +5,17 @@ use Conselho\DataSource\Permission\PermissionMapper;
 
 class Permission extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct(PermissionMapper::class);
+    }
+
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
-            'min_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+        $rules = self::DEFAULT_GET_RULES + [
             'search'  => ['optional', ['lengthMin', 3]],
-            'reference'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'reference'  => ['optional', ['lengthMin', 3]]
         ];
 
         return $this->run_validation($rules);
