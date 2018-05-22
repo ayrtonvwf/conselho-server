@@ -63,63 +63,6 @@ abstract class Controller {
         }
     }
 
-    // DEFAULT METHODS
-
-
-    public function post() : ?string {
-        if (!$this->validate_post()) {
-            http_response_code(400);
-            return json_encode([
-                'input_errors' => $this->get_validation_errors()
-            ], $this->pretty());
-        }
-
-        $data = $this->get_post_data();
-        if (!$record = $this->insert($data)) {
-            http_response_code(500);
-            return null;
-        }
-
-        return $this->post_output($record);
-    }
-
-    public function patch(int $id) : ?string {
-        if (!$record = $this->fetch($id)) {
-            http_response_code(404);
-            return null;
-        }
-
-        if (!$this->validate_patch()) {
-            http_response_code(400);
-            return json_encode([
-                'input_errors' => $this->get_validation_errors()
-            ], $this->pretty());
-        }
-
-        $data = $this->get_patch_data();
-        $record->set($data);
-        if (!$this->atlas()->update($record)) {
-            http_response_code(500);
-            return null;
-        }
-
-        return $this->patch_output($record);
-    }
-
-    public function delete(int $id) : void {
-        if (!$record = $this->fetch($id)) {
-            http_response_code(404);
-            return;
-        }
-
-        if (!$this->atlas()->delete($record)) {
-            http_response_code(500);
-            return;
-        }
-
-        http_response_code(204);
-    }
-
     // DB HELPERS
 
     public function insert(array $data) : ?RecordInterface {
@@ -214,7 +157,7 @@ abstract class Controller {
     }
 
     // INPUT HELPERS
-    
+
     protected function input_datetime(string $key) : ?string {
         if (is_null($datetime = $this->input_raw($key))) {
             return null;
