@@ -14,6 +14,7 @@ abstract class Controller {
     private $timezone = '+00:00';
     protected const DATETIME_EXTERNAL_FORMAT = 'Y-m-d\TH:i:sP';
     protected const DATETIME_INTERNAL_FORMAT = 'Y-m-d\TH:i:s';
+    protected const DATE_FORMAT = 'Y-m-d';
     private const ATLAS_MAPPERS = [
         DataSource\Council\CouncilMapper::CLASS,
         DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
