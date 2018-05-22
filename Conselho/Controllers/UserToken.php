@@ -3,7 +3,7 @@ namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\User\UserMapper;
 use Conselho\DataSource\UserToken\UserTokenMapper;
-use PDO, Exception;
+use Exception;
 
 class UserToken extends Controller
 {
