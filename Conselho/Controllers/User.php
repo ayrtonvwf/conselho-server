@@ -8,12 +8,16 @@ class User extends Controller
 {
 
     private function get_patch_data() : array {
-        return array_filter([
+        $data = array_filter([
             'name' => $this->input_string('name'),
             'email' => $this->input_string('email'),
             'password' => $this->input_raw('password') ? password_hash($this->input_raw('password'), PASSWORD_DEFAULT) : null,
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ]);
+        if (!is_null($active = $this->input_bool('active'))) {
+            $data['active'] = $active;
+        }
+        return $data;
     }
 
     private function get_post_data() : array {
