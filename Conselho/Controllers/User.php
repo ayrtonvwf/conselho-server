@@ -2,7 +2,6 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\User\UserMapper;
-use PDO;
 
 class User extends Controller
 {
