@@ -37,15 +37,9 @@ class User extends Controller
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
+        $rules = self::DEFAULT_GET_RULES + [
             'active'  => ['optional', 'integer', ['in', [0, 1]]],
-            'min_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'search'  => ['optional', ['lengthMin', 3]]
         ];
 
         return $this->run_validation($rules);

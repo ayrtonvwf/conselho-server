@@ -34,19 +34,13 @@ class Evaluation extends Controller
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
+        $rules = self::DEFAULT_GET_RULES + [
             'council_id' => ['optional', 'integer'],
             'grade_id' => ['optional', 'integer'],
             'student_id' => ['optional', 'integer'],
             'subject_id' => ['optional', 'integer'],
             'topic_option_id' => ['optional', 'integer'],
-            'user_id' => ['optional', 'integer'],
-            'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'user_id' => ['optional', 'integer']
         ];
 
         return $this->run_validation($rules);

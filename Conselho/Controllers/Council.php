@@ -36,20 +36,14 @@ class Council extends Controller
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
-            'page' => ['optional', 'integer', ['min', 1]],
+        $rules = self::DEFAULT_GET_RULES + [
             'school_id' => ['optional', 'integer'],
             'active' => ['optional', 'integer', ['in', [0, 1]]],
             'search'  => ['optional', ['lengthMin', 3]],
             'min_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'max_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'min_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
-            'max_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
-            'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]]
         ];
 
         return $this->run_validation($rules);

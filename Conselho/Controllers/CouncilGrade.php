@@ -20,16 +20,10 @@ class CouncilGrade extends Controller
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
+        $rules = self::DEFAULT_GET_RULES + [
             'council_id' => ['optional', 'integer'],
             'grade_id' => ['optional', 'integer'],
-            'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'search'  => ['optional', ['lengthMin', 3]]
         ];
 
         return $this->run_validation($rules);
