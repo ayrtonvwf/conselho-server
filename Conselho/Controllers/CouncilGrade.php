@@ -17,13 +17,12 @@ class CouncilGrade extends Controller
     private function validate_get() : bool {
         $rules = [
             'id' => ['optional', 'integer'],
-            'school_id' => ['optional', 'integer'],
-            'max_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_start_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'max_end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_end_date'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+            'council_id' => ['optional', 'integer'],
+            'grade_id' => ['optional', 'integer'],
+            'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
+            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'search'  => ['optional', ['lengthMin', 3]],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
@@ -33,11 +32,8 @@ class CouncilGrade extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'start_date'  => ['required', ['dateFormat', 'Y-m-d']],
-            'end_date'  => ['required', ['dateFormat', 'Y-m-d']],
-            'name'  => ['required', ['lengthBetween', 5, 30]],
-            'school_id' => ['required', 'integer'],
-            'topic_ids' => ['required', 'array']
+            'council_id' => ['required', 'integer'],
+            'grade_id' => ['required', 'integer']
         ];
 
         return $this->run_validation($rules);
