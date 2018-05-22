@@ -33,7 +33,7 @@ class Permission extends Controller
         }
 
         $atlas = $this->atlas();
-        $select = $atlas->select(PermissionMapper::CLASS);
+        $select = $atlas->select($this->mapper_class_name);
         if ($id = $this->input_int('id')) {
             $select->where('id = ?', $id);
         }
