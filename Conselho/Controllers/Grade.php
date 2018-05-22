@@ -1,48 +1,45 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use PDO;
+use Conselho\DataSource\Grade\GradeMapper;
 
 class Grade extends Controller
 {
-    private function get_filters() : array {
-        $filters = [
-            'id' => $this->input_int('id'),
-            'school_id' => $this->input_int('school_id'),
-            'min_updated_at' => $this->input_string('min_updated_at'),
-            'max_updated_at' => $this->input_string('max_updated_at'),
-            'search' => $this->input_string('search')
-        ];
-        $filters = array_filter($filters);
-        if (!is_null($this->input_int('min_level'))) {
-            $filters['min_level'] = $this->input_int('min_level');
-        }
-        if (!is_null($this->input_int('max_level'))) {
-            $filters['max_level'] = $this->input_int('max_level');
-        }
-        return $filters;
+    public function __construct()
+    {
+        parent::__construct(GradeMapper::class);
     }
 
-    private function get_data() : array {
+    private function get_post_data() : array {
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
             'name' => $this->input_string('name'),
-            'level' => (int) $this->input_string('level'),
-            'school_id' => $this->input_int('school_id')
+            'level' => $this->input_int('level'),
+            'school_id' => $this->input_int('school_id'),
+            'active' => $this->input_bool('active'),
+            'created_at' => $now,
+            'updated_at' => $now
+        ];
+    }
+
+    private function get_patch_data() : array {
+        return [
+            'name' => $this->input_string('name'),
+            'level' => $this->input_int('level'),
+            'active' => $this->input_int('active'),
+            'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ];
     }
 
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
-            'school_id' => ['optional', 'integer'],
+        $rules = self::DEFAULT_GET_RULES + [
+            'active' => ['optional', 'integer', ['in', [0, 1]]],
             'min_level' => ['optional', 'integer', ['min', 1]],
             'max_level' => ['optional', 'integer', ['min', 1]],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
             'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'school_id' => ['optional', 'integer']
         ];
 
         return $this->run_validation($rules);
@@ -52,26 +49,18 @@ class Grade extends Controller
         $rules = [
             'name'  => ['required', ['lengthBetween', 1, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['required', 'integer']
+            'active' => ['required', 'boolean'],
+            'school_id' => ['required', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
     }
 
-    private function validate_put() : bool {
+    private function validate_patch() : bool {
         $rules = [
-            'id' => ['required', 'integer'],
             'name'  => ['optional', ['lengthBetween', 1, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['optional', 'integer']
-        ];
-
-        return $this->run_validation($rules);
-    }
-
-    private function validate_delete() : bool {
-        $rules = [
-            'id' => ['required', 'integer']
+            'active' => ['required', 'boolean']
         ];
 
         return $this->run_validation($rules);
@@ -83,143 +72,114 @@ class Grade extends Controller
         if (!$this->validate_get()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $filters = $this->get_filters();
-
-        $where = [];
-        if (isset($filters['id'])) {
-            $where[] = '`id` = :id';
+        $atlas = $this->atlas();
+        $select = $atlas->select($this->mapper_class_name);
+        if ($id = $this->input_int('id')) {
+            $select->where('id = ?', $id);
         }
-        if (isset($filters['school_id'])) {
-            $where[] = '`school_id` = :school_id';
+        if ($school_id = $this->input_int('school_id')) {
+            $select->where('school_id = ?', $school_id);
         }
-        if (isset($filters['max_level'])) {
-            $where[] = '`level` <= :max_level';
+        if (!is_null($active = $this->input_bool('active'))) {
+            $select->where('active = ?', $active);
         }
-        if (isset($filters['min_level'])) {
-            $where[] = '`level` >= :min_level';
+        if ($min_level = $this->input_int('min_level')) {
+            $select->where('level >= ?', $min_level);
         }
-        if (isset($filters['max_updated_at'])) {
-            $where[] = '`updated_at` <= :max_updated_at';
+        if ($max_level = $this->input_int('max_level')) {
+            $select->where('level <= ?', $max_level);
         }
-        if (isset($filters['min_updated_at'])) {
-            $where[] = '`updated_at` >= :min_updated_at';
+        if ($min_created_at = $this->input_datetime('min_created_at')) {
+            $select->where('created_at >= ?', $min_created_at);
         }
-        if (isset($filters['search'])) {
-            $where[] = '`name` LIKE %:search%';
+        if ($max_created_at = $this->input_datetime('max_created_at')) {
+            $select->where('created_at <= ?', $max_created_at);
         }
-
-        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
-
+        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
+            $select->where('updated_at >= ?', $min_updated_at);
+        }
+        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
+            $select->where('updated_at <= ?', $max_updated_at);
+        }
+        if ($search = $this->input_string('search')) {
+            $select->where('name LIKE ?', "%$search%");
+        }
         $pagination = $this->get_pagination();
+        $select->limit($pagination['limit']);
+        $select->offset($pagination['offset']);
+        $select->cols(['*']);
 
-        $sql = "SELECT * FROM `grade` $where LIMIT :limit OFFSET :offset";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-
-        $parameters = $filters + $pagination;
-        foreach ($parameters as $parameter_name => $parameter_value) {
-            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-
-        if (!$statement->execute()) {
-            http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
-        }
-
-        $results = $statement->fetchAll(PDO::FETCH_OBJ);
-        // filter output columns
-
-        $sql = "SELECT COUNT(*) AS `all_results` FROM `grade` $where";
-        $statement = $db->prepare($sql);
-        $statement->execute($filters);
-        $all_results = (int) $statement->fetchObject()->all_results;
+        $results = array_map(function($result) {
+            $result['created_at'] = $this->output_datetime($result['created_at']);
+            $result['updated_at'] = $this->output_datetime($result['updated_at']);
+            return $result;
+        }, $select->fetchAll());
 
         $return = [
-            'results' => $results,
-            'all_results' => $all_results,
-            'per_page' => $pagination['limit']
+            'total_results' => $select->fetchCount(),
+            'current_page' => $pagination['page'],
+            'max_results_per_page' => $pagination['limit'],
+            'results' => $results
         ];
         return json_encode($return, $this->pretty());
     }
 
-    public function post() : string {
+    public function post() : ?string {
         if (!$this->validate_post()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $data = $this->get_data();
-        $columns = implode(', ', array_keys($data));
-        $values = ':'.implode(', :', array_keys($data));
-        $sql = "INSERT INTO `grade` ($columns) VALUES ($values)";
-
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $data = $this->get_post_data();
+        if (!$record = $this->insert($data)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_INSERT'], $this->pretty());
+            return null;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+
+        return $this->post_output($record);
     }
 
-    public function put() : string {
-        if (!$this->validate_put()) {
+    public function patch(int $id) : ?string {
+        if (!$record = $this->fetch($id)) {
+            http_response_code(404);
+            return null;
+        }
+
+        if (!$this->validate_patch()) {
             http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $data = array_filter($this->get_data());
-        if (!$data) {
-            http_response_code(400);
-            return json_encode(['error_code' => 'EMPTY_UPDATE'], $this->pretty());
-        }
-
-        $fields = [];
-        foreach ($data as $column => $value) {
-            $fields[] = "`$column` = :$column";
-        }
-        $set = implode(', ', $fields);
-        $sql = "UPDATE `grade` SET $set WHERE `id` = :id";
-
-        $data['id'] = $this->input_int('id');
-
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute($data)) {
+        $data = $this->get_patch_data();
+        $record->set($data);
+        if (!$this->atlas()->update($record)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_UPDATE'], $this->pretty());
+            return null;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+
+        return $this->patch_output($record);
     }
 
-    public function delete() : string {
-        if (!$this->validate_delete()) {
-            http_response_code(400);
-            return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
-            ], $this->pretty());
+    public function delete(int $id) : void {
+        if (!$record = $this->fetch($id)) {
+            http_response_code(404);
+            return;
         }
 
-        $sql = "DELETE FROM `grade` WHERE `id` = :id";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-        if (!$statement->execute(['id' => $this->input_int('integer')])) {
+        if (!$this->atlas()->delete($record)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_DELETE'], $this->pretty());
+            return;
         }
-        return json_encode(['error_code' => null], $this->pretty());
+
+        http_response_code(204);
     }
 
 }
