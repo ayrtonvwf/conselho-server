@@ -2,7 +2,6 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Council\CouncilMapper;
-use PDO;
 
 class Council extends Controller
 {
