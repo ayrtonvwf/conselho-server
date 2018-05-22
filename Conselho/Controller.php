@@ -67,6 +67,7 @@ abstract class Controller {
 
     public function insert(array $data) : ?RecordInterface {
         $atlas = $this->atlas();
+        $data['created_at'] = $data['updated_at'] = date(self::DATETIME_INTERNAL_FORMAT);
         $record = $atlas->newRecord($this->mapper_class_name, $data);
         return $atlas->insert($record) ? $record : null;
     }

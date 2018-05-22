@@ -11,16 +11,13 @@ class Evaluation extends Controller
     }
 
     private function get_post_data() : array {
-        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
             'council_id' => $this->input_int('council_id'),
             'grade_id' => $this->input_int('grade_id'),
             'student_id' => $this->input_int('student_id'),
             'subject_id' => $this->input_int('subject_id'),
             'topic_option_id' => $this->input_int('topic_option_id'),
-            'user_id' => $this->get_user()->id,
-            'created_at' => $now,
-            'updated_at' => $now
+            'user_id' => $this->get_user()->id
         ];
     }
 

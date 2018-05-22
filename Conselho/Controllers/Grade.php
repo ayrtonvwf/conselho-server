@@ -11,14 +11,11 @@ class Grade extends Controller
     }
 
     private function get_post_data() : array {
-        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
             'name' => $this->input_string('name'),
             'level' => $this->input_int('level'),
             'school_id' => $this->input_int('school_id'),
-            'active' => $this->input_bool('active'),
-            'created_at' => $now,
-            'updated_at' => $now
+            'active' => $this->input_bool('active')
         ];
     }
 

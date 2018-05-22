@@ -11,25 +11,21 @@ class Council extends Controller
     }
 
     private function get_post_data() : array {
-        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
             'name' => $this->input_string('name'),
             'active' => $this->input_bool('active'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
-            'school_id' => $this->input_int('school_id'),
-            'created_at' => $now,
-            'updated_at' => $now
+            'school_id' => $this->input_int('school_id')
         ];
     }
     private function get_patch_data() : array {
-        $now = date(self::DATETIME_INTERNAL_FORMAT);
         return [
             'name' => $this->input_string('name'),
             'active' => $this->input_bool('active'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
-            'updated_at' => $now
+            'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ];
     }
 

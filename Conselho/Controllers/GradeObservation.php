@@ -23,7 +23,8 @@ class GradeObservation extends Controller
 
     private function get_patch_data() : array {
         return [
-            'description' => $this->input_string('description')
+            'description' => $this->input_string('description'),
+            'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ];
     }
 
