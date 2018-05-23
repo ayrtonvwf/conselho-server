@@ -34,12 +34,12 @@ class StudentGrade extends Controller
     }
 
     private function get_patch_data() : array {
-        return [
+        return array_filter([
             'number' => $this->input_int('number'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
-        ];
+        ]);
     }
 
     // VALIDATION

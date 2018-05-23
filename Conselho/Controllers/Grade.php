@@ -33,12 +33,15 @@ class Grade extends Controller
     }
 
     private function get_patch_data() : array {
-        return [
+        $data = array_filter([
             'name' => $this->input_string('name'),
             'level' => $this->input_int('level'),
-            'active' => $this->input_int('active'),
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
-        ];
+        ]);
+        if (!is_null($active = $this->input_bool('active'))) {
+            $data['active'] = $active;
+        }
+        return $data;
     }
 
     // VALIDATION

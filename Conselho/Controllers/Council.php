@@ -35,13 +35,16 @@ class Council extends Controller
         ];
     }
     private function get_patch_data() : array {
-        return [
+        $data = array_filter([
             'name' => $this->input_string('name'),
-            'active' => $this->input_bool('active'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
-        ];
+        ]);
+        if (!is_null($active = $this->input_bool('active'))) {
+            $data['active'] = $active;
+        }
+        return $data;
     }
 
     // VALIDATION
