@@ -93,7 +93,7 @@ abstract class Controller {
         $select->limit($pagination['limit']);
         $select->offset($pagination['offset']);
         $select->cols($cols);
-        
+
         $results = array_map(function($result) {
             $result['created_at'] = $this->output_datetime($result['created_at']);
             $result['updated_at'] = $this->output_datetime($result['updated_at']);
@@ -221,6 +221,11 @@ abstract class Controller {
 
     protected function input_raw(string $key) {
         return $this->input_data[$key] ?? null;
+    }
+
+    protected function input_search(string $key) : ?string {
+        $value = $this->input_string($key);
+        return !is_null($value) ? "%$value%" : null;
     }
 
     protected function input_string(string $key) : ?string {
