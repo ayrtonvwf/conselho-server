@@ -1,29 +1,59 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use PDO;
+use Conselho\DataSource\MedicalReport\MedicalReportMapper;
 
 class RoleType extends Controller
 {
-    private function get_filters() : array {
-        $filters = [
-            'id' => $this->input_int('id'),
-            'search' => $this->input_string('search'),
-            'min_updated_at' => $this->input_string('min_updated_at'),
-            'max_updated_at' => $this->input_string('max_updated_at')
+    public function __construct()
+    {
+        parent::__construct(MedicalReportMapper::class);
+    }
+
+    private function get_get_data() : array {
+        return array_filter([
+            'name LIKE ?' => $this->input_search('search'),
+            'school_id = ?' => $this->input_int('school_id')
+        ]);
+    }
+
+    private function get_post_data() : array {
+        return [
+            'name' => $this->input_string('name'),
+            'school_id' => $this->input_int('school_id')
         ];
-        return array_filter($filters);
+    }
+
+    private function get_patch_data() : array {
+        return [
+            'name' => $this->input_string('name'),
+            'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
+        ];
     }
 
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer'],
-            'max_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
-            'min_updated_at'  => ['optional', ['dateFormat', 'Y-m-d']],
+        $rules = self::DEFAULT_GET_RULES + [
             'search'  => ['optional', ['lengthMin', 3]],
-            'page' => ['optional', 'integer', ['min', 1]]
+            'school_id' => ['optional', 'integer', ['min', 1]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_post() : bool {
+        $rules = [
+            'name' => ['required', 'string', ['maxLength', 50]],
+            'school_id' => ['required', 'integer', ['min', 1]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_patch() : bool {
+        $rules = [
+            'name' => ['required', 'string', ['maxLength', 50]]
         ];
 
         return $this->run_validation($rules);
@@ -34,60 +64,68 @@ class RoleType extends Controller
     public function get() : string {
         if (!$this->validate_get()) {
             http_response_code(400);
+            return $this->input_error_output();
+        }
+
+        $where = $this->get_get_data();
+
+        $result = $this->search($where);
+
+        return json_encode($result, $this->pretty());
+    }
+
+    public function post() : ?string {
+        if (!$this->validate_post()) {
+            http_response_code(400);
             return json_encode([
-                'error_code' => 'INVALID_INPUT',
-                'error_messages' => $this->get_validation_errors()
+                'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
         }
 
-        $filters = $this->get_filters();
-
-        $where = [];
-        if (isset($filters['id'])) {
-            $where[] = '`id` = :id';
-        }
-        if (isset($filters['max_updated_at'])) {
-            $where[] = '`updated_at` <= :max_updated_at';
-        }
-        if (isset($filters['min_updated_at'])) {
-            $where[] = '`updated_at` >= :min_updated_at';
-        }
-        if (isset($filters['search'])) {
-            $where[] = '`name` LIKE %:search%';
-        }
-
-        $where = $where ? 'WHERE '.implode(' AND ', $where) : '';
-
-        $pagination = $this->get_pagination();
-
-        $sql = "SELECT * FROM `role_type` $where LIMIT :limit OFFSET :offset";
-        $db = $this->get_db_connection();
-        $statement = $db->prepare($sql);
-
-        $parameters = $filters + $pagination;
-        foreach ($parameters as $parameter_name => $parameter_value) {
-            $statement->bindValue(":$parameter_name", $parameter_value, is_int($parameter_value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-
-        if (!$statement->execute()) {
+        $data = $this->get_post_data();
+        if (!$record = $this->insert($data)) {
             http_response_code(500);
-            return json_encode(['error_code' => 'CANNOT_QUERY'], $this->pretty());
+            return null;
         }
 
-        $results = $statement->fetchAll(PDO::FETCH_OBJ);
-        // filter output columns
+        return $this->post_output($record);
+    }
 
-        $sql = "SELECT COUNT(*) AS `all_results` FROM `role_type` $where";
-        $statement = $db->prepare($sql);
-        $statement->execute($filters);
-        $all_results = (int) $statement->fetchObject()->all_results;
+    public function patch(int $id) : ?string {
+        if (!$record = $this->fetch($id)) {
+            http_response_code(404);
+            return null;
+        }
 
-        $return = [
-            'results' => $results,
-            'all_results' => $all_results,
-            'per_page' => $pagination['limit']
-        ];
-        return json_encode($return, $this->pretty());
+        if (!$this->validate_patch()) {
+            http_response_code(400);
+            return json_encode([
+                'input_errors' => $this->get_validation_errors()
+            ], $this->pretty());
+        }
+
+        $data = $this->get_patch_data();
+        $record->set($data);
+        if (!$this->atlas()->update($record)) {
+            http_response_code(500);
+            return null;
+        }
+
+        return $this->patch_output($record);
+    }
+
+    public function delete(int $id) : void {
+        if (!$record = $this->fetch($id)) {
+            http_response_code(404);
+            return;
+        }
+
+        if (!$this->atlas()->delete($record)) {
+            http_response_code(500);
+            return;
+        }
+
+        http_response_code(204);
     }
 
 }
