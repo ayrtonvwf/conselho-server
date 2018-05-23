@@ -4,6 +4,7 @@ use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Atlas\Orm\Mapper\Record;
 use Atlas\Orm\Mapper\RecordInterface;
+use Atlas\Orm\Mapper\RecordSetInterface;
 use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
 use PDO, PDOStatement, DateTime, DateTimeZone;
@@ -65,6 +66,48 @@ abstract class Controller {
 
     // DB HELPERS
 
+    private function default_get_filters() : array {
+        return array_filter([
+            'id = ?' => $this->input_int('id'),
+            'created_at >= ?' => $this->input_datetime('min_created_at'),
+            'created_at <= ?' => $this->input_datetime('max_created_at'),
+            'updated_at >= ?' => $this->input_datetime('min_updated_at'),
+            'updated_at <= ?' => $this->input_datetime('max_updated_at')
+        ]);
+    }
+
+    public function search(array $where, array $cols = ['*']) : array{
+        $where = $this->default_get_filters() + $where;
+
+        $atlas = $this->atlas();
+        $select = $atlas->select($this->mapper_class_name);
+        foreach ($where as $condition => $value) {
+            if (is_array($value)) {
+                $select->where($condition);
+                $select->bindValues($value);
+            } else {
+                $select->where($condition, $value);
+            }
+        }
+        $pagination = $this->get_pagination();
+        $select->limit($pagination['limit']);
+        $select->offset($pagination['offset']);
+        $select->cols($cols);
+        
+        $results = array_map(function($result) {
+            $result['created_at'] = $this->output_datetime($result['created_at']);
+            $result['updated_at'] = $this->output_datetime($result['updated_at']);
+            return $result;
+        }, $select->fetchAll());
+
+        return [
+            'total_results' => $select->fetchCount(),
+            'current_page' => $pagination['page'],
+            'max_results_per_page' => $pagination['limit'],
+            'results' => $results
+        ];
+    }
+
     public function insert(array $data) : ?RecordInterface {
         $atlas = $this->atlas();
         $data['created_at'] = $data['updated_at'] = date(self::DATETIME_INTERNAL_FORMAT);
@@ -78,6 +121,13 @@ abstract class Controller {
     }
 
     // OUTPUT HELPERS
+
+    public function input_error_output() : string {
+        $data = [
+            'input_errors' => $this->get_validation_errors()
+        ];
+        return json_encode($data, $this->pretty());
+    }
 
     public function post_output(RecordInterface $record) : string {
         $data = [
@@ -175,7 +225,6 @@ abstract class Controller {
 
     protected function input_string(string $key) : ?string {
         $value = $this->input_raw($key);
-
         return !is_null($value) ? trim(strip_tags($value)) : null;
     }
 
