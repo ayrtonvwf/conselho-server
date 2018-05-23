@@ -10,6 +10,18 @@ class Permission extends Controller
         parent::__construct(PermissionMapper::class);
     }
 
+    private function get_get_data() : array
+    {
+        $search_values = array_filter([
+            'name_search' => $search = $this->input_search('search'),
+            'reference_search' => $search
+        ]);
+        return array_filter([
+            'reference = ?' => $this->input_string('reference'),
+            '(name LIKE :name_search OR reference LIKE :reference_search)' => $search_values
+        ]);
+    }
+
     // VALIDATION
 
     private function validate_get() : bool {
@@ -23,55 +35,17 @@ class Permission extends Controller
 
     // METHODS
 
-    public function get() : string
-    {
+    public function get() : string {
         if (!$this->validate_get()) {
             http_response_code(400);
-            return json_encode([
-                'input_errors' => $this->get_validation_errors()
-            ], $this->pretty());
+            return $this->input_error_output();
         }
 
-        $atlas = $this->atlas();
-        $select = $atlas->select($this->mapper_class_name);
-        if ($id = $this->input_int('id')) {
-            $select->where('id = ?', $id);
-        }
-        if ($min_created_at = $this->input_datetime('min_created_at')) {
-            $select->where('created_at >= ?', $min_created_at);
-        }
-        if ($max_created_at = $this->input_datetime('max_created_at')) {
-            $select->where('created_at <= ?', $max_created_at);
-        }
-        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
-            $select->where('updated_at >= ?', $min_updated_at);
-        }
-        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
-            $select->where('updated_at <= ?', $max_updated_at);
-        }
-        if ($search = $this->input_string('search')) {
-            $select->where('(name LIKE ? OR reference LIKE ?)', "%$search%");
-        }
-        if ($reference = $this->input_string('reference')) {
-            $select->where('reference = ?', $search);
-        }
-        $pagination = $this->get_pagination();
-        $select->limit($pagination['limit']);
-        $select->offset($pagination['offset']);
-        $select->cols(['*']);
-        $results = array_map(function($result) {
-            $result['created_at'] = $this->output_datetime($result['created_at']);
-            $result['updated_at'] = $this->output_datetime($result['updated_at']);
-            return $result;
-        }, $select->fetchAll());
+        $where = $this->get_get_data();
 
-        $return = [
-            'total_results' => $select->fetchCount(),
-            'current_page' => $pagination['page'],
-            'max_results_per_page' => $pagination['limit'],
-            'results' => $results
-        ];
-        return json_encode($return, $this->pretty());
+        $result = $this->search($where);
+
+        return json_encode($result, $this->pretty());
     }
 
 }

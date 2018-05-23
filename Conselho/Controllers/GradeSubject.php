@@ -10,6 +10,13 @@ class GradeSubject extends Controller
         parent::__construct(GradeSubjectMapper::class);
     }
 
+    private function get_get_data() : array {
+        return array_filter([
+            'grade_id = ?' => $this->input_int('grade_id'),
+            'subject_id = ?' => $this->input_int('subject_id')
+        ]);
+    }
+
     private function get_post_data() : array {
         return [
             'grade_id' => $this->input_int('grade_id'),
@@ -41,52 +48,14 @@ class GradeSubject extends Controller
     public function get() : string {
         if (!$this->validate_get()) {
             http_response_code(400);
-            return json_encode([
-                'input_errors' => $this->get_validation_errors()
-            ], $this->pretty());
+            return $this->input_error_output();
         }
 
-        $atlas = $this->atlas();
-        $select = $atlas->select($this->mapper_class_name);
-        if ($id = $this->input_int('id')) {
-            $select->where('id = ?', $id);
-        }
-        if ($grade_id = $this->input_int('grade_id')) {
-            $select->where('grade_id = ?', $grade_id);
-        }
-        if ($subject_id = $this->input_int('subject_id')) {
-            $select->where('subject_id = ?', $subject_id);
-        }
-        if ($min_created_at = $this->input_datetime('min_created_at')) {
-            $select->where('created_at >= ?', $min_created_at);
-        }
-        if ($max_created_at = $this->input_datetime('max_created_at')) {
-            $select->where('created_at <= ?', $max_created_at);
-        }
-        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
-            $select->where('updated_at >= ?', $min_updated_at);
-        }
-        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
-            $select->where('updated_at <= ?', $max_updated_at);
-        }
-        $pagination = $this->get_pagination();
-        $select->limit($pagination['limit']);
-        $select->offset($pagination['offset']);
-        $select->cols(['*']);
+        $where = $this->get_get_data();
 
-        $results = array_map(function($result) {
-            $result['created_at'] = $this->output_datetime($result['created_at']);
-            $result['updated_at'] = $this->output_datetime($result['updated_at']);
-            return $result;
-        }, $select->fetchAll());
+        $result = $this->search($where);
 
-        $return = [
-            'total_results' => $select->fetchCount(),
-            'current_page' => $pagination['page'],
-            'max_results_per_page' => $pagination['limit'],
-            'results' => $results
-        ];
-        return json_encode($return, $this->pretty());
+        return json_encode($result, $this->pretty());
     }
 
     public function post() : ?string {

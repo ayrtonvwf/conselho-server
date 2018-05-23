@@ -10,6 +10,21 @@ class Council extends Controller
         parent::__construct(CouncilMapper::class);
     }
 
+    private function get_get_data() : array {
+        $where = array_filter([
+            'school_id = ?' => $this->input_int('school_id'),
+            'start_date >= ?' => $this->input_string('min_start_date'),
+            'start_date <= ?' => $this->input_string('max_start_date'),
+            'end_date >= ?' => $this->input_string('min_end_date'),
+            'end_date <= ?' => $this->input_string('max_end_date'),
+            'name LIKE ?' => $this->input_search('search')
+        ]);
+        if (!is_null($active = $this->input_bool('active'))) {
+            $where['active = ?'] = $active;
+        }
+        return $where;
+    }
+
     private function get_post_data() : array {
         return [
             'name' => $this->input_string('name'),
@@ -73,67 +88,14 @@ class Council extends Controller
     public function get() : string {
         if (!$this->validate_get()) {
             http_response_code(400);
-            return json_encode([
-                'input_errors' => $this->get_validation_errors()
-            ], $this->pretty());
+            return $this->input_error_output();
         }
 
-        $atlas = $this->atlas();
-        $select = $atlas->select($this->mapper_class_name);
-        if ($id = $this->input_int('id')) {
-            $select->where('id = ?', $id);
-        }
-        if ($school_id = $this->input_int('school_id')) {
-            $select->where('school_id = ?', $school_id);
-        }
-        if (!is_null($active = $this->input_bool('active'))) {
-            $select->where('active = ?', $active);
-        }
-        if ($search = $this->input_string('search')) {
-            $select->where('name LIKE ?', "%$search%");
-        }
-        if ($min_start_date = $this->input_string('min_start_date')) {
-            $select->where('start_date >= ?', $min_start_date);
-        }
-        if ($max_start_date = $this->input_string('max_start_date')) {
-            $select->where('start_date <= ?', $max_start_date);
-        }
-        if ($min_end_date = $this->input_string('min_end_date')) {
-            $select->where('end_date >= ?', $min_end_date);
-        }
-        if ($max_end_date = $this->input_string('max_end_date')) {
-            $select->where('end_date <= ?', $max_end_date);
-        }
-        if ($min_created_at = $this->input_datetime('min_created_at')) {
-            $select->where('created_at >= ?', $min_created_at);
-        }
-        if ($max_created_at = $this->input_datetime('max_created_at')) {
-            $select->where('created_at <= ?', $max_created_at);
-        }
-        if ($min_updated_at = $this->input_datetime('min_updated_at')) {
-            $select->where('updated_at >= ?', $min_updated_at);
-        }
-        if ($max_updated_at = $this->input_datetime('max_updated_at')) {
-            $select->where('updated_at <= ?', $max_updated_at);
-        }
-        $pagination = $this->get_pagination();
-        $select->limit($pagination['limit']);
-        $select->offset($pagination['offset']);
-        $select->cols(['*']);
+        $where = $this->get_get_data();
 
-        $results = array_map(function($result) {
-            $result['created_at'] = $this->output_datetime($result['created_at']);
-            $result['updated_at'] = $this->output_datetime($result['updated_at']);
-            return $result;
-        }, $select->fetchAll());
+        $result = $this->search($where);
 
-        $return = [
-            'total_results' => $select->fetchCount(),
-            'current_page' => $pagination['page'],
-            'max_results_per_page' => $pagination['limit'],
-            'results' => $results
-        ];
-        return json_encode($return, $this->pretty());
+        return json_encode($result, $this->pretty());
     }
 
     public function post() : ?string {
