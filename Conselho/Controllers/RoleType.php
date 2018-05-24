@@ -35,7 +35,7 @@ class RoleType extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'search'  => ['optional', ['lengthMin', 3]],
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
             'school_id' => ['optional', 'integer', ['min', 1]]
         ];
 
@@ -44,7 +44,7 @@ class RoleType extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'name' => ['required', 'string', ['maxLength', 50]],
+            'name' => ['required', 'string', ['lengthBetween', 3, 50]],
             'school_id' => ['required', 'integer', ['min', 1]]
         ];
 
@@ -53,7 +53,7 @@ class RoleType extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'name' => ['required', 'string', ['maxLength', 50]]
+            'name' => ['required', 'string', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);

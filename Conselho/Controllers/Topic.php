@@ -46,7 +46,7 @@ class Topic extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'active' => ['optional', 'integer', ['in', [0, 1]]],
-            'search'  => ['optional', ['lengthMin', 3]],
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
             'school_id' => ['optional', 'integer', ['min', 1]],
             'topic_option_id' => ['optional', 'integer', ['min', 1]]
         ];
@@ -57,7 +57,7 @@ class Topic extends Controller
     private function validate_post() : bool {
         $rules = [
             'active' => ['required', 'boolean'],
-            'name'  => ['required', ['lengthBetween', 5, 30]],
+            'name'  => ['required', ['lengthBetween', 3, 50]],
             'school_id' => ['required', 'integer', ['min', 1]]
         ];
 
@@ -67,7 +67,7 @@ class Topic extends Controller
     private function validate_patch() : bool {
         $rules = [
             'active' => ['optional', 'boolean'],
-            'name'  => ['optional', ['lengthBetween', 5, 30]],
+            'name'  => ['optional', ['lengthBetween', 3, 50]],
             'topic_option_id' => ['required', 'integer', ['min', 1]]
         ];
 

@@ -34,8 +34,8 @@ class UserToken extends Controller
             return (bool) $user;
         };
         $rules = [
-            'email' => ['required', 'email', ['lengthBetween', 5, 200], [$exists_email, 'This email is not registered']],
-            'password' => ['required', ['lengthBetween', 5, 32]]
+            'email' => ['required', 'email', ['lengthBetween', 3, 100], [$exists_email, 'This email is not registered']],
+            'password' => ['required', ['lengthBetween', 5, 50]]
         ];
 
         return $this->run_validation($rules);

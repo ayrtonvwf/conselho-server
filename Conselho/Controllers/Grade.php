@@ -51,8 +51,8 @@ class Grade extends Controller
             'active' => ['optional', 'integer', ['in', [0, 1]]],
             'min_level' => ['optional', 'integer', ['min', 1]],
             'max_level' => ['optional', 'integer', ['min', 1]],
-            'search'  => ['optional', ['lengthMin', 3]],
-            'school_id' => ['optional', 'integer']
+            'school_id' => ['optional', 'integer', ['min', 1]],
+            'search'  => ['optional', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);
@@ -60,10 +60,10 @@ class Grade extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'name'  => ['required', ['lengthBetween', 1, 50]],
+            'name'  => ['required', ['lengthBetween', 3, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'active' => ['required', 'boolean'],
-            'school_id' => ['required', 'integer', ['min', 1]]
+            'school_id' => ['required', 'integer', ['min', 1]],
+            'active' => ['required', 'boolean']
         ];
 
         return $this->run_validation($rules);
@@ -71,7 +71,7 @@ class Grade extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'name'  => ['optional', ['lengthBetween', 1, 50]],
+            'name'  => ['optional', ['lengthBetween', 3, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
             'active' => ['required', 'boolean']
         ];

@@ -42,12 +42,12 @@ class Evaluation extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'council_id' => ['optional', 'integer'],
-            'grade_id' => ['optional', 'integer'],
-            'student_id' => ['optional', 'integer'],
-            'subject_id' => ['optional', 'integer'],
-            'topic_option_id' => ['optional', 'integer'],
-            'user_id' => ['optional', 'integer']
+            'council_id' => ['optional', 'integer', ['min', 1]],
+            'grade_id' => ['optional', 'integer', ['min', 1]],
+            'student_id' => ['optional', 'integer', ['min', 1]],
+            'subject_id' => ['optional', 'integer', ['min', 1]],
+            'topic_option_id' => ['optional', 'integer', ['min', 1]],
+            'user_id' => ['optional', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
@@ -55,18 +55,19 @@ class Evaluation extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'council_id' => ['required', 'integer'],
-            'grade_id' => ['required', 'integer'],
-            'student_id' => ['required', 'integer'],
-            'subject_id' => ['required', 'integer'],
-            'topic_option_id' => ['required', 'integer']
+            'council_id' => ['required', 'integer', ['min', 1]],
+            'grade_id' => ['required', 'integer', ['min', 1]],
+            'student_id' => ['required', 'integer', ['min', 1]],
+            'subject_id' => ['required', 'integer', ['min', 1]],
+            'topic_option_id' => ['required', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
     }
+
     private function validate_patch() : bool {
         $rules = [
-            'topic_option_id' => ['required', 'integer']
+            'topic_option_id' => ['required', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);

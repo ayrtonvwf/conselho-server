@@ -20,12 +20,12 @@ class School extends Controller
 
     private function validate_get() : bool {
         $rules = [
-            'id' => ['optional', 'integer'],
+            'id' => ['optional', 'integer', ['min', 1]],
             'min_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'max_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'search'  => ['optional', ['lengthMin', 3]],
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
             'page' => ['optional', 'integer', ['min', 1]]
         ];
 

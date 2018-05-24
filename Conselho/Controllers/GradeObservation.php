@@ -41,11 +41,11 @@ class GradeObservation extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'search'  => ['optional', ['lengthMin', 3]],
-            'council_id' => ['optional', 'integer'],
-            'grade_id' => ['optional', 'integer'],
-            'subject_id' => ['optional', 'integer'],
-            'user_id' => ['optional', 'integer']
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
+            'council_id' => ['optional', 'integer', ['min', 1]],
+            'grade_id' => ['optional', 'integer', ['min', 1]],
+            'subject_id' => ['optional', 'integer', ['min', 1]],
+            'user_id' => ['optional', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
@@ -53,7 +53,7 @@ class GradeObservation extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'description' => ['required', 'string', ['maxLength', 300]],
+            'description' => ['required', 'string', ['lengthBetween', 3, 1000]],
             'council_id' => ['required', 'integer', ['min', 1]],
             'grade_id' => ['required', 'integer', ['min', 1]],
             'subject_id' => ['required', 'integer', ['min', 1]],
@@ -65,7 +65,7 @@ class GradeObservation extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'description' => ['required', 'string', ['maxLength', 300]]
+            'description' => ['required', 'string', ['lengthBetween', 3, 1000]]
         ];
 
         return $this->run_validation($rules);

@@ -48,9 +48,9 @@ class TopicOption extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'active' => ['optional', 'integer', ['in', [0, 1]]],
-            'search'  => ['optional', ['lengthMin', 3]],
-            'min_value' => ['optional', 'integer', ['between', 0, 100]],
-            'max_value' => ['optional', 'integer', ['between', 0, 100]],
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
+            'min_value' => ['optional', 'integer', ['min', 0], ['max', 100]],
+            'max_value' => ['optional', 'integer', ['min', 0], ['max', 100]],
             'topic_id' => ['optional', 'integer', ['min', 1]]
         ];
 
@@ -60,8 +60,8 @@ class TopicOption extends Controller
     private function validate_post() : bool {
         $rules = [
             'active' => ['required', 'boolean'],
-            'name'  => ['required', ['lengthBetween', 5, 30]],
-            'value' => ['required', 'integer', ['between', 0, 100]],
+            'name'  => ['required', ['lengthBetween', 3, 50]],
+            'value' => ['required', 'integer', ['min', 0], ['max', 100]],
             'topic_id' => ['required', 'integer', ['min', 1]]
         ];
 
@@ -71,8 +71,8 @@ class TopicOption extends Controller
     private function validate_patch() : bool {
         $rules = [
             'active' => ['optional', 'boolean'],
-            'name'  => ['optional', ['lengthBetween', 5, 30]],
-            'value' => ['required', 'integer', ['between', 0, 100]]
+            'name'  => ['optional', ['lengthBetween', 3, 50]],
+            'value' => ['required', 'integer', ['min', 0], ['max', 100]]
         ];
 
         return $this->run_validation($rules);

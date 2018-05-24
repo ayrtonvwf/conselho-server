@@ -26,8 +26,8 @@ class Permission extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'search'  => ['optional', ['lengthMin', 3]],
-            'reference'  => ['optional', ['lengthMin', 3]]
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
+            'reference'  => ['optional', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);

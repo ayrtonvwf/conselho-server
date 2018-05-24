@@ -53,7 +53,7 @@ class User extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'active'  => ['optional', 'integer', ['in', [0, 1]]],
-            'search'  => ['optional', ['lengthMin', 3]]
+            'search'  => ['optional', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);
@@ -66,9 +66,9 @@ class User extends Controller
             return !$user;
         };
         $rules = [
-            'name'  => ['required', ['lengthBetween', 5, 100]],
-            'email' => ['required', 'email', ['lengthBetween', 5, 200], [$email_exists, 'message' => 'This email is already registered']],
-            'password' => ['required', ['lengthBetween', 5, 32]]
+            'name'  => ['required', ['lengthBetween', 3, 50]],
+            'email' => ['required', 'email', ['lengthBetween', 3, 100], [$email_exists, 'message' => 'This email is already registered']],
+            'password' => ['required', ['lengthBetween', 5, 50]]
         ];
 
         return $this->run_validation($rules);
@@ -86,7 +86,7 @@ class User extends Controller
         $rules = [
             'name'  => ['optional', ['lengthBetween', 5, 100]],
             'email' => ['optional', 'email', ['lengthBetween', 5, 200], [$email_exists, 'message' => 'This email is already registered']],
-            'password' => ['optional', ['lengthBetween', 5, 32]]
+            'password' => ['optional', ['lengthBetween', 5, 50]]
         ];
 
         return $this->run_validation($rules);

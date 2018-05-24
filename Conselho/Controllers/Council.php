@@ -51,9 +51,9 @@ class Council extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'school_id' => ['optional', 'integer'],
+            'school_id' => ['optional', 'integer', ['min', 1]],
             'active' => ['optional', 'integer', ['in', [0, 1]]],
-            'search'  => ['optional', ['lengthMin', 3]],
+            'search'  => ['optional', ['lengthBetween', 3, 50]],
             'min_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'max_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'min_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
@@ -66,10 +66,10 @@ class Council extends Controller
     private function validate_post() : bool {
         $rules = [
             'active' => ['required', 'boolean'],
-            'name'  => ['required', ['lengthBetween', 5, 30]],
+            'name'  => ['required', ['lengthBetween', 3, 30]],
             'start_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
-            'school_id' => ['required', 'integer']
+            'school_id' => ['required', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
@@ -78,7 +78,7 @@ class Council extends Controller
     private function validate_patch() : bool {
         $rules = [
             'active' => ['optional', 'boolean'],
-            'name'  => ['optional', ['lengthBetween', 5, 30]],
+            'name'  => ['optional', ['lengthBetween', 3, 30]],
             'start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
         ];
