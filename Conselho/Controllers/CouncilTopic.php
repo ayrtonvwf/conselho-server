@@ -29,7 +29,7 @@ class CouncilTopic extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'council_id' => ['optional', 'integer', ['min', 1]],
-            'grade_id' => ['optional', 'integer', ['min', 1]]
+            'topic_id' => ['optional', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
@@ -38,7 +38,7 @@ class CouncilTopic extends Controller
     private function validate_post() : bool {
         $rules = [
             'council_id' => ['required', 'integer', ['min', 1]],
-            'grade_id' => ['required', 'integer', ['min', 1]]
+            'topic_id' => ['required', 'integer', ['min', 1]]
         ];
 
         return $this->run_validation($rules);
