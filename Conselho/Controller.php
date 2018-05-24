@@ -6,7 +6,7 @@ use Atlas\Orm\Mapper\Record;
 use Atlas\Orm\Mapper\RecordInterface;
 use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
-use PDO, PDOStatement, DateTime, DateTimeZone, Exception;
+use PDO, DateTime, DateTimeZone, Exception;
 
 abstract class Controller {
     private $input_data = [];
@@ -297,29 +297,5 @@ abstract class Controller {
 
     protected function get_validation_errors() : array {
         return $this->validation_errors;
-    }
-
-    protected function bind_values(PDOStatement $statement, array $values) : PDOStatement {
-        foreach ($values as $parameter => $value) {
-            $parameter_type = $this->get_pdo_parameter_type($value);
-            $statement->bindValue(":$parameter", $value, $parameter_type);
-        }
-        return $statement;
-    }
-
-    private function get_pdo_parameter_type($value) : ?int {
-        if (is_int($value)) {
-            return PDO::PARAM_INT;
-        }
-        if (is_bool($value)) {
-            return PDO::PARAM_BOOL;
-        }
-        if (is_string($value)) {
-            return PDO::PARAM_STR;
-        }
-        if (is_null($value)) {
-            return PDO::PARAM_NULL;
-        }
-        return null;
     }
 }
