@@ -19,7 +19,7 @@ abstract class Controller {
     protected $mapper_class_name;
 
     protected const DEFAULT_GET_RULES = [
-        'id' => ['optional', 'integer', ['min', 1]],
+        'id' => ['optional', 'integer', ['min', 1], ['id_exists']],
         'page' => ['optional', 'integer', ['min', 1]],
         'min_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
         'max_created_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
@@ -287,7 +287,11 @@ abstract class Controller {
             $data[$key] = is_string($value) ? trim(strip_tags($value)) : $value;
         }
 
+        $atlas = $this->atlas();
         $validator = new Validator($data);
+        $validator->addInstanceRule('id_exists', function(string $field, int $value, array $extra) use ($atlas) : bool {
+            return (bool) $atlas->fetchRecord($extra[0] ?? $this->mapper_class_name, $value);
+        }, 'The {field} does not exists in db');
         $validator->mapFieldsRules($rules);
         $validator->validate();
         $this->validation_errors = $validator->errors();
