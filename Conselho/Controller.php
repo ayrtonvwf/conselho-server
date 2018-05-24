@@ -119,7 +119,7 @@ abstract class Controller {
         return $atlas->fetchRecord($this->mapper_class_name, $id);
     }
 
-    public function delete_with_dependencies(RecordInterface $record, array $blocking_dependencies) : bool {
+    public function delete_with_dependencies(RecordInterface $record, array $blocking_dependencies = []) : bool {
         $atlas = $this->atlas();
         $all_dependencies = array_keys($record->getRelated()->getFields());
 
