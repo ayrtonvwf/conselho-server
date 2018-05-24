@@ -135,29 +135,10 @@ class Topic extends Controller
             return;
         }
 
-        $atlas = $this->atlas();
+        $blocking_dependencies = ['council_topics'];
 
-        $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations'];
-        $record = $atlas->fetchRecord($this->mapper_class_name, $record->id, $blocking_dependencies);
-        $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($record) {
-            return (bool) $record->$dependency;
-        });
-        if ($has_blocking_dependency) {
+        if (!$this->delete_with_dependencies($record, $blocking_dependencies)) {
             http_response_code(409);
-            return;
-        }
-
-        $full_dependencies = array_merge($blocking_dependencies, ['council_topics', 'council_grades']);
-        $record = $atlas->fetchRecord($this->mapper_class_name, $record->id, $full_dependencies);
-        $transaction = $atlas->newTransaction();
-        foreach ($full_dependencies as $dependency_name) {
-            foreach ($record->$dependency_name as $dependency) {
-                $transaction->delete($dependency);
-            }
-        }
-        $transaction->delete($record);
-        if (!$transaction->exec()) {
-            http_response_code(500);
             return;
         }
 

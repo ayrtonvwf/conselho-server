@@ -86,8 +86,8 @@ class CouncilGrade extends Controller
             return;
         }
 
-        if (!$this->atlas()->delete($record)) {
-            http_response_code(500);
+        if (!$this->delete_with_dependencies($record)) {
+            http_response_code(409);
             return;
         }
 

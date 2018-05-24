@@ -140,12 +140,13 @@ class Grade extends Controller
             return;
         }
 
-        if (!$this->atlas()->delete($record)) {
-            http_response_code(500);
+        $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations', 'student_grades'];
+
+        if (!$this->delete_with_dependencies($record, $blocking_dependencies)) {
+            http_response_code(409);
             return;
         }
 
         http_response_code(204);
     }
-
 }
