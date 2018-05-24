@@ -48,7 +48,7 @@ types:
       strict: false
     (x-restlet):
       section: "Custom Response Types"
-  Put Success:
+  Patch Success:
     type: "object"
     properties:
       updated_at:
@@ -62,28 +62,20 @@ types:
   Input Error:
     type: "object"
     properties:
-      error_code:
-        type: "string"
-        example: "INVALID_INPUT"
-      input_error_messages:
-        type: "array"
-        description: "Detailed error messages for every input error"
-        uniqueItems: true
-        minItems: 1
-        items:
-          type: "string"
-          description: "Readable message"
-          examples:
-            example: "Name is required"
-            example1: "Email should be a valid email address"
+      input_errors:
+        type: "object"
+        description: "Detailed error messages for every input field"
         example:
-          value: "[\n  \"Name is required\",\n  \"Email should be a valid email address\"\
-            \n]"
+          value: "{\n    \"name\": [\n      \"Name is required\",\n      \"Name must\
+            \ be between 5 and 100 characters\"],\n    \"email\": [\n      \"Email\
+            \ is required\",\n      \"Email is not a valid email address\",\n    \
+            \  \"Email must be between 5 and 200 characters\"]\n  }"
           strict: false
     example:
-      value: "{\n  \"error_code\": \"INVALID_INPUT\",\n  \"input_error_messages\"\
-        : [\n    \"Name is required\",\n    \"Email should be a valid email address\"\
-        \n  ]\n}"
+      value: "{\n  \"input_errors\": {\n    \"name\": [\n      \"Name is required\"\
+        ,\n      \"Name must be between 5 and 100 characters\"],\n    \"email\": [\n\
+        \      \"Email is required\",\n      \"Email is not a valid email address\"\
+        ,\n      \"Email must be between 5 and 200 characters\"]\n  }\n}"
       strict: false
     (x-restlet):
       section: "Custom Response Types"
@@ -118,7 +110,7 @@ types:
       name:
         type: "string"
         description: "A name that identifies the council."
-        minLength: 5
+        minLength: 3
         maxLength: 50
         example: "2018 - 1° Trimestre"
       start_date:
@@ -302,6 +294,8 @@ types:
         type: "Int Positive Non-Zerable"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       school_id:
         type: "Id"
       created_at:
@@ -429,6 +423,8 @@ types:
         type: "Id"
       description:
         type: "string"
+        minLength: 3
+        maxLength: 50
       student_id:
         type: "Id"
       created_at:
@@ -509,8 +505,12 @@ types:
         type: "Id"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       reference:
         type: "string"
+        minLength: 3
+        maxLength: 50
       created_at:
         type: "datetime"
         format: "rfc3339"
@@ -592,6 +592,8 @@ types:
         type: "Id"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       school_id:
         type: "Id"
       created_at:
@@ -672,6 +674,8 @@ types:
         type: "Id"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       created_at:
         type: "datetime"
         format: "rfc3339"
@@ -710,6 +714,8 @@ types:
         type: "Id"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 100
       school_id:
         type: "Id"
       created_at:
@@ -797,8 +803,8 @@ types:
         type: "Id"
       description:
         type: "string"
-        minLength: 10
-        maxLength: 300
+        minLength: 3
+        maxLength: 1000
         required: false
       council_id:
         type: "Id"
@@ -851,6 +857,8 @@ types:
         type: "boolean"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       school_id:
         type: "Id"
       created_at:
@@ -981,6 +989,8 @@ types:
         type: "boolean"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       school_id:
         type: "Id"
       topic_option_id:
@@ -1028,6 +1038,8 @@ types:
         type: "boolean"
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       value:
         type: "integer"
         minimum: 0
@@ -1072,8 +1084,12 @@ types:
         type: "boolean"
       email:
         type: "string"
+        minLength: 3
+        maxLength: 100
       name:
         type: "string"
+        minLength: 3
+        maxLength: 50
       created_at:
         type: "datetime"
         format: "rfc3339"
@@ -1153,6 +1169,8 @@ securedBy:
           type: "boolean"
         name:
           type: "string"
+          minLength: 3
+          maxLength: 50
         start_date:
           type: "date-only"
         end_date:
@@ -1172,6 +1190,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1181,7 +1200,10 @@ securedBy:
       page:
         type: "Page Number"
         required: false
-      status:
+      school_id:
+        type: "Id"
+        required: false
+      active:
         type: "boolean"
         required: false
       search:
@@ -1245,6 +1267,8 @@ securedBy:
           required: false
         name:
           type: "string"
+          minLength: 3
+          maxLength: 50
           required: false
         start_date:
           type: "date-only"
@@ -1255,7 +1279,7 @@ securedBy:
     responses:
       200:
         body:
-          type: "Post Success"
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -1283,6 +1307,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Council"
@@ -1308,6 +1333,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1370,6 +1396,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Council Grade"
@@ -1395,6 +1422,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1457,6 +1485,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Council Topic"
@@ -1490,6 +1519,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1559,6 +1589,9 @@ securedBy:
         topic_option_id:
           type: "Id"
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -1569,6 +1602,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -1582,6 +1616,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Evaluation"
@@ -1613,6 +1648,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1633,6 +1669,8 @@ securedBy:
         required: false
       search:
         type: "string"
+        minLength: 3
+        maxLength: 50
         required: false
       school_id:
         type: "Id"
@@ -1688,6 +1726,9 @@ securedBy:
           maxLength: 50
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -1698,6 +1739,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -1711,6 +1753,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Grade"
@@ -1721,8 +1764,8 @@ securedBy:
       properties:
         description:
           type: "string"
-          minLength: 5
-          maxLength: 300
+          minLength: 3
+          maxLength: 1000
         council_id:
           type: "Id"
         grade_id:
@@ -1744,6 +1787,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1755,8 +1799,8 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
-        maxLength: 300
+        minLength: 3
+        maxLength: 50
         required: false
       council_id:
         type: "Id"
@@ -1811,9 +1855,12 @@ securedBy:
       properties:
         description:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 300
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -1824,6 +1871,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -1837,6 +1885,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Grade Observation"
@@ -1862,6 +1911,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1924,6 +1974,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Grade Subject"
@@ -1934,7 +1985,7 @@ securedBy:
       properties:
         description:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
         student_id:
           type: "Id"
@@ -1951,6 +2002,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -1962,7 +2014,7 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 50
         required: false
       student_id:
@@ -2009,9 +2061,12 @@ securedBy:
       properties:
         description:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2022,6 +2077,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -2035,6 +2091,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Medical Report"
@@ -2060,6 +2117,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2122,6 +2180,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Medical Report Subject"
@@ -2136,12 +2195,12 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 50
         required: false
       reference:
         type: "string"
-        minLength: 1
+        minLength: 3
         maxLength: 50
         required: false
       min_created_at:
@@ -2189,6 +2248,7 @@ securedBy:
       401: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2201,6 +2261,8 @@ securedBy:
       page:
         type: "Page Number"
         required: false
+      user_id:
+        type: "Id"
       role_type_id:
         type: "Id"
         required: false
@@ -2239,6 +2301,9 @@ securedBy:
   patch:
     displayName: "Approve a role"
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2261,6 +2326,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Role"
@@ -2271,7 +2337,7 @@ securedBy:
       properties:
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
         school_id:
           type: "Id"
@@ -2288,6 +2354,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2299,7 +2366,7 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 50
         required: false
       school_id:
@@ -2343,9 +2410,12 @@ securedBy:
       properties:
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2356,6 +2426,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -2369,6 +2440,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Role Type"
@@ -2394,6 +2466,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2453,6 +2526,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Role Type Permission"
@@ -2467,7 +2541,7 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 50
         required: false
       min_created_at:
@@ -2505,7 +2579,7 @@ securedBy:
       properties:
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 100
         school_id:
           type: "Id"
@@ -2522,6 +2596,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2533,8 +2608,8 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
-        maxLength: 100
+        minLength: 3
+        maxLength: 50
         required: false
       school_id:
         type: "Id"
@@ -2580,10 +2655,13 @@ securedBy:
       properties:
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 100
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2594,6 +2672,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -2607,6 +2686,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Student"
@@ -2638,6 +2718,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2720,6 +2801,9 @@ securedBy:
           type: "date-only"
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2730,6 +2814,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -2743,6 +2828,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Student Grade"
@@ -2754,7 +2840,7 @@ securedBy:
         description:
           type: "string"
           minLength: 5
-          maxLength: 300
+          maxLength: 1000
         council_id:
           type: "Id"
         grade_id:
@@ -2778,6 +2864,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2788,8 +2875,8 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
-        maxLength: 300
+        minLength: 3
+        maxLength: 50
         required: false
       council_id:
         type: "Id"
@@ -2847,10 +2934,13 @@ securedBy:
       properties:
         description:
           type: "string"
-          minLength: 5
-          maxLength: 300
+          minLength: 3
+          maxLength: 1000
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2861,6 +2951,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -2874,6 +2965,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Student Observation"
@@ -2886,7 +2978,7 @@ securedBy:
           type: "boolean"
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
         school_id:
           type: "Id"
@@ -2903,6 +2995,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -2967,10 +3060,13 @@ securedBy:
           required: false
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -2981,6 +3077,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -2994,6 +3091,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Subject"
@@ -3030,6 +3128,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -3115,6 +3214,9 @@ securedBy:
           type: "Id"
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -3125,6 +3227,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -3138,6 +3241,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Teacher"
@@ -3163,6 +3267,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -3228,6 +3333,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Teacher Request"
@@ -3240,13 +3346,10 @@ securedBy:
           type: "boolean"
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
         school_id:
           type: "Id"
-        topic_option_id:
-          type: "Id"
-          required: false
     responses:
       201:
         body:
@@ -3260,6 +3363,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -3274,7 +3378,7 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 50
         required: false
       school_id:
@@ -3327,13 +3431,16 @@ securedBy:
           required: false
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
           required: false
         topic_option_id:
           type: "Id"
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -3344,6 +3451,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -3357,6 +3465,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Topic"
@@ -3369,7 +3478,7 @@ securedBy:
           type: "boolean"
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
         value:
           type: "integer"
@@ -3390,6 +3499,7 @@ securedBy:
           type: "Permission Error"
       406: {}
       415: {}
+      422: {}
       500: {}
   get:
     queryParameters:
@@ -3404,7 +3514,7 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 50
         required: false
       min_value:
@@ -3464,7 +3574,7 @@ securedBy:
           required: false
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
           required: false
         value:
@@ -3473,6 +3583,9 @@ securedBy:
           maximum: 100
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
@@ -3483,6 +3596,7 @@ securedBy:
       404: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
@@ -3496,6 +3610,7 @@ securedBy:
           type: "Permission Error"
       404: {}
       406: {}
+      409: {}
       500: {}
   (x-restlet):
     section: "Topic Option"
@@ -3508,16 +3623,16 @@ securedBy:
           type: "boolean"
         email:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 100
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
         password:
           type: "string"
           minLength: 5
-          maxLength: 255
+          maxLength: 50
     responses:
       201:
         body:
@@ -3527,6 +3642,7 @@ securedBy:
           type: "Input Error"
       406: {}
       415: {}
+      422: {}
       500: {}
     securedBy:
     - null
@@ -3539,32 +3655,37 @@ securedBy:
           required: false
         email:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 100
           required: false
         name:
           type: "string"
-          minLength: 5
+          minLength: 3
           maxLength: 50
           required: false
         password:
           type: "string"
           minLength: 5
-          maxLength: 255
+          maxLength: 50
           required: false
     responses:
+      200:
+        body:
+          type: "Patch Success"
       400:
         body:
           type: "Input Error"
       401: {}
       406: {}
       415: {}
+      422: {}
       500: {}
   delete:
     responses:
       204: {}
       401: {}
       406: {}
+      409: {}
       500: {}
   get:
     queryParameters:
@@ -3579,7 +3700,7 @@ securedBy:
         required: false
       search:
         type: "string"
-        minLength: 5
+        minLength: 3
         maxLength: 100
         required: false
       min_created_at:
@@ -3635,8 +3756,11 @@ securedBy:
       400:
         body:
           type: "Input Error"
+      401:
+        description: "Password doesn't match"
       406: {}
       415: {}
+      422: {}
       500: {}
     securedBy:
     - null
@@ -3732,13 +3856,15 @@ securedBy:
         \ not found |\n| 405 | Method Not Allowed | The client is trying to send a\
         \ request to a resource with a invalid method |\n| 406 | Not Acceptable |\
         \ The client doesn't specify a `Accept` header, or it's value is not `application/json`\
-        \ |\n| 415 | Unsupported Media Type | The client doesn't specify a `Content-Type`\
-        \ header, or it's value is not `application/json`. This is only required in\
-        \ the methods which actually uses the body data as input, but it's acceptable\
-        \ to define a `Content-Type` for all requests |\n| 422 | Unprocessable Entity\
-        \ | Probably a malformed JSON input |\n| 500 | Internal Server Error | A technical\
-        \ server error. This errors are logged in the server and are meant to be fixed\
-        \ by the server staff, not the client |"
+        \ |\n| 409 | Conflict | In a `DELETE` method, the resource cannot be deleted\
+        \ cause there's already other resources depending on it |\n| 415 | Unsupported\
+        \ Media Type | The client doesn't specify a `Content-Type` header, or it's\
+        \ value is not `application/json`. This is only required in the methods which\
+        \ actually uses the body data as input, but it's acceptable to define a `Content-Type`\
+        \ for all requests |\n| 422 | Unprocessable Entity | Probably a malformed\
+        \ JSON input |\n| 500 | Internal Server Error | A technical server error.\
+        \ This errors are logged in the server and are meant to be fixed by the server\
+        \ staff, not the client |"
       section: "General"
     dvr87mp:
       title: "Introduction and General Advices"
@@ -3752,16 +3878,37 @@ securedBy:
         \ Type` response. There's no problem in (and would probably be the best option)\
         \ add this header in every request even the requests with no body data.\n\n\
         Every date needs to be in the `yyyy-mm-dd` format (like `2000-12-31`). \n\n\
-        Every date-time needs to be in the `RFC 3339` format (including timezone,\
-        \ like `2000-12-31T23:59:59+00:00`).\n\nWhen the `Pretty-Output` header is\
-        \ found, with a true value, the output is prettified (indented and formated\
-        \ json). This is only useful in debugging and is not recomended to keep in\
-        \ production, since it would just increase the response size.\n\nDate-time\
-        \ inputs are converted from the specified timezone (as of RFC 3339) to the\
-        \ UTC timezone before being stored in the database. When the `Timezone` header\
-        \ is found, with a valid timezone value (like `+03:00` or `-05:30`), the date-time\
-        \ outputs are converted from the stored UTC to the requested timezone. If\
-        \ no timezone is provided, the date-time outputs defaults to the UTC timezone."
+        Every date-time needs to be in the `RFC 3339` format (including the difference\
+        \ from the GMT with colon between hours and minutes, like `2000-12-31T23:59:59+00:00`).\n\
+        \nWhen the `Pretty-Output` header is found, with a true value, the output\
+        \ is prettified (indented and formated json). This is only useful in debugging\
+        \ and is not recomended to keep in production, since it would just increase\
+        \ the response size.\n\nDate-time inputs are converted from the specified\
+        \ timezone (as of RFC 3339) to the UTC timezone before being stored in the\
+        \ database. When the `Timezone` header is found, with a valid timezone value\
+        \ (like `+03:00` or `-05:30`), the date-time outputs are converted from the\
+        \ stored UTC to the requested timezone. If no timezone is provided, the date-time\
+        \ outputs defaults to the UTC timezone.\n\nDon't use trailling slashes. URL's\
+        \ like `/council/` may result in error. Use `/council` instead.\n\nMost `GET`\
+        \ methods (with the only exception being in the `/user_token` resource) accept\
+        \ these default inputs:\n\n| Name | Description |\n| -------- | -------- |\n\
+        | id | id of the desired record. |\n| page | page of the collection of records.\
+        \ |\n| min_created_at | minimum date of creation of the record. |\n| max_created_at\
+        \ | maxium date of creation of the record. |\n| min_updated_at | minimum date\
+        \ of the last update of the record. |\n| max_updated_at | maximum date of\
+        \ the last update of the record. |\n\nThe `GET` methods of resources that\
+        \ have `integer` (like `student_grade.number`  `topic_option.value`) and date\
+        \ (like `council.start_date`, `council.end_date`, and `teacher.start_date`)\
+        \ properties accept `min_` and `max_` inputs of these properties (like `min_number`,\
+        \ `max_number`, `min_start_date`, and `max_start_date`).\n\nThe `GET` methods\
+        \ that have `string` properties (like `student.name` and `council.name`) accept\
+        \ the `search` input, that matches results that contain the searched string\
+        \ (searching for 'ohn Do' would match 'J**ohn Do**e').\n\nAll `string` fields\
+        \ require a minimum of 3 characters, except for the `user.password` field\
+        \ that for security requires a minimum of 5 characters. The maximum value\
+        \ of strings is either 50, 100 or 1000 characters. The maximum value of the\
+        \ `search` input is always 50, regardless of the searched field's maximum.\n\
+        \n"
       section: "General"
     81dliy4:
       title: "Permissions"
