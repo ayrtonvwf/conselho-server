@@ -4,10 +4,9 @@ use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Atlas\Orm\Mapper\Record;
 use Atlas\Orm\Mapper\RecordInterface;
-use Atlas\Orm\Mapper\RecordSetInterface;
 use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
-use PDO, PDOStatement, DateTime, DateTimeZone;
+use PDO, PDOStatement, DateTime, DateTimeZone, Exception;
 
 abstract class Controller {
     private $input_data = [];
@@ -118,6 +117,35 @@ abstract class Controller {
     public function fetch(int $id) : ?RecordInterface {
         $atlas = $this->atlas();
         return $atlas->fetchRecord($this->mapper_class_name, $id);
+    }
+
+    public function delete_with_dependencies(RecordInterface $record, array $blocking_dependencies) : bool {
+        $atlas = $this->atlas();
+        $all_dependencies = array_keys($record->getRelated()->getFields());
+
+        $record = $atlas->fetchRecord($this->mapper_class_name, $record->id, $all_dependencies);
+
+        $has_blocking_dependency = array_filter($blocking_dependencies, function($dependency) use ($record) {
+            return (bool) $record->$dependency;
+        });
+
+        if ($has_blocking_dependency) {
+            return false;
+        }
+
+        $transaction = $atlas->newTransaction();
+        foreach ($all_dependencies as $dependency_name) {
+            foreach ($record->$dependency_name as $dependency) {
+                $transaction->delete($dependency);
+            }
+        }
+        $transaction->delete($record);
+
+        try {
+            return $transaction->exec();
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     // OUTPUT HELPERS
