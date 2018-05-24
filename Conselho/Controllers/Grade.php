@@ -2,6 +2,7 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Grade\GradeMapper;
+use Conselho\DataSource\School\SchoolMapper;
 
 class Grade extends Controller
 {
@@ -51,7 +52,7 @@ class Grade extends Controller
             'active' => ['optional', 'integer', ['in', [0, 1]]],
             'min_level' => ['optional', 'integer', ['min', 1]],
             'max_level' => ['optional', 'integer', ['min', 1]],
-            'school_id' => ['optional', 'integer', ['min', 1]],
+            'school_id' => ['optional', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]],
             'search'  => ['optional', ['lengthBetween', 3, 50]]
         ];
 
@@ -62,7 +63,7 @@ class Grade extends Controller
         $rules = [
             'name'  => ['required', ['lengthBetween', 3, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'school_id' => ['required', 'integer', ['min', 1]],
+            'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]],
             'active' => ['required', 'boolean']
         ];
 

@@ -1,7 +1,10 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Grade\GradeMapper;
+use Conselho\DataSource\Subject\SubjectMapper;
 use Conselho\DataSource\Teacher\TeacherMapper;
+use Conselho\DataSource\User\UserMapper;
 
 class Teacher extends Controller
 {
@@ -50,9 +53,9 @@ class Teacher extends Controller
             'max_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'min_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'max_end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
-            'grade_id' => ['optional', 'integer', ['min', 1]],
-            'subject_id' => ['optional', 'integer', ['min', 1]],
-            'user_id' => ['optional', 'integer', ['min', 1]]
+            'grade_id' => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -62,9 +65,9 @@ class Teacher extends Controller
         $rules = [
             'start_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
-            'grade_id' => ['required', 'integer', ['min', 1]],
-            'subject_id' => ['required', 'integer', ['min', 1]],
-            'user_id' => ['required', 'integer', ['min', 1]]
+            'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'user_id' => ['required', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -74,9 +77,9 @@ class Teacher extends Controller
         $rules = [
             'start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
-            'grade_id' => ['optional', 'integer', ['min', 1]],
-            'subject_id' => ['optional', 'integer', ['min', 1]],
-            'user_id' => ['optional', 'integer', ['min', 1]]
+            'grade_id' => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
         ];
 
         return $this->run_validation($rules);

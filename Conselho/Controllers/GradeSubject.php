@@ -1,7 +1,9 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Grade\GradeMapper;
 use Conselho\DataSource\GradeSubject\GradeSubjectMapper;
+use Conselho\DataSource\Subject\SubjectMapper;
 
 class GradeSubject extends Controller
 {
@@ -28,8 +30,8 @@ class GradeSubject extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'grade_id' => ['optional', 'integer', ['min', 1]],
-            'subject_id' => ['optional', 'integer', ['min', 1]]
+            'grade_id' => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -37,8 +39,8 @@ class GradeSubject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'grade_id' => ['required', 'integer', ['min', 1]],
-            'subject_id' => ['required', 'integer', ['min', 1]]
+            'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
         ];
 
         return $this->run_validation($rules);

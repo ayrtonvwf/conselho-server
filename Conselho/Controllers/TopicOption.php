@@ -1,6 +1,7 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Topic\TopicMapper;
 use Conselho\DataSource\TopicOption\TopicOptionMapper;
 
 class TopicOption extends Controller
@@ -51,7 +52,7 @@ class TopicOption extends Controller
             'search'  => ['optional', ['lengthBetween', 3, 50]],
             'min_value' => ['optional', 'integer', ['min', 0], ['max', 100]],
             'max_value' => ['optional', 'integer', ['min', 0], ['max', 100]],
-            'topic_id' => ['optional', 'integer', ['min', 1]]
+            'topic_id' => ['optional', 'integer', ['min', 1], ['id_exists', TopicMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -62,7 +63,7 @@ class TopicOption extends Controller
             'active' => ['required', 'boolean'],
             'name'  => ['required', ['lengthBetween', 3, 50]],
             'value' => ['required', 'integer', ['min', 0], ['max', 100]],
-            'topic_id' => ['required', 'integer', ['min', 1]]
+            'topic_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicMapper::class]]
         ];
 
         return $this->run_validation($rules);

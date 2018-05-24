@@ -19,14 +19,8 @@ class School extends Controller
     // VALIDATION
 
     private function validate_get() : bool {
-        $rules = [
-            'id' => ['optional', 'integer', ['min', 1]],
-            'min_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_created_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'min_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'max_updated_at'  => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
-            'search'  => ['optional', ['lengthBetween', 3, 50]],
-            'page' => ['optional', 'integer', ['min', 1]]
+        $rules = self::DEFAULT_GET_RULES + [
+            'search'  => ['optional', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);

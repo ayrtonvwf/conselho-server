@@ -1,6 +1,8 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Permission\PermissionMapper;
+use Conselho\DataSource\RoleType\RoleTypeMapper;
 use Conselho\DataSource\RoleTypePermission\RoleTypePermissionMapper;
 
 class RoleTypePermission extends Controller
@@ -28,8 +30,8 @@ class RoleTypePermission extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'role_type_id' => ['optional', 'integer', ['min', 1]],
-            'permission_id' => ['optional', 'integer', ['min', 1]]
+            'role_type_id' => ['optional', 'integer', ['min', 1], ['id_exists', RoleTypeMapper::class]],
+            'permission_id' => ['optional', 'integer', ['min', 1], ['id_exists', PermissionMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -37,8 +39,8 @@ class RoleTypePermission extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'role_type_id' => ['required', 'integer', ['min', 1]],
-            'permission_id' => ['required', 'integer', ['min', 1]]
+            'role_type_id' => ['required', 'integer', ['min', 1], ['id_exists', RoleTypeMapper::class]],
+            'permission_id' => ['required', 'integer', ['min', 1], ['id_exists', PermissionMapper::class]]
         ];
 
         return $this->run_validation($rules);

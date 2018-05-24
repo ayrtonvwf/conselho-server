@@ -1,7 +1,9 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\School\SchoolMapper;
 use Conselho\DataSource\Topic\TopicMapper;
+use Conselho\DataSource\TopicOption\TopicOptionMapper;
 
 class Topic extends Controller
 {
@@ -47,8 +49,8 @@ class Topic extends Controller
         $rules = self::DEFAULT_GET_RULES + [
             'active' => ['optional', 'integer', ['in', [0, 1]]],
             'search'  => ['optional', ['lengthBetween', 3, 50]],
-            'school_id' => ['optional', 'integer', ['min', 1]],
-            'topic_option_id' => ['optional', 'integer', ['min', 1]]
+            'school_id' => ['optional', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]],
+            'topic_option_id' => ['optional', 'integer', ['min', 1], ['id_exists', TopicOptionMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -58,7 +60,7 @@ class Topic extends Controller
         $rules = [
             'active' => ['required', 'boolean'],
             'name'  => ['required', ['lengthBetween', 3, 50]],
-            'school_id' => ['required', 'integer', ['min', 1]]
+            'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -68,7 +70,7 @@ class Topic extends Controller
         $rules = [
             'active' => ['optional', 'boolean'],
             'name'  => ['optional', ['lengthBetween', 3, 50]],
-            'topic_option_id' => ['required', 'integer', ['min', 1]]
+            'topic_option_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicOptionMapper::class]]
         ];
 
         return $this->run_validation($rules);

@@ -2,6 +2,8 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Role\RoleMapper;
+use Conselho\DataSource\RoleType\RoleTypeMapper;
+use Conselho\DataSource\User\UserMapper;
 
 class Role extends Controller
 {
@@ -40,8 +42,8 @@ class Role extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'approved'  => ['optional', 'integer', ['in', [0, 1]]],
-            'role_type_id' => ['optional', 'integer', ['min', 1]],
-            'user_id' => ['optional', 'integer', ['min', 1]]
+            'role_type_id' => ['optional', 'integer', ['min', 1], ['id_exists', RoleTypeMapper::class]],
+            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -49,7 +51,7 @@ class Role extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'role_type_id' => ['required', 'integer', ['min', 1]]
+            'role_type_id' => ['required', 'integer', ['min', 1], ['id_exists', RoleTypeMapper::class]]
         ];
 
         return $this->run_validation($rules);

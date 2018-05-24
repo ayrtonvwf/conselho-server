@@ -1,6 +1,8 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Grade\GradeMapper;
+use Conselho\DataSource\Student\StudentMapper;
 use Conselho\DataSource\StudentGrade\StudentGradeMapper;
 
 class StudentGrade extends Controller
@@ -52,8 +54,8 @@ class StudentGrade extends Controller
             'max_start_date' => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'min_end_date' => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'max_end_date' => ['optional', ['dateFormat', self::DATE_FORMAT]],
-            'grade_id' => ['optional', 'integer', ['min', 1]],
-            'student_id' => ['optional', 'integer', ['min', 1]]
+            'grade_id' => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'student_id' => ['optional', 'integer', ['min', 1], ['id_exists', StudentMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -64,8 +66,8 @@ class StudentGrade extends Controller
             'number' => ['required', 'integer', ['min', 1]],
             'start_date' => ['required', ['dateFormat', self::DATE_FORMAT]],
             'end_date' => ['required', ['dateFormat', self::DATE_FORMAT]],
-            'grade_id' => ['required', 'integer', ['min', 1]],
-            'student_id' => ['required', 'integer', ['min', 1]]
+            'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]]
         ];
 
         return $this->run_validation($rules);

@@ -1,7 +1,9 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Council\CouncilMapper;
 use Conselho\DataSource\CouncilTopic\CouncilTopicMapper;
+use Conselho\DataSource\Topic\TopicMapper;
 
 class CouncilTopic extends Controller
 {
@@ -28,8 +30,8 @@ class CouncilTopic extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'council_id' => ['optional', 'integer', ['min', 1]],
-            'topic_id' => ['optional', 'integer', ['min', 1]]
+            'council_id' => ['optional', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
+            'topic_id' => ['optional', 'integer', ['min', 1], ['id_exists', TopicMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -37,8 +39,8 @@ class CouncilTopic extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'council_id' => ['required', 'integer', ['min', 1]],
-            'topic_id' => ['required', 'integer', ['min', 1]]
+            'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
+            'topic_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicMapper::class]]
         ];
 
         return $this->run_validation($rules);

@@ -1,7 +1,9 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\MedicalReport\MedicalReportMapper;
 use Conselho\DataSource\MedicalReportSubject\MedicalReportSubjectMapper;
+use Conselho\DataSource\Subject\SubjectMapper;
 
 class MedicalReportSubject extends Controller
 {
@@ -28,8 +30,8 @@ class MedicalReportSubject extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'medical_report_id' => ['optional', 'integer', ['min', 1]],
-            'subject_id' => ['optional', 'integer', ['min', 1]]
+            'medical_report_id' => ['optional', 'integer', ['min', 1], ['id_exists', MedicalReportMapper::class]],
+            'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -37,8 +39,8 @@ class MedicalReportSubject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'medical_report_id' => ['required', 'integer', ['min', 1]],
-            'subject_id' => ['required', 'integer', ['min', 1]]
+            'medical_report_id' => ['required', 'integer', ['min', 1], ['id_exists', MedicalReportMapper::class]],
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
         ];
 
         return $this->run_validation($rules);

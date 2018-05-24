@@ -2,6 +2,7 @@
 namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Council\CouncilMapper;
+use Conselho\DataSource\School\SchoolMapper;
 
 class Council extends Controller
 {
@@ -51,7 +52,7 @@ class Council extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'school_id' => ['optional', 'integer', ['min', 1]],
+            'school_id' => ['optional', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]],
             'active' => ['optional', 'integer', ['in', [0, 1]]],
             'search'  => ['optional', ['lengthBetween', 3, 50]],
             'min_start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
@@ -69,7 +70,7 @@ class Council extends Controller
             'name'  => ['required', ['lengthBetween', 3, 30]],
             'start_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
-            'school_id' => ['required', 'integer', ['min', 1]]
+            'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
 
         return $this->run_validation($rules);

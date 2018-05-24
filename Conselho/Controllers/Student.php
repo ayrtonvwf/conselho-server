@@ -1,6 +1,7 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\School\SchoolMapper;
 use Conselho\DataSource\Student\StudentMapper;
 
 class Student extends Controller
@@ -36,7 +37,7 @@ class Student extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'search'  => ['optional', ['lengthBetween', 3, 50]],
-            'school_id' => ['optional', 'integer', ['min', 1]]
+            'school_id' => ['optional', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -45,7 +46,7 @@ class Student extends Controller
     private function validate_post() : bool {
         $rules = [
             'name' => ['required', 'string', ['lengthBetween', 3, 50]],
-            'school_id' => ['required', 'integer', ['min', 1]]
+            'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
 
         return $this->run_validation($rules);

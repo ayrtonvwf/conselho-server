@@ -1,7 +1,12 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Council\CouncilMapper;
+use Conselho\DataSource\Grade\GradeMapper;
 use Conselho\DataSource\MedicalReport\MedicalReportMapper;
+use Conselho\DataSource\Student\StudentMapper;
+use Conselho\DataSource\Subject\SubjectMapper;
+use Conselho\DataSource\User\UserMapper;
 
 class MedicalReport extends Controller
 {
@@ -36,10 +41,10 @@ class MedicalReport extends Controller
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
             'search'  => ['optional', ['lengthBetween', 3, 50]],
-            'council_id' => ['optional', 'integer', ['min', 1]],
-            'grade_id' => ['optional', 'integer', ['min', 1]],
-            'subject_id' => ['optional', 'integer', ['min', 1]],
-            'user_id' => ['optional', 'integer', ['min', 1]]
+            'council_id' => ['optional', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
+            'grade_id' => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -48,7 +53,7 @@ class MedicalReport extends Controller
     private function validate_post() : bool {
         $rules = [
             'description' => ['required', 'string', ['lengthBetween', 3, 50]],
-            'student_id' => ['required', 'integer', ['min', 1]]
+            'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]]
         ];
 
         return $this->run_validation($rules);

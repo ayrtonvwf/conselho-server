@@ -1,7 +1,13 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
+use Conselho\DataSource\Council\CouncilMapper;
 use Conselho\DataSource\Evaluation\EvaluationMapper;
+use Conselho\DataSource\Grade\GradeMapper;
+use Conselho\DataSource\Student\StudentMapper;
+use Conselho\DataSource\Subject\SubjectMapper;
+use Conselho\DataSource\TopicOption\TopicOptionMapper;
+use Conselho\DataSource\User\UserMapper;
 
 class Evaluation extends Controller
 {
@@ -42,12 +48,12 @@ class Evaluation extends Controller
 
     private function validate_get() : bool {
         $rules = self::DEFAULT_GET_RULES + [
-            'council_id' => ['optional', 'integer', ['min', 1]],
-            'grade_id' => ['optional', 'integer', ['min', 1]],
-            'student_id' => ['optional', 'integer', ['min', 1]],
-            'subject_id' => ['optional', 'integer', ['min', 1]],
-            'topic_option_id' => ['optional', 'integer', ['min', 1]],
-            'user_id' => ['optional', 'integer', ['min', 1]]
+            'council_id' => ['optional', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
+            'grade_id' => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'student_id' => ['optional', 'integer', ['min', 1], ['id_exists', StudentMapper::class]],
+            'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'topic_option_id' => ['optional', 'integer', ['min', 1], ['id_exists', TopicOptionMapper::class]],
+            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -55,11 +61,11 @@ class Evaluation extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'council_id' => ['required', 'integer', ['min', 1]],
-            'grade_id' => ['required', 'integer', ['min', 1]],
-            'student_id' => ['required', 'integer', ['min', 1]],
-            'subject_id' => ['required', 'integer', ['min', 1]],
-            'topic_option_id' => ['required', 'integer', ['min', 1]]
+            'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
+            'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]],
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'topic_option_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicOptionMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -67,7 +73,7 @@ class Evaluation extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'topic_option_id' => ['required', 'integer', ['min', 1]]
+            'topic_option_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicOptionMapper::class]]
         ];
 
         return $this->run_validation($rules);
