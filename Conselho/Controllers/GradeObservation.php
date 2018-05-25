@@ -30,7 +30,7 @@ class GradeObservation extends Controller
             'council_id' => $this->input_int('council_id'),
             'grade_id' => $this->input_int('grade_id'),
             'subject_id' => $this->input_int('subject_id'),
-            'user_id' => $this->input_int('user_id')
+            'user_id' => $this->get_user()->id
         ];
     }
 
@@ -60,8 +60,7 @@ class GradeObservation extends Controller
             'description' => ['required', 'string', ['lengthBetween', 3, 1000]],
             'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
-            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
-            'user_id' => ['required', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -75,12 +74,34 @@ class GradeObservation extends Controller
         return $this->run_validation($rules);
     }
 
+    private function has_conflict() : bool {
+        $atlas = $this->atlas();
+        $school_ids = [];
+
+        if ($council_id = $this->input_int('council_id')) {
+            $school_ids[] = $atlas->fetchRecord(CouncilMapper::class, $council_id)->school_id;
+        }
+        if ($grade_id = $this->input_int('grade_id')) {
+            $school_ids[] = $atlas->fetchRecord(GradeMapper::class, $grade_id)->school_id;
+        }
+        if ($subject_id = $this->input_int('subject_id')) {
+            $school_ids[]  = $atlas->fetchRecord(SubjectMapper::class, $subject_id)->school_id;
+        }
+
+        return count(array_unique($school_ids)) > 1;
+    }
+
     // METHODS
 
-    public function get() : string {
+    public function get() : ?string {
         if (!$this->validate_get()) {
             http_response_code(400);
             return $this->input_error_output();
+        }
+
+        if ($this->has_conflict()) {
+            http_response_code(409);
+            return null;
         }
 
         $where = $this->get_get_data();
@@ -96,6 +117,11 @@ class GradeObservation extends Controller
             return json_encode([
                 'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
+        }
+
+        if ($this->has_conflict()) {
+            http_response_code(409);
+            return null;
         }
 
         $data = $this->get_post_data();

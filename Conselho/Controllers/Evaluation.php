@@ -79,12 +79,46 @@ class Evaluation extends Controller
         return $this->run_validation($rules);
     }
 
+    private function has_conflict(int $id = null) : bool {
+        $atlas = $this->atlas();
+        if ($id) { // patch
+            $evaluation = $atlas->fetchRecord(EvaluationMapper::class, $id, ['topic_option' => ['topic']]);
+            $topic_option = $atlas->fetchRecord(TopicOptionMapper::class, $this->input_int('topic_option_id'), ['topic']);
+            return $evaluation->topic_option->topic->school_id != $topic_option->topic->school_id;
+        }
+
+        $school_ids = [];
+
+        if ($council_id = $this->input_int('council_id')) {
+            $school_ids[] = $atlas->fetchRecord(CouncilMapper::class, $council_id)->school_id;
+        }
+        if ($grade_id = $this->input_int('grade_id')) {
+            $school_ids[] = $atlas->fetchRecord(GradeMapper::class, $grade_id)->school_id;
+        }
+        if ($student_id = $this->input_int('student_id')) {
+            $school_ids[] = $atlas->fetchRecord(StudentMapper::class, $student_id)->school_id;
+        }
+        if ($subject_id = $this->input_int('subject_id')) {
+            $school_ids[] = $atlas->fetchRecord(SubjectMapper::class, $subject_id)->school_id;
+        }
+        if ($topic_option_id = $this->input_int('topic_option_id')) {
+            $school_ids[] = $atlas->fetchRecord(TopicOptionMapper::class, $this->input_int('topic_option_id'), ['topic'])->topic->school_id;
+        }
+
+        return count(array_unique($school_ids)) > 1;
+    }
+
     // METHODS
 
-    public function get() : string {
+    public function get() : ?string {
         if (!$this->validate_get()) {
             http_response_code(400);
             return $this->input_error_output();
+        }
+
+        if ($this->has_conflict()) {
+            http_response_code(409);
+            return null;
         }
 
         $where = $this->get_get_data();
@@ -102,6 +136,11 @@ class Evaluation extends Controller
             ], $this->pretty());
         }
 
+        if ($this->has_conflict()) {
+            http_response_code(409);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -114,6 +153,11 @@ class Evaluation extends Controller
     public function patch(int $id) : ?string {
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
+            return null;
+        }
+
+        if ($this->has_conflict($id)) {
+            http_response_code(409);
             return null;
         }
 

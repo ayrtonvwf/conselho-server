@@ -45,12 +45,32 @@ class CouncilTopic extends Controller
 
         return $this->run_validation($rules);
     }
+
+    private function has_conflict() : bool {
+        $atlas = $this->atlas();
+        $school_ids = [];
+
+        if ($council_id = $this->input_int('council_id')) {
+            $school_ids[] = $atlas->fetchRecord(CouncilMapper::class, $council_id)->school_id;
+        }
+        if ($topic_id = $this->input_int('topic_id')) {
+            $school_ids[] = $atlas->fetchRecord(TopicMapper::class, $topic_id)->school_id;
+        }
+
+        return count(array_unique($school_ids)) > 1;
+    }
+
     // METHODS
 
-    public function get() : string {
+    public function get() : ?string {
         if (!$this->validate_get()) {
             http_response_code(400);
             return $this->input_error_output();
+        }
+
+        if ($this->has_conflict()) {
+            http_response_code(409);
+            return null;
         }
 
         $where = $this->get_get_data();
@@ -66,6 +86,11 @@ class CouncilTopic extends Controller
             return json_encode([
                 'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
+        }
+
+        if ($this->has_conflict()) {
+            http_response_code(409);
+            return null;
         }
 
         $data = $this->get_post_data();
