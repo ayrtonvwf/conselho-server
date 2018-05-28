@@ -45,7 +45,7 @@ class RoleType extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'name' => ['required', 'string', ['lengthBetween', 3, 50]],
+            'name' => ['required', ['lengthBetween', 3, 50]],
             'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
 
@@ -54,7 +54,7 @@ class RoleType extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'name' => ['required', 'string', ['lengthBetween', 3, 50]]
+            'name' => ['required', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);

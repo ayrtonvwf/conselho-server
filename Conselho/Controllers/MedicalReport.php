@@ -45,7 +45,7 @@ class MedicalReport extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'description' => ['required', 'string', ['lengthBetween', 3, 50]],
+            'description' => ['required', ['lengthBetween', 3, 50]],
             'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]]
         ];
 
@@ -54,7 +54,7 @@ class MedicalReport extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'description' => ['required', 'string', ['lengthBetween', 3, 50]]
+            'description' => ['required', ['lengthBetween', 3, 50]]
         ];
 
         return $this->run_validation($rules);
