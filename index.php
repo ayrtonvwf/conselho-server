@@ -136,5 +136,8 @@ try {
     $router->dispatch();
 } catch(Exception $e) {
     $error_code = $e->getMessage() == '404' ? 404 : 500;
+    if (getenv('ENV') == 'dev') {
+        echo json_encode($e->getMessage());
+    }
     http_response_code($error_code);
 }
