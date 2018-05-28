@@ -289,7 +289,10 @@ abstract class Controller {
 
         $atlas = $this->atlas();
         $validator = new Validator($data);
-        $validator->addInstanceRule('id_exists', function(string $field, int $value, array $extra) use ($atlas) : bool {
+        $validator->addInstanceRule('id_exists', function(string $field, ?int $value, array $extra) use ($atlas) : bool {
+            if (!$value) {
+                return false;
+            }
             return (bool) $atlas->fetchRecord($extra[0] ?? $this->mapper_class_name, $value);
         }, 'The {field} does not exists in db');
         $validator->mapFieldsRules($rules);
