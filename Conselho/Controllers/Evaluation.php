@@ -90,22 +90,59 @@ class Evaluation extends Controller
         $school_ids = [];
 
         if ($council_id = $this->input_int('council_id')) {
-            $school_ids[] = $atlas->fetchRecord(CouncilMapper::class, $council_id)->school_id;
+            $council = $atlas->fetchRecord(CouncilMapper::class, $council_id, ['council_topics', 'council_grades']);
+            $school_ids[] = $council->school_id;
         }
         if ($grade_id = $this->input_int('grade_id')) {
-            $school_ids[] = $atlas->fetchRecord(GradeMapper::class, $grade_id)->school_id;
+            $grade = $atlas->fetchRecord(GradeMapper::class, $grade_id, ['grade_subjects']);
+            $school_ids[] = $grade->school_id;
         }
         if ($student_id = $this->input_int('student_id')) {
-            $school_ids[] = $atlas->fetchRecord(StudentMapper::class, $student_id)->school_id;
+            $student = $atlas->fetchRecord(StudentMapper::class, $student_id, ['student_grades']);
+            $school_ids[] = $student->school_id;
+            $current_student_grade = array_filter($student->student_grades->getArrayCopy(), function($student_grade) {
+                return $student_grade['end_date'] >= date(self::DATE_FORMAT);
+            })[0] ?? null;
         }
         if ($subject_id = $this->input_int('subject_id')) {
-            $school_ids[] = $atlas->fetchRecord(SubjectMapper::class, $subject_id)->school_id;
+            $subject = $atlas->fetchRecord(SubjectMapper::class, $subject_id);
+            $school_ids[] = $subject->school_id;
         }
         if ($topic_option_id = $this->input_int('topic_option_id')) {
-            $school_ids[] = $atlas->fetchRecord(TopicOptionMapper::class, $this->input_int('topic_option_id'), ['topic'])->topic->school_id;
+            $topic_option = $atlas->fetchRecord(TopicOptionMapper::class, $topic_option_id, ['topic']);
+            $school_ids[] = $topic_option->topic->school_id;
         }
 
-        return count(array_unique($school_ids)) > 1;
+        if (count(array_unique($school_ids)) > 1) {
+            return true;
+        }
+
+        if (empty($current_student_grade) || $current_student_grade['grade_id'] != $grade_id) {
+            return true;
+        }
+
+        if (!$council_id || !$grade_id || !$student_id || !$subject_id || !$topic_option_id) {
+            return false;
+        }
+
+        $council_has_topic = array_filter($council->council_topics->getArrayCopy(), function($council_topic) use ($topic_option) {
+            return $council_topic->topic_id == $topic_option->topic_id;
+        });
+        if (!$council_has_topic) {
+            return true;
+        }
+
+        $grade_has_subject = array_filter($grade->grade_subjects->getArrayCopy(), function($grade_subject) use ($subject) {
+            return $grade_subject['subject_id'] = $subject->id;
+        });
+        if (!$grade_has_subject) {
+            return true;
+        }
+
+        $council_has_grade = array_filter($council->council_grades->getArrayCopy(), function($council_grade) use ($grade) {
+            return $council_grade['grade_id'] == $grade->id;
+        });
+        return !$council_has_grade;
     }
 
     // METHODS

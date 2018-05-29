@@ -57,7 +57,7 @@ class GradeObservation extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'description' => ['required', 'string', ['lengthBetween', 3, 1000]],
+            'description' => ['required', ['lengthBetween', 3, 1000]],
             'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
@@ -68,7 +68,7 @@ class GradeObservation extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'description' => ['required', 'string', ['lengthBetween', 3, 1000]]
+            'description' => ['required', ['lengthBetween', 3, 1000]]
         ];
 
         return $this->run_validation($rules);
@@ -79,16 +79,37 @@ class GradeObservation extends Controller
         $school_ids = [];
 
         if ($council_id = $this->input_int('council_id')) {
-            $school_ids[] = $atlas->fetchRecord(CouncilMapper::class, $council_id)->school_id;
+            $council = $atlas->fetchRecord(CouncilMapper::class, $council_id, ['council_grades']);
+            $school_ids[] = $council->school_id;
         }
         if ($grade_id = $this->input_int('grade_id')) {
-            $school_ids[] = $atlas->fetchRecord(GradeMapper::class, $grade_id)->school_id;
+            $grade = $atlas->fetchRecord(GradeMapper::class, $grade_id, ['grade_subjects']);
+            $school_ids[] = $grade->school_id;
         }
         if ($subject_id = $this->input_int('subject_id')) {
-            $school_ids[]  = $atlas->fetchRecord(SubjectMapper::class, $subject_id)->school_id;
+            $subject = $atlas->fetchRecord(SubjectMapper::class, $subject_id);
+            $school_ids[] = $subject->school_id;
         }
 
-        return count(array_unique($school_ids)) > 1;
+        if (count(array_unique($school_ids)) > 1) {
+            return true; // checks if all share the same school id
+        }
+
+        if (empty($council) || empty($grade)) {
+            return false;
+        }
+
+        $council_has_grade = array_filter($council->council_grades->getArrayCopy(), function($council_grade) use ($grade) {
+            return $council_grade['grade_id'] == $grade->id;
+        });
+        if (!$council_has_grade) {
+            return true;
+        }
+
+        $grade_has_subject = array_filter($grade->grade_subjects->getArrayCopy(), function($grade_subject) use ($subject) {
+            return $grade_subject['subject_id'] = $subject->id;
+        });
+        return !$grade_has_subject;
     }
 
     // METHODS
