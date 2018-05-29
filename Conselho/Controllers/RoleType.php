@@ -1,14 +1,14 @@
 <?php
 namespace Conselho\Controllers;
 use Conselho\Controller;
-use Conselho\DataSource\MedicalReport\MedicalReportMapper;
+use Conselho\DataSource\RoleType\RoleTypeMapper;
 use Conselho\DataSource\School\SchoolMapper;
 
 class RoleType extends Controller
 {
     public function __construct()
     {
-        parent::__construct(MedicalReportMapper::class);
+        parent::__construct(RoleTypeMapper::class);
     }
 
     private function get_get_data() : array {
