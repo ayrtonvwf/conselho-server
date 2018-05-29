@@ -145,6 +145,18 @@ class Evaluation extends Controller
         return !$council_has_grade;
     }
 
+    private function check_permission(int $id = null) : bool {
+        $atlas = $this->atlas();
+
+        if ($id) {
+            $school_id = $atlas->fetchRecord($this->mapper_class_name, $id, ['council'])->council->school_id;
+        } else {
+            $school_id = $atlas->fetchRecord(CouncilMapper::class, $this->input_int('council_id'))->school_id;
+        }
+
+        return $this->has_permission('evaluate', $school_id);
+    }
+
     // METHODS
 
     public function get() : ?string {
@@ -178,6 +190,11 @@ class Evaluation extends Controller
             return null;
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -193,8 +210,8 @@ class Evaluation extends Controller
             return null;
         }
 
-        if ($this->has_conflict($id)) {
-            http_response_code(409);
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
             return null;
         }
 
@@ -203,6 +220,11 @@ class Evaluation extends Controller
             return json_encode([
                 'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
+        }
+
+        if ($this->has_conflict($id)) {
+            http_response_code(409);
+            return null;
         }
 
         $data = $this->get_patch_data();
@@ -219,6 +241,11 @@ class Evaluation extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         if (!$this->delete_with_dependencies($record)) {

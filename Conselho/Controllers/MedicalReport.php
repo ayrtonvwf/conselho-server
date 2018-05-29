@@ -60,6 +60,27 @@ class MedicalReport extends Controller
         return $this->run_validation($rules);
     }
 
+    private function check_permission(int $id = null) : bool {
+        $atlas = $this->atlas();
+
+        if ($id) {
+            $student = $atlas->fetchRecord($this->mapper_class_name, $id, ['student' => ['student_grades' => ['grade']]])->student;
+        } else {
+            $student = $atlas->fetchRecord(StudentMapper::class, $this->input_int('id'), ['student_grades' => ['grade']]);
+        }
+
+        $current_student_grade = array_filter($student->student_grades->getArrayCopy(), function($student_grade) {
+            return $student_grade['end_date'] >= date(self::DATE_FORMAT);
+        })[0] ?? null;
+        if (!$current_student_grade) {
+            return false;
+        }
+
+        $school_id = $current_student_grade->grade->school_id;
+
+        return $this->has_permission('medical_report', $school_id);
+    }
+
     // METHODS
 
     public function get() : string {
@@ -89,12 +110,22 @@ class MedicalReport extends Controller
             return null;
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         return $this->post_output($record);
     }
 
     public function patch(int $id) : ?string {
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
+            return null;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
             return null;
         }
 
@@ -119,6 +150,11 @@ class MedicalReport extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         if (!$this->delete_with_dependencies($record)) {
