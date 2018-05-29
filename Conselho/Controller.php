@@ -4,6 +4,7 @@ use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasContainer;
 use Atlas\Orm\Mapper\Record;
 use Atlas\Orm\Mapper\RecordInterface;
+use Conselho\DataSource\Role\RoleMapper;
 use Conselho\DataSource\UserToken\UserTokenMapper;
 use Valitron\Validator;
 use PDO, DateTime, DateTimeZone, Exception;
@@ -146,6 +147,24 @@ abstract class Controller {
         } catch (Exception $e) {
             return false;
         }
+    }
+
+    public function has_permission(string $reference, int $school_id) : bool {
+        $atlas = $this->atlas();
+        $user = $this->get_user();
+        $roles = $atlas->fetchRecordsBy(RoleMapper::class, ['user_id' => $user->id, 'approved' => true], ['role_type' => ['role_type_permissions' => ['permission']]]);
+
+        $roles = array_filter($roles, function ($role) use ($school_id, $reference) {
+            if ($role->role_type->school_id != $school_id) {
+                return false;
+            }
+
+            return array_filter($role->role_type->role_type_permissions->getArrayCopy(), function ($role_type_permission) use ($reference) {
+                return $role_type_permission['permission']['reference'] == $reference;
+            });
+        }); // filters out the ones without any permission
+
+        return (bool) $roles;
     }
 
     // OUTPUT HELPERS
