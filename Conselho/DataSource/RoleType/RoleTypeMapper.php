@@ -18,6 +18,6 @@ class RoleTypeMapper extends AbstractMapper
     {
         $this->manyToOne('school', SchoolMapper::CLASS)->on(['school_id' => 'id']);
         $this->oneToMany('roles', RoleMapper::CLASS)->on(['id' => 'role_type_id']);
-        $this->oneToMany('role_type_permissions', RoleTypePermissionMapper::CLASS)->on(['id' => 'role_type_permission_id']);
+        $this->oneToMany('role_type_permissions', RoleTypePermissionMapper::CLASS)->on(['id' => 'role_type_id']);
     }
 }
