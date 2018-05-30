@@ -45,6 +45,19 @@ class RoleTypePermission extends Controller
 
         return $this->run_validation($rules);
     }
+
+    private function check_permission(int $id = null) : bool {
+        $atlas = $this->atlas();
+
+        if ($id) {
+            $school_id = $atlas->fetchRecord($this->mapper_class_name, $id, ['role_type'])->role_type->school_id;
+        } else {
+            $school_id = $atlas->fetchRecord(RoleTypeMapper::class, $this->input_int('role_type_id'))->school_id;
+        }
+
+        return $this->has_permission('role_type', $school_id);
+    }
+
     // METHODS
 
     public function get() : string {
@@ -68,6 +81,11 @@ class RoleTypePermission extends Controller
             ], $this->pretty());
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -81,6 +99,11 @@ class RoleTypePermission extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         if (!$this->delete_with_dependencies($record)) {

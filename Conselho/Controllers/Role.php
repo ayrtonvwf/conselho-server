@@ -107,7 +107,7 @@ class Role extends Controller
             return null;
         }
 
-        if (!$this->check_permission()) {
+        if (!$this->check_permission($id)) {
             http_response_code(403);
             return null;
         }
@@ -128,7 +128,7 @@ class Role extends Controller
             return;
         }
 
-        if (!$this->check_permission()) {
+        if (!$this->check_permission($id)) {
             http_response_code(403);
             return null;
         }

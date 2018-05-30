@@ -60,6 +60,16 @@ class RoleType extends Controller
         return $this->run_validation($rules);
     }
 
+    private function check_permission(int $id = null) : bool {
+        if ($id) {
+            $school_id = $this->fetch($id)->school_id;
+        } else {
+            $school_id = $this->input_int('school_id');
+        }
+
+        return $this->has_permission('role_type', $school_id);
+    }
+
     // METHODS
 
     public function get() : string {
@@ -81,6 +91,11 @@ class RoleType extends Controller
             return json_encode([
                 'input_errors' => $this->get_validation_errors()
             ], $this->pretty());
+        }
+
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
         }
 
         $data = $this->get_post_data();
@@ -105,6 +120,11 @@ class RoleType extends Controller
             ], $this->pretty());
         }
 
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_patch_data();
         $record->set($data);
         if (!$this->atlas()->update($record)) {
@@ -119,6 +139,11 @@ class RoleType extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         $blocking_dependencies = ['roles'];

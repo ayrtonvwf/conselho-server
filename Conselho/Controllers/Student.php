@@ -60,6 +60,16 @@ class Student extends Controller
         return $this->run_validation($rules);
     }
 
+    private function check_permission(int $id = null) : bool {
+        if ($id) {
+            $school_id = $this->fetch($id)->school_id;
+        } else {
+            $school_id = $this->input_int('school_id');
+        }
+
+        return $this->has_permission('student', $school_id);
+    }
+
     // METHODS
 
     public function get() : string {
@@ -83,6 +93,11 @@ class Student extends Controller
             ], $this->pretty());
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -95,6 +110,11 @@ class Student extends Controller
     public function patch(int $id) : ?string {
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
+            return null;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
             return null;
         }
 
@@ -119,6 +139,11 @@ class Student extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         $blocking_dependencies = ['evaluations', 'student_observations', 'medical_reports', 'student_grades'];

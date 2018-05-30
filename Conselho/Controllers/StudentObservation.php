@@ -128,6 +128,18 @@ class StudentObservation extends Controller
         return !$grade_has_subject;
     }
 
+    private function check_permission(int $id = null) : bool {
+        $atlas = $this->atlas();
+
+        if ($id) {
+            $school_id = $atlas->fetchRecord($this->mapper_class_name, $id, ['council'])->council->school_id;
+        } else {
+            $school_id = $atlas->fetchRecord(CouncilMapper::class, $this->input_int('council_id'))->school_id;
+        }
+
+        return $this->has_permission('evaluate', $school_id);
+    }
+
     // METHODS
 
     public function get() : ?string {
