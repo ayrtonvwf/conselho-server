@@ -79,6 +79,18 @@ class TopicOption extends Controller
         return $this->run_validation($rules);
     }
 
+    private function check_permission(int $id = null) : bool {
+        $atlas = $this->atlas();
+
+        if ($id) {
+            $school_id = $atlas->fetchRecord($this->mapper_class_name, $id, ['topic'])->topic->school_id;
+        } else {
+            $school_id = $atlas->fetchRecord(TopicMapper::class, $this->input_int('topic_id'))->school_id;
+        }
+
+        return $this->has_permission('topic', $school_id);
+    }
+
     // METHODS
 
     public function get() : string {
@@ -102,6 +114,11 @@ class TopicOption extends Controller
             ], $this->pretty());
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -114,6 +131,11 @@ class TopicOption extends Controller
     public function patch(int $id) : ?string {
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
+            return null;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
             return null;
         }
 
@@ -138,6 +160,11 @@ class TopicOption extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         $blocking_dependencies = ['evaluations'];

@@ -90,6 +90,16 @@ class Topic extends Controller
         return count(array_unique($school_ids)) > 1;
     }
 
+    private function check_permission(int $id = null) : bool {
+        if ($id) {
+            $school_id = $this->fetch($id)->school_id;
+        } else {
+            $school_id = $this->input_int('school_id');
+        }
+
+        return $this->has_permission('topic', $school_id);
+    }
+
     // METHODS
 
     public function get() : string {
@@ -123,6 +133,11 @@ class Topic extends Controller
             return null;
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -135,6 +150,11 @@ class Topic extends Controller
     public function patch(int $id) : ?string {
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
+            return null;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
             return null;
         }
 
@@ -164,6 +184,11 @@ class Topic extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         $blocking_dependencies = ['council_topics'];

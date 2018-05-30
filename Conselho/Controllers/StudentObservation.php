@@ -173,6 +173,11 @@ class StudentObservation extends Controller
             return null;
         }
 
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
         $data = $this->get_post_data();
         if (!$record = $this->insert($data)) {
             http_response_code(500);
@@ -185,6 +190,11 @@ class StudentObservation extends Controller
     public function patch(int $id) : ?string {
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
+            return null;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
             return null;
         }
 
@@ -214,6 +224,11 @@ class StudentObservation extends Controller
         if (!$record = $this->fetch($id)) {
             http_response_code(404);
             return;
+        }
+
+        if (!$this->check_permission($id)) {
+            http_response_code(403);
+            return null;
         }
 
         if (!$this->delete_with_dependencies($record)) {
