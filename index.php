@@ -16,9 +16,12 @@ header('Access-Control-Allow-Methods: OPTIONS, GET, POST, PATCH, DELETE');
 if (!empty($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
     header("Access-Control-Allow-Headers: $_SERVER[HTTP_ACCESS_CONTROL_REQUEST_HEADERS]");
 }
+if (strtoupper($_SERVER['REQUEST_METHOD']) === 'OPTIONS') {
+    exit;
+}
 
 $accept = strtolower($_SERVER['HTTP_ACCEPT'] ?? '');
-if (strtoupper($_SERVER['REQUEST_METHOD']) !== 'OPTIONS' && strpos($accept, 'application/json') !== 0) {
+if (strpos($accept, 'application/json') !== 0) {
     http_response_code(406);
     exit;
 }
@@ -138,7 +141,6 @@ $router->group('Conselho\\Auth@check', function(Router $router) use ($controller
 });
 $router->map('POST', '/user[/]*', "{$controller_prefix}User@post");
 $router->map('POST', '/user_token[/]*', "{$controller_prefix}UserToken@post");
-$router->map('OPTIONS', '*', function() {});
 
 try {
     $router->dispatch();
