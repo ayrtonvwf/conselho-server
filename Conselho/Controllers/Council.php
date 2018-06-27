@@ -170,7 +170,7 @@ class Council extends Controller
 
         if (!$this->check_permission($id)) {
             http_response_code(403);
-            return null;
+            return;
         }
 
         $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations'];

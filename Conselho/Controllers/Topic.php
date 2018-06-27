@@ -188,7 +188,7 @@ class Topic extends Controller
 
         if (!$this->check_permission($id)) {
             http_response_code(403);
-            return null;
+            return;
         }
 
         $blocking_dependencies = ['council_topics'];

@@ -117,7 +117,7 @@ class Evaluation extends Controller
             return true;
         }
 
-        if (empty($current_student_grade) || $current_student_grade['grade_id'] != $grade_id) {
+        if (!empty($current_student_grade) && $current_student_grade['grade_id'] != $grade_id) {
             return true;
         }
 
@@ -245,7 +245,7 @@ class Evaluation extends Controller
 
         if (!$this->check_permission($id)) {
             http_response_code(403);
-            return null;
+            return;
         }
 
         if (!$this->delete_with_dependencies($record)) {

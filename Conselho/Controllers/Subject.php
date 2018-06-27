@@ -54,7 +54,7 @@ class Subject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'active' => ['required', 'boolean'],
+            'active' => ['required', ['in', [0, '0', '', null, false, true, 1, '1', 'true']]],
             'name'  => ['required', ['lengthBetween', 3, 50]],
             'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
@@ -154,7 +154,7 @@ class Subject extends Controller
 
         if (!$this->check_permission($id)) {
             http_response_code(403);
-            return null;
+            return;
         }
 
         $blocking_dependencies = ['evaluations', 'student_observations', 'grade_observations'];

@@ -199,7 +199,7 @@ class Teacher extends Controller
 
         if (!$this->check_permission($id)) {
             http_response_code(403);
-            return null;
+            return;
         }
 
         if (!$this->delete_with_dependencies($record)) {
