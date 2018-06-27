@@ -10,9 +10,15 @@ use MiladRahimi\PHPRouter\Exceptions\HttpError;
 
 date_default_timezone_set('UTC');
 header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Max-Age: 86400'); // cache for 1 day
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: OPTIONS, GET, POST, PATCH, DELETE');
+if (!empty($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
+    header("Access-Control-Allow-Headers: $_SERVER[HTTP_ACCESS_CONTROL_REQUEST_HEADERS]");
+}
 
 $accept = strtolower($_SERVER['HTTP_ACCEPT'] ?? '');
-if (strpos($accept, 'application/json') !== 0) {
+if (strtoupper($_SERVER['REQUEST_METHOD']) !== 'OPTIONS' && strpos($accept, 'application/json') !== 0) {
     http_response_code(406);
     exit;
 }
@@ -132,6 +138,7 @@ $router->group('Conselho\\Auth@check', function(Router $router) use ($controller
 });
 $router->map('POST', '/user[/]*', "{$controller_prefix}User@post");
 $router->map('POST', '/user_token[/]*', "{$controller_prefix}UserToken@post");
+$router->map('OPTIONS', '*', function() {});
 
 try {
     $router->dispatch();
