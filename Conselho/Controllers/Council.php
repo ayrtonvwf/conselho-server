@@ -66,7 +66,7 @@ class Council extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'active' => ['required', 'boolean'],
+            'active' => ['required', 'is_bool'],
             'name'  => ['required', ['lengthBetween', 3, 30]],
             'start_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['required', ['dateFormat', self::DATE_FORMAT]],
@@ -78,7 +78,7 @@ class Council extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'active' => ['optional', 'boolean'],
+            'active' => ['optional', 'is_bool'],
             'name'  => ['optional', ['lengthBetween', 3, 30]],
             'start_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'end_date'  => ['optional', ['dateFormat', self::DATE_FORMAT]],

@@ -54,7 +54,7 @@ class Subject extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'active' => ['required', ['in', [0, '0', '', null, false, true, 1, '1', 'true']]],
+            'active' => ['required', 'is_bool'],
             'name'  => ['required', ['lengthBetween', 3, 50]],
             'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]]
         ];
@@ -64,7 +64,7 @@ class Subject extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'active' => ['optional', 'boolean'],
+            'active' => ['optional', 'is_bool'],
             'name'  => ['optional', ['lengthBetween', 3, 50]],
         ];
 

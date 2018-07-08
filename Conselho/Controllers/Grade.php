@@ -64,7 +64,7 @@ class Grade extends Controller
             'name'  => ['required', ['lengthBetween', 3, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
             'school_id' => ['required', 'integer', ['min', 1], ['id_exists', SchoolMapper::class]],
-            'active' => ['required', 'boolean']
+            'active' => ['required', 'is_bool']
         ];
 
         return $this->run_validation($rules);
@@ -74,7 +74,7 @@ class Grade extends Controller
         $rules = [
             'name'  => ['optional', ['lengthBetween', 3, 50]],
             'level'  => ['required', 'integer', ['min', 1]],
-            'active' => ['required', 'boolean']
+            'active' => ['required', 'is_bool']
         ];
 
         return $this->run_validation($rules);

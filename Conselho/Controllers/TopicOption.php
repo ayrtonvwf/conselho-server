@@ -60,7 +60,7 @@ class TopicOption extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'active' => ['required', 'boolean'],
+            'active' => ['required', 'is_bool'],
             'name'  => ['required', ['lengthBetween', 3, 50]],
             'value' => ['required', 'integer', ['min', 0], ['max', 100]],
             'topic_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicMapper::class]]
@@ -71,7 +71,7 @@ class TopicOption extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'active' => ['optional', 'boolean'],
+            'active' => ['optional', 'is_bool'],
             'name'  => ['optional', ['lengthBetween', 3, 50]],
             'value' => ['required', 'integer', ['min', 0], ['max', 100]]
         ];

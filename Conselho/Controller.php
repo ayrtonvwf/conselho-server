@@ -314,6 +314,10 @@ abstract class Controller {
             }
             return (bool) $atlas->fetchRecord($extra[0] ?? $this->mapper_class_name, $value);
         }, 'The {field} does not exists in db');
+        $validator->addInstanceRule('is_bool', function(string $field, $value, array $extra) : bool {
+            $allowed_values = [true, false, 1, 0, '1', '0'];
+            return in_array($value, $allowed_values, true);
+        }, 'The {field} must be a boolean');
         $validator->mapFieldsRules($rules);
         $validator->validate();
         $this->validation_errors = $validator->errors();
