@@ -34,7 +34,7 @@ class Topic extends Controller
     private function get_patch_data() : array {
         $data = array_filter([
             'name' => $this->input_string('name'),
-            'topic_option_id' => $this->input_int('topic_option'),
+            'topic_option_id' => $this->input_int('topic_option_id'),
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ]);
         if (!is_null($active = $this->input_bool('active'))) {
