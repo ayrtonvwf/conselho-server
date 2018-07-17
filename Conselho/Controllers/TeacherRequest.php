@@ -3,13 +3,14 @@ namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Grade\GradeMapper;
 use Conselho\DataSource\Subject\SubjectMapper;
+use Conselho\DataSource\TeacherRequest\TeacherRequestMapper;
 use Conselho\DataSource\User\UserMapper;
 
 class TeacherRequest extends Controller
 {
     public function __construct()
     {
-        parent::__construct(TeacherRequest::class);
+        parent::__construct(TeacherRequestMapper::class);
     }
 
     private function get_get_data() : array {
