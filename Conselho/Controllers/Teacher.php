@@ -108,7 +108,7 @@ class Teacher extends Controller
             $school_id = $atlas->fetchRecord(GradeMapper::class, $this->input_int('grade_id'))->school_id;
         }
 
-        return $this->has_permission('evaluate', $school_id);
+        return $this->has_permission('teacher', $school_id);
     }
 
     // METHODS
