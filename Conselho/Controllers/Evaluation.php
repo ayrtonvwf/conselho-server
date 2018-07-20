@@ -126,7 +126,7 @@ class Evaluation extends Controller
         }
 
         $council_has_topic = array_filter($council->council_topics->getArrayCopy(), function($council_topic) use ($topic_option) {
-            return $council_topic->topic_id == $topic_option->topic_id;
+            return $council_topic['topic_id'] == $topic_option->topic_id;
         });
         if (!$council_has_topic) {
             return true;
