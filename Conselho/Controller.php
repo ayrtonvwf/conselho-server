@@ -237,7 +237,7 @@ abstract class Controller {
         return $this->atlas;
     }
 
-    protected function get_pagination(int $limit = 50) : array {
+    protected function get_pagination(int $limit = 5000) : array {
         $page = $this->input_int('page');
         if (!$page) {
             $page = 1;
