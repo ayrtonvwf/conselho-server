@@ -3,6 +3,7 @@
         "php": "^7.2",
         "ext-sodium": "*",
         "ext-PDO": "^7.2",
+        "ext-json": "^7.2",
         "vlucas/phpdotenv": "^2.4",
         "miladrahimi/phprouter": "^2.3",
         "vlucas/valitron": "^1.4",
