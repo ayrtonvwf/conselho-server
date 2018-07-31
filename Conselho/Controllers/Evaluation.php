@@ -17,13 +17,19 @@ class Evaluation extends Controller
     }
 
     private function get_get_data() : array {
-        return array_filter([
+        $filter = array_filter([
             'council_id = ?' => $this->input_int('council_id'),
             'grade_id = ?' => $this->input_int('grade_id'),
             'student_id = ?' => $this->input_int('student_id'),
             'subject_id = ?' => $this->input_int('subject_id'),
             'topic_option_id = ?' => $this->input_int('topic_option_id')
         ]);
+        $school_id = $this->input_int('school_id');
+        if ($school_id && !$this->has_permission('council_report', $school_id)) {
+            $filter['user_id = ?'] = $this->get_user()->id;
+        }
+
+        return $filter;
     }
 
     private function get_post_data() : array {
