@@ -207,7 +207,7 @@ abstract class Controller {
             return [];
         }
 
-        if (($_SERVER['CONTENT_TYPE'] ?? '') !== 'application/json') {
+        if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') === false) {
             http_response_code(415); // Unsupported Media Type
         }
 
