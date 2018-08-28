@@ -99,14 +99,14 @@ class GradeObservation extends Controller
             return false;
         }
 
-        $council_has_grade = array_filter($council->council_grades->getArrayCopy(), function($council_grade) use ($grade) {
+        $council_has_grade = !isset($grade) || array_filter($council->council_grades->getArrayCopy(), function($council_grade) use ($grade) {
             return $council_grade['grade_id'] == $grade->id;
         });
         if (!$council_has_grade) {
             return true;
         }
 
-        $grade_has_subject = array_filter($grade->grade_subjects->getArrayCopy(), function($grade_subject) use ($subject) {
+        $grade_has_subject = !isset($subject) || array_filter($grade->grade_subjects->getArrayCopy(), function($grade_subject) use ($subject) {
             return $grade_subject['subject_id'] = $subject->id;
         });
         return !$grade_has_subject;
