@@ -2,12 +2,12 @@
     "require": {
         "php": "^7.2",
         "ext-sodium": "*",
-        "ext-PDO": "^7.2",
-        "ext-json": "^7.2",
-        "vlucas/phpdotenv": "^2.4",
-        "miladrahimi/phprouter": "^2.3",
+        "ext-PDO": "*",
+        "ext-json": "*",
+        "vlucas/phpdotenv": "^2.5",
+        "miladrahimi/phprouter": "2.*",
         "vlucas/valitron": "^1.4",
-        "atlas/orm": "^2.3"
+        "atlas/orm": "2.*"
     },
     "autoload": {
         "psr-4": {
@@ -15,6 +15,6 @@
         }
     },
     "require-dev": {
-        "atlas/cli": "^1.1"
+        "atlas/cli": "1.*"
     }
 }

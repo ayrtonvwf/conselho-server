@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5adb8a560e6f7b382ca7f30c77f72c99",
+    "content-hash": "9ae74f1c662e6c7c34d3ab57a8c51f89",
     "packages": [
         {
             "name": "atlas/orm",
-            "version": "2.3.0",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlasphp/Atlas.Orm.git",
-                "reference": "c3462e660f81ef366cf82b60c9a18f4cba6bc035"
+                "reference": "060f2e17aad26d999a4737ba1b1b340b7dee72a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlasphp/Atlas.Orm/zipball/c3462e660f81ef366cf82b60c9a18f4cba6bc035",
-                "reference": "c3462e660f81ef366cf82b60c9a18f4cba6bc035",
+                "url": "https://api.github.com/repos/atlasphp/Atlas.Orm/zipball/060f2e17aad26d999a4737ba1b1b340b7dee72a6",
+                "reference": "060f2e17aad26d999a4737ba1b1b340b7dee72a6",
                 "shasum": ""
             },
             "require": {
@@ -59,20 +59,20 @@
                 "orm",
                 "sql"
             ],
-            "time": "2018-05-06T21:01:22+00:00"
+            "time": "2018-09-17T14:52:35+00:00"
         },
         {
             "name": "aura/sql",
-            "version": "2.5.2",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/auraphp/Aura.Sql.git",
-                "reference": "2fe8840c25891511a9d988b5504d03ad7d234364"
+                "reference": "16206efbe5ba63603fe3b18ba54a4c5296cd5f3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/2fe8840c25891511a9d988b5504d03ad7d234364",
-                "reference": "2fe8840c25891511a9d988b5504d03ad7d234364",
+                "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/16206efbe5ba63603fe3b18ba54a4c5296cd5f3e",
+                "reference": "16206efbe5ba63603fe3b18ba54a4c5296cd5f3e",
                 "shasum": ""
             },
             "require": {
@@ -115,7 +115,7 @@
                 "sqlserver",
                 "sqlsrv"
             ],
-            "time": "2018-03-04T06:43:25+00:00"
+            "time": "2018-08-15T13:33:56+00:00"
         },
         {
             "name": "aura/sqlquery",
@@ -183,16 +183,16 @@
         },
         {
             "name": "miladrahimi/phprouter",
-            "version": "v2.3.5",
+            "version": "v2.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/miladrahimi/phprouter.git",
-                "reference": "651a6d651b9bed30cc1f0280806d8cef8b6d86df"
+                "reference": "ef9032c101560b08edec71d4b11b999ab7a8d92a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/miladrahimi/phprouter/zipball/651a6d651b9bed30cc1f0280806d8cef8b6d86df",
-                "reference": "651a6d651b9bed30cc1f0280806d8cef8b6d86df",
+                "url": "https://api.github.com/repos/miladrahimi/phprouter/zipball/ef9032c101560b08edec71d4b11b999ab7a8d92a",
+                "reference": "ef9032c101560b08edec71d4b11b999ab7a8d92a",
                 "shasum": ""
             },
             "require": {
@@ -226,32 +226,32 @@
                 "routing",
                 "url"
             ],
-            "time": "2018-04-21T11:11:39+00:00"
+            "time": "2018-07-16T06:49:11+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
-            "version": "v2.4.0",
+            "version": "v2.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vlucas/phpdotenv.git",
-                "reference": "3cc116adbe4b11be5ec557bf1d24dc5e3a21d18c"
+                "reference": "8abb4f9aa89ddea9d52112c65bbe8d0125e2fa8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/3cc116adbe4b11be5ec557bf1d24dc5e3a21d18c",
-                "reference": "3cc116adbe4b11be5ec557bf1d24dc5e3a21d18c",
+                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/8abb4f9aa89ddea9d52112c65bbe8d0125e2fa8e",
+                "reference": "8abb4f9aa89ddea9d52112c65bbe8d0125e2fa8e",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.9"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.8 || ^5.0"
+                "phpunit/phpunit": "^4.8.35 || ^5.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.4-dev"
+                    "dev-master": "2.5-dev"
                 }
             },
             "autoload": {
@@ -261,7 +261,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-3-Clause-Attribution"
+                "BSD-3-Clause"
             ],
             "authors": [
                 {
@@ -276,7 +276,7 @@
                 "env",
                 "environment"
             ],
-            "time": "2016-09-01T10:05:43+00:00"
+            "time": "2018-07-29T20:33:41+00:00"
         },
         {
             "name": "vlucas/valitron",
@@ -554,7 +554,8 @@
     "platform": {
         "php": "^7.2",
         "ext-sodium": "*",
-        "ext-pdo": "^7.2"
+        "ext-pdo": "*",
+        "ext-json": "*"
     },
     "platform-dev": []
 }

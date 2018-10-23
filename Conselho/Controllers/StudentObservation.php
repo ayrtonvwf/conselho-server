@@ -3,6 +3,7 @@ namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Council\CouncilMapper;
 use Conselho\DataSource\Grade\GradeMapper;
+use Conselho\DataSource\ObservationTopic\ObservationTopicMapper;
 use Conselho\DataSource\Student\StudentMapper;
 use Conselho\DataSource\StudentObservation\StudentObservationMapper;
 use Conselho\DataSource\Subject\SubjectMapper;
@@ -22,7 +23,8 @@ class StudentObservation extends Controller
             'grade_id = ?' => $this->input_int('grade_id'),
             'student_id = ?' => $this->input_int('student_id'),
             'subject_id = ?' => $this->input_int('subject_id'),
-            'user_id = ?' => $this->input_int('user_id')
+            'user_id = ?' => $this->input_int('user_id'),
+            'observation_topic_id = ?' => $this->input_int('observation_topic_id')
         ]);
     }
 
@@ -33,6 +35,7 @@ class StudentObservation extends Controller
             'grade_id' => $this->input_int('grade_id'),
             'student_id' => $this->input_int('student_id'),
             'subject_id' => $this->input_int('subject_id'),
+            'observation_topic_id' => $this->input_int('observation_topic_id'),
             'user_id' => $this->get_user()->id
         ];
     }
@@ -53,7 +56,8 @@ class StudentObservation extends Controller
             'grade_id'  => ['optional', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'student_id' => ['optional', 'integer', ['min', 1], ['id_exists', StudentMapper::class]],
             'subject_id' => ['optional', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
-            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]]
+            'user_id' => ['optional', 'integer', ['min', 1], ['id_exists', UserMapper::class]],
+            'observation_topic_id' => ['optional', 'integer', ['min', 1], ['id_exists', ObservationTopicMapper::class]]
         ];
 
         return $this->run_validation($rules);
@@ -65,7 +69,8 @@ class StudentObservation extends Controller
             'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]],
-            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'observation_topic_id' => ['required', 'integer', ['min', 1], ['id_exists', ObservationTopicMapper::class]]
         ];
 
         return $this->run_validation($rules);

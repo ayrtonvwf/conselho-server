@@ -6,7 +6,6 @@ const BASE_PATH = __DIR__;
 
 use Dotenv\Dotenv;
 use MiladRahimi\PHPRouter\Router;
-use MiladRahimi\PHPRouter\Exceptions\HttpError;
 
 date_default_timezone_set('UTC');
 header('Content-Type: application/json; charset=UTF-8');
@@ -42,10 +41,14 @@ $router->group('Conselho\\Auth@check', function(Router $router) use ($controller
     $router->map('POST', '/council_grade', "{$controller_prefix}CouncilGrade@post");
     $router->map('DELETE', '/council_grade/{id}', "{$controller_prefix}CouncilGrade@delete");
     
+    $router->map('GET', '/council_observation_topic', "{$controller_prefix}CouncilObservationTopic@get");
+    $router->map('POST', '/council_observation_topic', "{$controller_prefix}CouncilObservationTopic@post");
+    $router->map('DELETE', '/council_observation_topic/{id}', "{$controller_prefix}CouncilObservationTopic@delete");
+
     $router->map('GET', '/council_topic', "{$controller_prefix}CouncilTopic@get");
     $router->map('POST', '/council_topic', "{$controller_prefix}CouncilTopic@post");
     $router->map('DELETE', '/council_topic/{id}', "{$controller_prefix}CouncilTopic@delete");
-    
+
     $router->map('GET', '/evaluation', "{$controller_prefix}Evaluation@get");
     $router->map('POST', '/evaluation', "{$controller_prefix}Evaluation@post");
     $router->map('PATCH', '/evaluation/{id}', "{$controller_prefix}Evaluation@patch");
@@ -73,7 +76,12 @@ $router->group('Conselho\\Auth@check', function(Router $router) use ($controller
     $router->map('GET', '/medical_report_subject', "{$controller_prefix}MedicalReportSubject@get");
     $router->map('POST', '/medical_report_subject', "{$controller_prefix}MedicalReportSubject@post");
     $router->map('DELETE', '/medical_report_subject/{id}', "{$controller_prefix}MedicalReportSubject@delete");
-    
+
+    $router->map('GET', '/observation_topic', "{$controller_prefix}ObservationTopic@get");
+    $router->map('POST', '/observation_topic', "{$controller_prefix}ObservationTopic@post");
+    $router->map('PATCH', '/observation_topic/{id}', "{$controller_prefix}ObservationTopic@patch");
+    $router->map('DELETE', '/observation_topic/{id}', "{$controller_prefix}ObservationTopic@delete");
+
     $router->map('GET', '/permission', "{$controller_prefix}Permission@get");
 
     $router->map('GET', '/role', "{$controller_prefix}Role@get");
@@ -147,7 +155,7 @@ try {
 } catch(Exception $e) {
     $error_code = $e->getMessage() == '404' ? 404 : 500;
     if (getenv('ENV') == 'dev') {
-        echo json_encode($e->getMessage());
+        echo json_encode([$e->getMessage(), $e->getTrace()], JSON_PRETTY_PRINT);
     }
     http_response_code($error_code);
 }

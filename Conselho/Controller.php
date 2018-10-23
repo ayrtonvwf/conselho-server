@@ -30,6 +30,7 @@ abstract class Controller {
     private const ATLAS_MAPPERS = [
         DataSource\Council\CouncilMapper::CLASS,
         DataSource\CouncilGrade\CouncilGradeMapper::CLASS,
+        DataSource\CouncilObservationTopic\CouncilObservationTopicMapper::CLASS,
         DataSource\CouncilTopic\CouncilTopicMapper::CLASS,
         DataSource\Evaluation\EvaluationMapper::CLASS,
         DataSource\Grade\GradeMapper::CLASS,
@@ -37,6 +38,7 @@ abstract class Controller {
         DataSource\GradeSubject\GradeSubjectMapper::CLASS,
         DataSource\MedicalReport\MedicalReportMapper::CLASS,
         DataSource\MedicalReportSubject\MedicalReportSubjectMapper::CLASS,
+        DataSource\ObservationTopic\ObservationTopicMapper::CLASS,
         DataSource\Permission\PermissionMapper::CLASS,
         DataSource\Role\RoleMapper::CLASS,
         DataSource\RoleType\RoleTypeMapper::CLASS,
