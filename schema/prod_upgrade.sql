@@ -75,3 +75,9 @@ ALTER TABLE `student_observation`
 ALTER TABLE `student_observation`
   DROP INDEX `student_observation_unique`,
   ADD UNIQUE `student_observation_unique` (`student_id`, `user_id`, `subject_id`, `council_id`, `observation_topic_id`) USING BTREE;
+
+-- CREATE NEW OBSERVATION_TOPICS
+INSERT INTO `observation_topic` (`id`, `active`, `name`, `school_id`, `created_at`, `updated_at`)
+	VALUES
+		(NULL, '1', 'Conteúdos não assimilados', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(NULL, '1', 'Ações efetivadas', '1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
