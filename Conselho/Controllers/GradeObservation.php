@@ -57,7 +57,7 @@ class GradeObservation extends Controller
 
     private function validate_post() : bool {
         $rules = [
-            'description' => ['required', ['lengthBetween', 3, 1000]],
+            'description' => ['required', ['lengthBetween', 3, 3000]],
             'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]]
@@ -68,7 +68,7 @@ class GradeObservation extends Controller
 
     private function validate_patch() : bool {
         $rules = [
-            'description' => ['required', ['lengthBetween', 3, 1000]]
+            'description' => ['required', ['lengthBetween', 3, 3000]]
         ];
 
         return $this->run_validation($rules);
