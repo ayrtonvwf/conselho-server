@@ -77,7 +77,7 @@ class StudentGradeTable extends AbstractTable
                 'type' => 'date',
                 'size' => null,
                 'scale' => null,
-                'notnull' => true,
+                'notnull' => false,
                 'default' => null,
                 'autoinc' => false,
                 'primary' => false,

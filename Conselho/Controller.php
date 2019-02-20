@@ -78,7 +78,7 @@ abstract class Controller {
         ]);
     }
 
-    public function search(array $where, array $cols = ['*']) : array{
+    public function search(array $where, array $cols = ['*'], array $joins = []) : array{
         $where = $this->default_get_filters() + $where;
 
         $atlas = $this->atlas();
@@ -94,6 +94,12 @@ abstract class Controller {
         $pagination = $this->get_pagination();
         $select->limit($pagination['limit']);
         $select->offset($pagination['offset']);
+        foreach ($joins as $join) {
+            $select->join($join[0], $join[1], $join[2]);
+        }
+        $mapper = $atlas->mapper($this->mapper_class_name);
+        $table = $mapper->getTable()->getName();
+        $select->groupBy(["$table.id"]);
         $select->cols($cols);
 
         $results = array_map(function($result) {

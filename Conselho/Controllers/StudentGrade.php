@@ -65,7 +65,7 @@ class StudentGrade extends Controller
         $rules = [
             'number' => ['required', 'integer', ['min', 1]],
             'start_date' => ['required', ['dateFormat', self::DATE_FORMAT]],
-            'end_date' => ['required', ['dateFormat', self::DATE_FORMAT]],
+            'end_date' => [['dateFormat', self::DATE_FORMAT]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]]
         ];

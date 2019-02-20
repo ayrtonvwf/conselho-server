@@ -79,8 +79,15 @@ class Student extends Controller
         }
 
         $where = $this->get_get_data();
+        $cols = [
+            'student.*',
+            'MAX(student_grade.grade_id) AS current_grade_id'
+        ];
+        $joins = [
+            ['LEFT', 'student_grade', 'student_grade.student_id = student.id AND student_grade.end_date IS NULL']
+        ];
 
-        $result = $this->search($where);
+        $result = $this->search($where, $cols, $joins);
 
         return json_encode($result, $this->pretty());
     }

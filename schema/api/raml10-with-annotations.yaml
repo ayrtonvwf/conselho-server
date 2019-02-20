@@ -1,0 +1,3934 @@
+#%RAML 1.0
+title: "Conselho API"
+description: "An API for evaluating the students upon many topics and subjects"
+version: "1"
+protocols:
+- "HTTP"
+baseUri: "http://conselho/conselho-server"
+mediaType:
+- "application/json"
+annotationTypes:
+  x-restlet: "any"
+types:
+  Id:
+    type: "integer"
+    description: "Auto generated identification"
+    minimum: 1
+    example: 1
+    (x-restlet):
+      section: "Custom Property Types"
+  Int Positive Zerable:
+    type: "integer"
+    minimum: 0
+    (x-restlet):
+      section: "Custom Property Types"
+  Int Positive Non-Zerable:
+    type: "integer"
+    minimum: 1
+    (x-restlet):
+      section: "Custom Property Types"
+  Page Number:
+    type: "integer"
+    default: 1
+    minimum: 1
+    (x-restlet):
+      section: "Custom Property Types"
+  Post Success:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+        description: "The generated id."
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+        description: "The time when the entity was inserted in the database."
+    example:
+      value: "{\n    \"id\": 1,\n    \"created_at\": \"2018-12-31 23:59:59\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Custom Response Types"
+  Patch Success:
+    type: "object"
+    properties:
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"updated_at\": \"2018-12-31 23:59:59\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Custom Response Types"
+  Input Error:
+    type: "object"
+    properties:
+      input_errors:
+        type: "object"
+        description: "Detailed error messages for every input field"
+        example:
+          value: "{\n    \"name\": [\n      \"Name is required\",\n      \"Name must\
+            \ be between 5 and 100 characters\"],\n    \"email\": [\n      \"Email\
+            \ is required\",\n      \"Email is not a valid email address\",\n    \
+            \  \"Email must be between 5 and 200 characters\"]\n  }"
+          strict: false
+    example:
+      value: "{\n  \"input_errors\": {\n    \"name\": [\n      \"Name is required\"\
+        ,\n      \"Name must be between 5 and 100 characters\"],\n    \"email\": [\n\
+        \      \"Email is required\",\n      \"Email is not a valid email address\"\
+        ,\n      \"Email must be between 5 and 200 characters\"]\n  }\n}"
+      strict: false
+    (x-restlet):
+      section: "Custom Response Types"
+  Permission Error:
+    type: "object"
+    properties:
+      error_code:
+        type: "string"
+        enum:
+        - "PERMISSION_ERROR"
+      denied_field:
+        type: "string"
+        description: "The input field that caused the permission error"
+        examples:
+          example: "school_id"
+          example1: "user_id"
+          example2: "council_id"
+    (x-restlet):
+      section: "Custom Response Types"
+  Council:
+    type: "object"
+    description: "A representation of a Council."
+    properties:
+      id:
+        type: "Id"
+        description: "Auto generated identificator."
+      active:
+        type: "boolean"
+        description: "If the evaluations needs to stop and the council needs to be\
+          \ hidden from teachers, it can be deactivated with this property."
+        default: true
+      name:
+        type: "string"
+        description: "A name that identifies the council."
+        minLength: 3
+        maxLength: 50
+        example: "2018 - 1° Trimestre"
+      start_date:
+        type: "date-only"
+        description: "The first day when the teachers can evaluate the students."
+      end_date:
+        type: "date-only"
+        description: "The last day when the teachers can evaluate the students."
+      school_id:
+        type: "Id"
+        description: "The school in which this council is gonna happen."
+      created_at:
+        type: "datetime"
+        description: "The time when this council was inserted in the database."
+      updated_at:
+        type: "datetime"
+        description: "The last time when this council was updated in the database."
+    example:
+      value: "{\n    \"id\": 1,\n    \"active\": true,\n    \"name\": \"2018 - 1°\
+        \ Semestre\",\n    \"start_date\": \"2018-02-01\",\n    \"end_date\": \"2018-03-10\"\
+        ,\n    \"school_id\": 1,\n    \"created_at\": \"2018-01-29T14:31:12+00:00\"\
+        ,\n    \"updated_at\": \"2018-01-30T16:24:16+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Council"
+  Council Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Council"
+    (x-restlet):
+      section: "Council"
+  Council Grade:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      council_id:
+        type: "Id"
+      grade_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"council_id\": 1,\n    \"grade_id\": 1,\n  \
+        \  \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\": \"\
+        2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Council Grade"
+  Council Grade Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Council Grade"
+    (x-restlet):
+      section: "Council Grade"
+  Council Topic:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      council_id:
+        type: "Id"
+      topic_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"council_id\": 1,\n    \"topic_id\": 1,\n  \
+        \  \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\": \"\
+        2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Council Topic"
+  Council Topic Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Council Topic"
+    (x-restlet):
+      section: "Council Topic"
+  Evaluation:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      council_id:
+        type: "Id"
+      grade_id:
+        type: "Id"
+      student_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      topic_option_id:
+        type: "Id"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"council_id\": 1,\n    \"grade_id\": 1,\n  \
+        \  \"student_id\": 1,\n    \"subject_id\": 1,\n    \"topic_type_id\": 1,\n\
+        \    \"user_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n\
+        \    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Evaluation"
+  Evaluation Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Evaluation"
+    (x-restlet):
+      section: "Evaluation"
+  Grade:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      active:
+        type: "boolean"
+      level:
+        type: "Int Positive Non-Zerable"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      school_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"active\": true,\n    \"level\": 1,\n    \"\
+        name\": \"1° A\",\n    \"school_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\"\
+        ,\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Grade"
+  Grade Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Grade"
+    (x-restlet):
+      section: "Grade"
+  Grade Observation:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      description:
+        type: "string"
+      council_id:
+        type: "Id"
+      grade_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"description\": \"Turma com ótimo rendimento.\"\
+        ,\n    \"council_id\": 1,\n    \"grade_id\": 1,\n    \"subject_id\": 1,\n\
+        \    \"user_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n\
+        \    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Grade Observation"
+  Grade Observation Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Grade Observation"
+    (x-restlet):
+      section: "Grade Observation"
+  Grade Subject:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      grade_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"grade_id\": 1,\n    \"subject_id\": 1,\n  \
+        \  \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\": \"\
+        2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Grade Subject"
+  Grade Subject Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Grade Subject"
+    (x-restlet):
+      section: "Grade Subject"
+  Medical Report:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      description:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      student_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"description\": \"Dislexia\",\n    \"student_id\"\
+        : 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Medical Report"
+  Medical Report Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Medical Report"
+    (x-restlet):
+      section: "Medical Report"
+  Medical Report Subject:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      medical_report_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"medical_report_id\": 1,\n    \"subject_id\"\
+        : 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Medical Report Subject"
+  Medical Report Subject Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Medical Report Subject"
+    (x-restlet):
+      section: "Medical Report Subject"
+  Permission:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      reference:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"name\": \"Gerenciar Estudantes\",\n    \"reference\"\
+        : \"student\",\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"\
+        updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Permission"
+  Permission Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Permission"
+    (x-restlet):
+      section: "Permission"
+  Role:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      approved:
+        type: "boolean"
+        default: false
+      role_type_id:
+        type: "Id"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"approved\": false,\n    \"role_type_id\": 1,\n\
+        \    \"user_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n\
+        \    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Role"
+  Role Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Role"
+    (x-restlet):
+      section: "Role"
+  Role Type:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      school_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"name\": \"Supervisor\",\n    \"school_id\"\
+        : 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Role Type"
+  Role Type Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Role Type"
+    (x-restlet):
+      section: "Role Type"
+  Role Type Permission:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      permission_id:
+        type: "Id"
+      role_type_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"permission_id\": 1,\n    \"role_type_id\":\
+        \ 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Role Type Permission"
+  Role Type Permission Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Role Type Permission"
+    (x-restlet):
+      section: "Role Type Permission"
+  School:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"name\": \"Colégio Estadual João da Silva\"\
+        ,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "School"
+  School Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "School"
+    (x-restlet):
+      section: "School"
+  Student:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 100
+      school_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"name\": \"João da Silva\",\n    \"school_id\"\
+        : 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Student"
+  Student Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Student"
+    (x-restlet):
+      section: "Student"
+  Student Grade:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      number:
+        type: "Int Positive Non-Zerable"
+      start_date:
+        type: "date-only"
+      end_date:
+        type: "date-only"
+      grade_id:
+        type: "Id"
+      student_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"number\": 5,\n    \"start_date\": \"2018-01-01\"\
+        ,\n    \"end_date\": \"2018-12-31\",\n    \"grade_id\": 1,\n    \"student_id\"\
+        : 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Student Grade"
+  Student Grade Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Student Grade"
+    (x-restlet):
+      section: "Student Grade"
+  Student Observation:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      description:
+        type: "string"
+        minLength: 3
+        maxLength: 1000
+        required: false
+      council_id:
+        type: "Id"
+      grade_id:
+        type: "Id"
+      student_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"description\": \"Aluno excelente\",\n    \"\
+        council_id\": 1,\n    \"grade_id\": 1,\n    \"student_id\": 1,\n    \"subject_id\"\
+        : 1,\n    \"user_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\"\
+        ,\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Student Observation"
+  Student Observation Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Student Observation"
+    (x-restlet):
+      section: "Student Observation"
+  Subject:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      active:
+        type: "boolean"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      school_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"active\": true,\n    \"name\": \"Matemática\"\
+        ,\n    \"school_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\"\
+        ,\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Subject"
+  Subject Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Subject"
+    (x-restlet):
+      section: "Subject"
+  Teacher:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      start_date:
+        type: "date-only"
+      end_date:
+        type: "date-only"
+        required: false
+      grade_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"start_date\": \"2018-01-01\",\n    \"end_date\"\
+        : \"2018-31-12\",\n    \"grade_id\": 1,\n    \"subject_id\": 1,\n    \"user_id\"\
+        : 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\"\
+        : \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Teacher"
+  Teacher Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Teacher"
+    (x-restlet):
+      section: "Teacher"
+  Teacher Request:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      grade_id:
+        type: "Id"
+      subject_id:
+        type: "Id"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+      updated_at:
+        type: "datetime"
+    example:
+      value: "{\n    \"id\": 1,\n    \"grade_id\": 1,\n    \"subject_id\": 1,\n  \
+        \  \"user_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\",\n \
+        \   \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Teacher Request"
+  Teacher Request Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Teacher Request"
+    (x-restlet):
+      section: "Teacher Request"
+  Topic:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      active:
+        type: "boolean"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      school_id:
+        type: "Id"
+      topic_option_id:
+        type: "Id"
+        description: "The default option selected."
+        required: false
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"active\": true,\n    \"name\": \"Faz as tarefas\"\
+        ,\n    \"school_id\": 1,\n    \"topic_option_id\": null,\n    \"created_at\"\
+        : \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\
+        \n}"
+      strict: false
+    (x-restlet):
+      section: "Topic"
+  Topic Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Topic"
+    (x-restlet):
+      section: "Topic"
+  Topic Option:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      active:
+        type: "boolean"
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      value:
+        type: "integer"
+        minimum: 0
+        maximum: 100
+      topic_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+      updated_at:
+        type: "datetime"
+    example:
+      value: "{\n    \"id\": 1,\n    \"active\": true,\n    \"name\": \"Sim\",\n \
+        \   \"value\": 100,\n    \"topic_id\": 1,\n    \"created_at\": \"2018-12-31T23:59:59+00:00\"\
+        ,\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "Topic Option"
+  Topic Option Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "Topic Option"
+    (x-restlet):
+      section: "Topic Option"
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      active:
+        type: "boolean"
+      email:
+        type: "string"
+        minLength: 3
+        maxLength: 100
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"active\": true,\n    \"email\": \"joao.silva@email.com\"\
+        ,\n    \"name\": \"João Silva\",\n    \"created_at\": \"2018-12-31T23:59:59+00:00\"\
+        ,\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\n}"
+      strict: false
+    (x-restlet):
+      section: "User"
+  User Get Response:
+    type: "object"
+    properties:
+      total_results:
+        type: "Int Positive Zerable"
+      current_page:
+        type: "Int Positive Non-Zerable"
+      last_page:
+        type: "Int Positive Non-Zerable"
+      max_results_per_page:
+        type: "Int Positive Non-Zerable"
+      results:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "User"
+    (x-restlet):
+      section: "User"
+  User Token:
+    type: "object"
+    properties:
+      id:
+        type: "Id"
+      value:
+        type: "string"
+      expires_at:
+        type: "datetime"
+        format: "rfc3339"
+      user_id:
+        type: "Id"
+      created_at:
+        type: "datetime"
+        format: "rfc3339"
+      updated_at:
+        type: "datetime"
+        format: "rfc3339"
+    example:
+      value: "{\n    \"id\": 1,\n    \"value\": \"293616c469a5bf504363c04ad226a122a981251f914fb8312ca9a5f1c101a50e\"\
+        ,\n    \"expires_at\": \"2018-12-31T23:59:59\",\n    \"user_id\": 1,\n   \
+        \ \"created_at\": \"2018-12-31T23:59:59+00:00\",\n    \"updated_at\": \"2018-12-31T23:59:59+00:00\"\
+        \n}"
+      strict: false
+    (x-restlet):
+      section: "User Token"
+securitySchemes:
+  User Token:
+    type: "x-custom"
+    description: "With the user's email and password, the API generates a temporary\
+      \ token that needs to be sent with the header in every request."
+    describedBy:
+      headers:
+        Token:
+          type: "string"
+          description: "The temporary user's access token"
+          example: "203616d469a5bf504363c04ad226a132a983251f914fb8312ca9a5f1c101a51e"
+securedBy:
+- "User Token"
+/council:
+  post:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        start_date:
+          type: "date-only"
+        end_date:
+          type: "date-only"
+        school_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      school_id:
+        type: "Id"
+        required: false
+      active:
+        type: "boolean"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      min_start_date:
+        type: "date-only"
+        required: false
+      max_start_date:
+        type: "date-only"
+        required: false
+      min_end_date:
+        type: "date-only"
+        required: false
+      max_end_date:
+        type: "date-only"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Council Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Council"
+/council/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+          required: false
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+          required: false
+        start_date:
+          type: "date-only"
+          required: false
+        end_date:
+          type: "date-only"
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    queryParameters:
+      id:
+        type: "Id"
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Council"
+/council_grade:
+  post:
+    body:
+      type: "object"
+      properties:
+        council_id:
+          type: "Id"
+        grade_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      council_id:
+        type: "Id"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Council Grade Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Council Grade"
+/council_grade/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Council Grade"
+/council_topic:
+  post:
+    body:
+      type: "object"
+      properties:
+        council_id:
+          type: "Id"
+        topic_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      council_id:
+        type: "Id"
+        required: false
+      topic_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Council Topic Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Council Topic"
+/council_topic/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Council Topic"
+/evaluation:
+  post:
+    body:
+      type: "object"
+      properties:
+        council_id:
+          type: "Id"
+        grade_id:
+          type: "Id"
+        student_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+        topic_option_id:
+          type: "Id"
+        user_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      council_id:
+        type: "Id"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      student_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      topic_option_id:
+        type: "Id"
+        required: false
+      user_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Evaluation Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Evaluation"
+/evaluation/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        topic_option_id:
+          type: "Id"
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Evaluation"
+/grade:
+  post:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+        level:
+          type: "Int Positive Non-Zerable"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        school_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      active:
+        type: "boolean"
+        required: false
+      min_level:
+        type: "Int Positive Non-Zerable"
+        required: false
+      max_level:
+        type: "Int Positive Non-Zerable"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      school_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Council Grade Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Grade"
+/grade/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+          required: false
+        level:
+          type: "Int Positive Non-Zerable"
+          required: false
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Grade"
+/grade_observation:
+  post:
+    body:
+      type: "object"
+      properties:
+        description:
+          type: "string"
+          minLength: 3
+          maxLength: 1000
+        council_id:
+          type: "Id"
+        grade_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+        user_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      council_id:
+        type: "Id"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      user_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Grade Observation Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Grade Observation"
+/grade_observation/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        description:
+          type: "string"
+          minLength: 3
+          maxLength: 300
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Grade Observation"
+/grade_subject:
+  post:
+    body:
+      type: "object"
+      properties:
+        grade_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Grade Subject Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Grade Subject"
+/grade_subject/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Grade Subject"
+/medical_report:
+  post:
+    body:
+      type: "object"
+      properties:
+        description:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        student_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      student_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Medical Report Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Medical Report"
+/medical_report/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        description:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Medical Report"
+/medical_report_subject:
+  post:
+    body:
+      type: "object"
+      properties:
+        medical_report_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      medical_report_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Medical Report Subject Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Medical Report Subject"
+/medical_report_subject/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Medical Report Subject"
+/permission:
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      reference:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Permission Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Permission"
+/role:
+  post:
+    body:
+      type: "object"
+      properties:
+        role_type_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      approved:
+        type: "boolean"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      user_id:
+        type: "Id"
+      role_type_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Role"
+/role/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    displayName: "Approve a role"
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Role"
+/role_type:
+  post:
+    body:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        school_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      school_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Role Type Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Role Type"
+/role_type/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Role Type"
+/role_type_permission:
+  post:
+    body:
+      type: "object"
+      properties:
+        permission_id:
+          type: "Id"
+        role_type_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      permission_id:
+        type: "Id"
+        required: false
+      role_type_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Role Type Permission Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Role Type Permission"
+/role_type_permission/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Role Type Permission"
+/school:
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "School Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "School"
+/student:
+  post:
+    body:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 100
+        school_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      school_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Student Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Student"
+/student/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 100
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Student"
+/student_grade:
+  post:
+    body:
+      type: "object"
+      properties:
+        number:
+          type: "Int Positive Non-Zerable"
+        start_date:
+          type: "date-only"
+        end_date:
+          type: "date-only"
+        grade_id:
+          type: "Id"
+        student_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      min_number:
+        type: "Int Positive Non-Zerable"
+        required: false
+      max_number:
+        type: "Int Positive Non-Zerable"
+        required: false
+      min_start_date:
+        type: "date-only"
+        required: false
+      max_start_date:
+        type: "date-only"
+        required: false
+      min_end_date:
+        type: "date-only"
+        required: false
+      max_end_date:
+        type: "date-only"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      student_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Student Grade Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Student Grade"
+/student_grade/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        number:
+          type: "Int Positive Non-Zerable"
+          required: false
+        start_date:
+          type: "date-only"
+          required: false
+        end_date:
+          type: "date-only"
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Student Grade"
+/student_observation:
+  post:
+    body:
+      type: "object"
+      properties:
+        description:
+          type: "string"
+          minLength: 5
+          maxLength: 1000
+        council_id:
+          type: "Id"
+        grade_id:
+          type: "Id"
+        student_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+        user_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+      page:
+        type: "Page Number"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      council_id:
+        type: "Id"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      student_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      user_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Student Observation Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Student Observation"
+/student_observation/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        description:
+          type: "string"
+          minLength: 3
+          maxLength: 1000
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Student Observation"
+/subject:
+  post:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        school_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      active:
+        type: "boolean"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      school_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Subject Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Subject"
+/subject/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+          required: false
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Subject"
+/teacher:
+  post:
+    body:
+      type: "object"
+      properties:
+        start_date:
+          type: "date-only"
+        end_date:
+          type: "date-only"
+          required: false
+        grade_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+        user_id:
+          type: "Id"
+        created_at:
+          type: "datetime"
+        updated_at:
+          type: "datetime"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      min_start_date:
+        type: "date-only"
+        required: false
+      max_start_date:
+        type: "date-only"
+        required: false
+      min_end_date:
+        type: "date-only"
+        required: false
+      max_end_date:
+        type: "date-only"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      user_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Teacher Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Teacher"
+/teacher/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        start_date:
+          type: "date-only"
+          required: false
+        end_date:
+          type: "date-only"
+          required: false
+        grade_id:
+          type: "Id"
+          required: false
+        subject_id:
+          type: "Id"
+          required: false
+        user_id:
+          type: "Id"
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Teacher"
+/teacher_request:
+  post:
+    body:
+      type: "object"
+      properties:
+        grade_id:
+          type: "Id"
+        subject_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      grade_id:
+        type: "Id"
+        required: false
+      subject_id:
+        type: "Id"
+        required: false
+      user_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Teacher Request Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Teacher Request"
+/teacher_request/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Teacher Request"
+/topic:
+  post:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        school_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      active:
+        type: "boolean"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      school_id:
+        type: "Id"
+        required: false
+      topic_option_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Topic Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Topic"
+/topic/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+          required: false
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+          required: false
+        topic_option_id:
+          type: "Id"
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Topic"
+/topic_option:
+  post:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        value:
+          type: "integer"
+          minimum: 0
+          maximum: 100
+        topic_id:
+          type: "Id"
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      active:
+        type: "boolean"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+        required: false
+      min_value:
+        type: "integer"
+        minimum: 0
+        maximum: 100
+        required: false
+      max_value:
+        type: "integer"
+        minimum: 0
+        maximum: 100
+        required: false
+      topic_id:
+        type: "Id"
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "Topic Option Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "Topic Option"
+/topic_option/{id}:
+  uriParameters:
+    id:
+      type: "Id"
+  patch:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+          required: false
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+          required: false
+        value:
+          type: "integer"
+          minimum: 0
+          maximum: 100
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      404: {}
+      406: {}
+      409: {}
+      500: {}
+  (x-restlet):
+    section: "Topic Option"
+/user:
+  post:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+        email:
+          type: "string"
+          minLength: 3
+          maxLength: 100
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+        password:
+          type: "string"
+          minLength: 5
+          maxLength: 50
+    responses:
+      201:
+        body:
+          type: "Post Success"
+      400:
+        body:
+          type: "Input Error"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+    securedBy:
+    - null
+  patch:
+    body:
+      type: "object"
+      properties:
+        active:
+          type: "boolean"
+          required: false
+        email:
+          type: "string"
+          minLength: 3
+          maxLength: 100
+          required: false
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 50
+          required: false
+        password:
+          type: "string"
+          minLength: 5
+          maxLength: 50
+          required: false
+    responses:
+      200:
+        body:
+          type: "Patch Success"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+  delete:
+    responses:
+      204: {}
+      401: {}
+      406: {}
+      409: {}
+      500: {}
+  get:
+    queryParameters:
+      id:
+        type: "Id"
+        required: false
+      page:
+        type: "Page Number"
+        required: false
+      active:
+        type: "boolean"
+        required: false
+      search:
+        type: "string"
+        minLength: 3
+        maxLength: 100
+        required: false
+      min_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_created_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      min_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+      max_updated_at:
+        type: "datetime"
+        format: "rfc3339"
+        required: false
+    responses:
+      200:
+        body:
+          type: "User Get Response"
+      400:
+        body:
+          type: "Input Error"
+      401: {}
+      403:
+        body:
+          type: "Permission Error"
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "User"
+/user_token:
+  post:
+    displayName: "Log in"
+    body:
+      type: "object"
+      properties:
+        email:
+          type: "string"
+          minLength: 5
+          maxLength: 100
+        password:
+          type: "string"
+          minLength: 5
+          maxLength: 255
+          required: false
+    responses:
+      200:
+        body:
+          type: "User Token"
+      400:
+        body:
+          type: "Input Error"
+      401:
+        description: "Password doesn't match"
+      406: {}
+      415: {}
+      422: {}
+      500: {}
+    securedBy:
+    - null
+  delete:
+    displayName: "Log out"
+    responses:
+      204: {}
+      401: {}
+      406: {}
+      500: {}
+  get:
+    displayName: "Renew token"
+    description: "Generates a new token and invalidates the current one."
+    responses:
+      200:
+        body:
+          type: "User Token"
+      401: {}
+      406: {}
+      500: {}
+  (x-restlet):
+    section: "User Token"
+(x-restlet):
+  sections:
+    General: {}
+    Custom Property Types: {}
+    Custom Response Types: {}
+    Council:
+      description: "Periodic events when the teachers evaluate the students."
+    Council Grade: {}
+    Council Topic:
+      description: "Topics that will be evaluated in a council."
+    Evaluation:
+      description: "A single evaluation of a topic about a user."
+    Grade:
+      description: "A group of students.\n\nThis entity could also be named as \"\
+        Class\", but it's a reserved word in many programming languages, so it was\
+        \ named like this to prevent errors and workarounds."
+    Grade Observation:
+      description: "A teacher's observation about a grade in a council."
+    Grade Subject:
+      description: "The subjects that a grade has lessons about."
+    Medical Report:
+      description: "When the student has a health issue that may justify some dificulties\
+        \ in some subject."
+    Medical Report Subject:
+      description: "The subjects that may be hard to the student because of the health\
+        \ issue."
+    Permission:
+      description: "The actions that a user can take in the system that may or not\
+        \ be allowed to do."
+    Role:
+      description: "The role that the user performs in the system to a school."
+    Role Type:
+      description: "A grouping of permissions."
+    Role Type Permission:
+      description: "The actions that a role_type is allowed to do."
+    School:
+      description: "A School."
+    Student:
+      description: "A Student."
+    Student Grade:
+      description: "The grades that a user has gone through in a school."
+    Student Observation:
+      description: "Observations about a student made by a teacher in one council."
+    Subject:
+      description: "Subjects like Math and English."
+    Teacher:
+      description: "Which user teaches which subject to which grade."
+    Teacher Request: {}
+    Topic:
+      description: "Topics and aspects of the students to be evaluated."
+    Topic Option: {}
+    User:
+      description: "A User."
+    User Token:
+      description: "The token used to keep the user logged in the system without submitting\
+        \ the password in every request."
+  texts:
+    wb9ms4i:
+      title: "Response Codes"
+      content: "This API uses standard HTTP status codes to indicate the status of\
+        \ a response.\n\n| Code | Name | Description |\n| -------- | -------- | --------\
+        \ |\n| 200 | OK | Everything went fine in the request, and the return data\
+        \ is in the body of the response |\n| 201 | Created | The resource was successfully\
+        \ created (same as 200 but for `POST` requests) |\n| 204 | No Content | Everything\
+        \ went fine in the request, but there's no data to return |\n| 400 | Bad Request\
+        \ | The request doesn't meet a specification of this documentation, so the\
+        \ server refuses to continue to proccess it |\n| 401 | Unauthorized | The\
+        \ resource is only available upon login |\n| 403 | Forbidden | The current\
+        \ user doesn't have permission to do this action |\n| 404 | Not Found | The\
+        \ client is trying to apply some action to a specific resource, which was\
+        \ not found |\n| 405 | Method Not Allowed | The client is trying to send a\
+        \ request to a resource with a invalid method |\n| 406 | Not Acceptable |\
+        \ The client doesn't specify a `Accept` header, or it's value is not `application/json`\
+        \ |\n| 409 | Conflict | In a `DELETE` method, the resource cannot be deleted\
+        \ cause there's already other resources depending on it |\n| 415 | Unsupported\
+        \ Media Type | The client doesn't specify a `Content-Type` header, or it's\
+        \ value is not `application/json`. This is only required in the methods which\
+        \ actually uses the body data as input, but it's acceptable to define a `Content-Type`\
+        \ for all requests |\n| 422 | Unprocessable Entity | Probably a malformed\
+        \ JSON input |\n| 500 | Internal Server Error | A technical server error.\
+        \ This errors are logged in the server and are meant to be fixed by the server\
+        \ staff, not the client |"
+      section: "General"
+    dvr87mp:
+      title: "Introduction and General Advices"
+      content: "In almost every request, it's required a user token. This token is\
+        \ obtained with the user's email and password.\nThere's only two requests\
+        \ allowed to be performed without a token: the user register (POST /user)\
+        \ and the log in (POST /user_token).\n\nEvery request needs to have the `Accept:\
+        \ application/json` header, unless it'll receive a `406 Unnaceptable` response.\n\
+        \nEvery request that sends data through the body needs to have the `Content-Type:\
+        \ application/json` header, unless it'll receive a `415 Unsupported Media\
+        \ Type` response. There's no problem in (and would probably be the best option)\
+        \ add this header in every request even the requests with no body data.\n\n\
+        Every date needs to be in the `yyyy-mm-dd` format (like `2000-12-31`). \n\n\
+        Every date-time needs to be in the `RFC 3339` format (including the difference\
+        \ from the GMT with colon between hours and minutes, like `2000-12-31T23:59:59+00:00`).\n\
+        \nWhen the `Pretty-Output` header is found, with a true value, the output\
+        \ is prettified (indented and formated json). This is only useful in debugging\
+        \ and is not recomended to keep in production, since it would just increase\
+        \ the response size.\n\nDate-time inputs are converted from the specified\
+        \ timezone (as of RFC 3339) to the UTC timezone before being stored in the\
+        \ database. When the `Timezone` header is found, with a valid timezone value\
+        \ (like `+03:00` or `-05:30`), the date-time outputs are converted from the\
+        \ stored UTC to the requested timezone. If no timezone is provided, the date-time\
+        \ outputs defaults to the UTC timezone.\n\nDon't use trailling slashes. URL's\
+        \ like `/council/` may result in error. Use `/council` instead.\n\nMost `GET`\
+        \ methods (with the only exception being in the `/user_token` resource) accept\
+        \ these default inputs:\n\n| Name | Description |\n| -------- | -------- |\n\
+        | id | id of the desired record. |\n| page | page of the collection of records.\
+        \ |\n| min_created_at | minimum date of creation of the record. |\n| max_created_at\
+        \ | maxium date of creation of the record. |\n| min_updated_at | minimum date\
+        \ of the last update of the record. |\n| max_updated_at | maximum date of\
+        \ the last update of the record. |\n\nThe `GET` methods of resources that\
+        \ have `integer` (like `student_grade.number`  `topic_option.value`) and date\
+        \ (like `council.start_date`, `council.end_date`, and `teacher.start_date`)\
+        \ properties accept `min_` and `max_` inputs of these properties (like `min_number`,\
+        \ `max_number`, `min_start_date`, and `max_start_date`).\n\nThe `GET` methods\
+        \ that have `string` properties (like `student.name` and `council.name`) accept\
+        \ the `search` input, that matches results that contain the searched string\
+        \ (searching for 'ohn Do' would match 'J**ohn Do**e').\n\nAll `string` fields\
+        \ require a minimum of 3 characters, except for the `user.password` field\
+        \ that for security requires a minimum of 5 characters. The maximum value\
+        \ of strings is either 50, 100 or 1000 characters. The maximum value of the\
+        \ `search` input is always 50, regardless of the searched field's maximum.\n\
+        \n"
+      section: "General"
+    81dliy4:
+      title: "Permissions"
+      content: "The following permissions are set in the _permission_ resource and\
+        \ are used to control the actions that every user can take in the system.\n\
+        \n| Name | Reference | Resources | Description |\n| -------- | -------- |\
+        \ -------- | -------- |\n| Gerenciar conselhos | council | council, council_grade,\
+        \ council_topic | Manage councils. |\n| Avaliar alunos | evaluate | evaluation,\
+        \ grade_observation, student_observation, teacher_request, medical_report\\\
+        * | Become a teacher and evaluate students. |\n| Gerenciar turmas | grade\
+        \ | grade, grade_subject | Manage grades. |\n| Gerenciar laudos | medical_report\
+        \ | medical_report, medical_report_subject | Manage medical reports. |\n|\
+        \ Aceitar/negar permissões | role | role | Accept or deny role requests from\
+        \ other users |\n| Gerenciar tipos de usuários | role_type | role_type, role_type_permission\
+        \ | Manage role types. |\n| Gerenciar estudantes | student | student, student_grade\
+        \ | Manage students |\n| Gerenciar matérias | subject | subject | Manage subjects\
+        \ |\n| Gerenciar professores | teacher | teacher | Accept or deny teacher\
+        \ requests and create teachers |\n| Tópicos | topic | topic, topic_option\
+        \ | Manage topics |\n| Ver relatórios de conselhos | council_report | council\\\
+        *\\*, evaluation\\*\\*, student_observation\\*\\*, class_observation\\*\\\
+        * | Receber dados de conselhos não ativos |\n\n_**Manage** means \"create,\
+        \ edit and delete\"; **\\***: write only; **\\*\\***: read only._"
+      section: "General"

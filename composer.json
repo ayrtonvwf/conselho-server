@@ -17,5 +17,12 @@
     },
     "require-dev": {
         "atlas/cli": "1.*"
+    },
+    "scripts": {
+        "serve": "php -S localhost:8000"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "process-timeout": 0
     }
 }
