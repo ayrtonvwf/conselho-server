@@ -30,18 +30,25 @@ class StudentGrade extends Controller
             'number' => $this->input_int('number'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
+            'disabled_at' => $this->input_datetime('disabled_at'),
             'grade_id' => $this->input_int('grade_id'),
             'student_id' => $this->input_int('student_id')
         ];
     }
 
     private function get_patch_data() : array {
-        return array_filter([
+        $data = array_filter([
             'number' => $this->input_int('number'),
             'start_date' => $this->input_string('start_date'),
             'end_date' => $this->input_string('end_date'),
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ]);
+
+        if ($this->has_input('disabled_at')) {
+            $data['disabled_at'] = $this->input_datetime('disabled_at');
+        }
+
+        return $data;
     }
 
     // VALIDATION
@@ -65,7 +72,8 @@ class StudentGrade extends Controller
         $rules = [
             'number' => ['required', 'integer', ['min', 1]],
             'start_date' => ['required', ['dateFormat', self::DATE_FORMAT]],
-            'end_date' => [['dateFormat', self::DATE_FORMAT]],
+            'end_date' => ['required', ['dateFormat', self::DATE_FORMAT]],
+            'disabled_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]]
         ];
@@ -78,6 +86,7 @@ class StudentGrade extends Controller
             'number' => ['optional', 'integer', ['min', 1]],
             'start_date' => ['optional', ['dateFormat', self::DATE_FORMAT]],
             'end_date' => ['optional', ['dateFormat', self::DATE_FORMAT]],
+            'disabled_at' => ['optional', ['dateFormat', self::DATETIME_EXTERNAL_FORMAT]],
         ];
 
         return $this->run_validation($rules);

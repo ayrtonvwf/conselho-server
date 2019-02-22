@@ -1,7 +1,9 @@
 ALTER
   TABLE `student_grade`
-  CHANGE `end_date` `end_date` DATE NULL;
+  ADD `disabled_at` DATETIME NULL;
 
 UPDATE `student_grade`
-  SET `end_date` = NULL
-  WHERE `student_grade`.`end_date` = '2018-12-31';
+  SET `disabled_at`=`end_date`
+  WHERE
+    `end_date` != '2018-12-31' AND
+    `end_date` != '2018-12-31';

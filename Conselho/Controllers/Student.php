@@ -81,7 +81,9 @@ class Student extends Controller
         $where = $this->get_get_data();
         $cols = [
             'student.*',
-            'MAX(student_grade.grade_id) AS current_grade_id'
+            'MAX(student_grade.id) AS current_student_grade_id',
+            'MAX(student_grade.grade_id) AS current_grade_id',
+            'MAX(student_grade.number) AS current_number'
         ];
         $joins = [
             ['LEFT', 'student_grade', 'student_grade.student_id = student.id AND student_grade.end_date IS NULL']

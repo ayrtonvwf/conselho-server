@@ -263,6 +263,9 @@ abstract class Controller {
     }
 
     // INPUT HELPERS
+    protected function has_input(string $key) : bool {
+        return isset($this->input_data[$key]);
+    }
 
     protected function input_datetime(string $key) : ?string {
         if (is_null($datetime = $this->input_raw($key))) {
