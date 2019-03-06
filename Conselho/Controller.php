@@ -78,7 +78,7 @@ abstract class Controller {
         ]);
     }
 
-    public function search(array $where, array $cols = ['*']) : array{
+    public function search(array $where, array $cols = ['*'], array $joins = []) : array{
         $where = $this->default_get_filters() + $where;
 
         $atlas = $this->atlas();
@@ -94,6 +94,12 @@ abstract class Controller {
         $pagination = $this->get_pagination();
         $select->limit($pagination['limit']);
         $select->offset($pagination['offset']);
+        foreach ($joins as $join) {
+            $select->join($join[0], $join[1], $join[2]);
+        }
+        $mapper = $atlas->mapper($this->mapper_class_name);
+        $table = $mapper->getTable()->getName();
+        $select->groupBy(["$table.id"]);
         $select->cols($cols);
 
         $results = array_map(function($result) {
@@ -178,18 +184,20 @@ abstract class Controller {
         return json_encode($data, $this->pretty());
     }
 
-    public function post_output(RecordInterface $record) : string {
+    public function post_output(RecordInterface $record, array $extra = []) : string {
         $data = [
             'id' => (int) $record->id,
             'created_at' => $this->output_datetime($record->created_at)
-        ];
+        ] + $extra;
+
         return json_encode($data, $this->pretty());
     }
 
-    public function patch_output(RecordInterface $record) : string {
+    public function patch_output(RecordInterface $record, array $extra = []) : string {
         $data = [
             'updated_at' => $this->output_datetime($record->updated_at)
-        ];
+        ] + $extra;
+
         return json_encode($data, $this->pretty());
     }
 
@@ -257,6 +265,25 @@ abstract class Controller {
     }
 
     // INPUT HELPERS
+    protected function has_input(string $key) : bool {
+        return isset($this->input_data[$key]);
+    }
+
+    protected function input_jpeg(string $key) : ?string {
+        if (is_null($content = $this->input_raw($key))) {
+            return null;
+        }
+
+        $content = explode(',', $content);
+
+        if (empty($content[1])) {
+            return null;
+        }
+
+        $content = base64_decode($content[1]);
+
+        return $content ? $content : null;
+    }
 
     protected function input_datetime(string $key) : ?string {
         if (is_null($datetime = $this->input_raw($key))) {

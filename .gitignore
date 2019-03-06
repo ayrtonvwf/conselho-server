@@ -3,3 +3,5 @@ vendor
 .idea
 .vs
 *.bak
+uploads/student/image/*
+!*.gitkeep

@@ -1,0 +1,1 @@
+ALTER TABLE `student` ADD `image` VARCHAR(100) NULL;

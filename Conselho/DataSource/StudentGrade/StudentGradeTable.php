@@ -122,6 +122,16 @@ class StudentGradeTable extends AbstractTable
                 'autoinc' => false,
                 'primary' => false,
             ],
+            'disabled_at' => (object) [
+                'name' => 'disabled_at',
+                'type' => 'datetime',
+                'size' => null,
+                'scale' => null,
+                'notnull' => false,
+                'default' => null,
+                'autoinc' => false,
+                'primary' => false,
+            ],
         ];
     }
 

@@ -7,6 +7,18 @@ const BASE_PATH = __DIR__;
 use Dotenv\Dotenv;
 use MiladRahimi\PHPRouter\Router;
 
+$dotenv = new Dotenv(__DIR__);
+$dotenv->load();
+
+$sentry_dsn = getenv('SENTRY_DSN');
+if ($sentry_dsn) {
+    $client = new Raven_Client();
+    $error_handler = new Raven_ErrorHandler($client);
+    $error_handler->registerExceptionHandler();
+    $error_handler->registerErrorHandler();
+    $error_handler->registerShutdownFunction();
+}
+
 date_default_timezone_set('UTC');
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Max-Age: 86400'); // cache for 1 day
@@ -24,9 +36,6 @@ if (strpos($accept, 'application/json') !== 0) {
     http_response_code(406);
     exit;
 }
-
-$dotenv = new Dotenv(__DIR__);
-$dotenv->load();
 
 $controller_prefix = 'Conselho\\Controllers\\';
 $router = new Router(getenv('BASE_PATH'));

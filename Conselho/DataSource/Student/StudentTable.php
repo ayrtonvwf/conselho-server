@@ -27,6 +27,7 @@ class StudentTable extends AbstractTable
         return [
             'id',
             'name',
+            'image',
             'school_id',
             'created_at',
             'updated_at',
@@ -55,6 +56,16 @@ class StudentTable extends AbstractTable
                 'size' => 100,
                 'scale' => null,
                 'notnull' => true,
+                'default' => null,
+                'autoinc' => false,
+                'primary' => false,
+            ],
+            'image' => (object) [
+                'name' => 'image',
+                'type' => 'varchar',
+                'size' => 100,
+                'scale' => null,
+                'notnull' => false,
                 'default' => null,
                 'autoinc' => false,
                 'primary' => false,
@@ -118,6 +129,7 @@ class StudentTable extends AbstractTable
         return [
             'id' => null,
             'name' => null,
+            'image' => null,
             'school_id' => null,
             'created_at' => null,
             'updated_at' => null,
