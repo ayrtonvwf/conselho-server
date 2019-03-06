@@ -21,15 +21,22 @@ class Student extends Controller
     private function get_post_data() : array {
         return [
             'name' => $this->input_string('name'),
-            'school_id' => $this->input_int('school_id')
+            'school_id' => $this->input_int('school_id'),
+            'image' => $this->input_jpeg('image')
         ];
     }
 
     private function get_patch_data() : array {
-        return [
+        $data = [
             'name' => $this->input_string('name'),
             'updated_at' => date(self::DATETIME_INTERNAL_FORMAT)
         ];
+
+        if ($this->has_input('image')) {
+            $data['image'] = $this->input_jpeg('image');
+        }
+
+        return $data;
     }
 
     // VALIDATION
@@ -108,12 +115,23 @@ class Student extends Controller
         }
 
         $data = $this->get_post_data();
+
+        if ($data['image']) {
+            $image_name = getenv('STUDENT_IMAGE_PATH') . microtime(true) . $data['name'] . '.jpg';
+            $file = fopen($image_name, 'wb');
+            fwrite($file, $data['image']);
+            fclose($file);
+            $data['image'] = $image_name;
+        }
+
         if (!$record = $this->insert($data)) {
             http_response_code(500);
             return null;
         }
 
-        return $this->post_output($record);
+        $extra['image'] = $data['image'] ? getenv('API_URL') . $data['image'] : null;
+
+        return $this->post_output($record, $extra);
     }
 
     public function patch(int $id) : ?string {
@@ -135,13 +153,30 @@ class Student extends Controller
         }
 
         $data = $this->get_patch_data();
+
+        if (!empty($data['image'])) {
+            $old_image = $record->image;
+            $image_name = getenv('STUDENT_IMAGE_PATH') . microtime(true) . $data['name'] . '.jpg';
+            $file = fopen($image_name, 'wb');
+            fwrite($file, $data['image']);
+            fclose($file);
+            $data['image'] = $image_name;
+        }
+
         $record->set($data);
         if (!$this->atlas()->update($record)) {
             http_response_code(500);
             return null;
         }
 
-        return $this->patch_output($record);
+        $extra = [];
+
+        if (isset($old_image)) {
+            unlink($old_image);
+            $extra['image'] = $data['image'] ? getenv('API_URL') . $data['image'] : null;
+        }
+
+        return $this->patch_output($record, $extra);
     }
 
     public function delete(int $id) : void {
@@ -162,6 +197,9 @@ class Student extends Controller
             return;
         }
 
+        if ($record->image) {
+            unlink($record->image);
+        }
         http_response_code(204);
     }
 }

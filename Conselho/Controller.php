@@ -184,18 +184,20 @@ abstract class Controller {
         return json_encode($data, $this->pretty());
     }
 
-    public function post_output(RecordInterface $record) : string {
+    public function post_output(RecordInterface $record, array $extra = []) : string {
         $data = [
             'id' => (int) $record->id,
             'created_at' => $this->output_datetime($record->created_at)
-        ];
+        ] + $extra;
+
         return json_encode($data, $this->pretty());
     }
 
-    public function patch_output(RecordInterface $record) : string {
+    public function patch_output(RecordInterface $record, array $extra = []) : string {
         $data = [
             'updated_at' => $this->output_datetime($record->updated_at)
-        ];
+        ] + $extra;
+
         return json_encode($data, $this->pretty());
     }
 
@@ -265,6 +267,22 @@ abstract class Controller {
     // INPUT HELPERS
     protected function has_input(string $key) : bool {
         return isset($this->input_data[$key]);
+    }
+
+    protected function input_jpeg(string $key) : ?string {
+        if (is_null($content = $this->input_raw($key))) {
+            return null;
+        }
+
+        $content = explode(',', $content);
+
+        if (empty($content[1])) {
+            return null;
+        }
+
+        $content = base64_decode($content[1]);
+
+        return $content ? $content : null;
     }
 
     protected function input_datetime(string $key) : ?string {
