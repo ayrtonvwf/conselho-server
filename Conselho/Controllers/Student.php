@@ -169,11 +169,14 @@ class Student extends Controller
             return null;
         }
 
-        $extra = [];
-
         if (isset($old_image)) {
             unlink($old_image);
-            $extra['image'] = $data['image'] ? getenv('API_URL') . $data['image'] : null;
+        }
+
+        $extra = [];
+
+        if (!empty($data['image']) || isset($old_image)) {
+            $extra['image'] = !empty($data['image']) ? getenv('API_URL') . $data['image'] : null;
         }
 
         return $this->patch_output($record, $extra);
