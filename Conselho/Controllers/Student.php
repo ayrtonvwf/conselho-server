@@ -87,7 +87,12 @@ class Student extends Controller
 
         $where = $this->get_get_data();
         $cols = [
-            'student.*',
+            'student.id',
+            'student.name',
+            'student.school_id',
+            'student.created_at',
+            'student.updated_at',
+            'IF(student.image IS NOT NULL, CONCAT("'.getenv('API_URL').'", student.image), NULL) AS image',
             'MAX(student_grade.id) AS current_student_grade_id',
             'MAX(student_grade.grade_id) AS current_grade_id',
             'MAX(student_grade.number) AS current_number'

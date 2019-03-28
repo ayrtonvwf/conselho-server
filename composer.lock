@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "atlas/orm",
-            "version": "2.6.0",
+            "version": "2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlasphp/Atlas.Orm.git",
-                "reference": "060f2e17aad26d999a4737ba1b1b340b7dee72a6"
+                "reference": "fcc06cbc069cf1f1ff5b6bdbbc4f24ce80ed361a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlasphp/Atlas.Orm/zipball/060f2e17aad26d999a4737ba1b1b340b7dee72a6",
-                "reference": "060f2e17aad26d999a4737ba1b1b340b7dee72a6",
+                "url": "https://api.github.com/repos/atlasphp/Atlas.Orm/zipball/fcc06cbc069cf1f1ff5b6bdbbc4f24ce80ed361a",
+                "reference": "fcc06cbc069cf1f1ff5b6bdbbc4f24ce80ed361a",
                 "shasum": ""
             },
             "require": {
@@ -59,7 +59,7 @@
                 "orm",
                 "sql"
             ],
-            "time": "2018-09-17T14:52:35+00:00"
+            "time": "2019-03-10T16:17:30+00:00"
         },
         {
             "name": "aura/sql",
@@ -341,16 +341,16 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.10.0",
+            "version": "v1.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19"
+                "reference": "82ebae02209c21113908c229e9883c419720738a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/e3d826245268269cd66f8326bd8bc066687b4a19",
-                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/82ebae02209c21113908c229e9883c419720738a",
+                "reference": "82ebae02209c21113908c229e9883c419720738a",
                 "shasum": ""
             },
             "require": {
@@ -362,7 +362,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.9-dev"
+                    "dev-master": "1.11-dev"
                 }
             },
             "autoload": {
@@ -384,7 +384,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
+                    "email": "backendtea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
@@ -395,7 +395,7 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2018-08-06T14:22:27+00:00"
+            "time": "2019-02-06T07:57:58+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -450,16 +450,16 @@
         },
         {
             "name": "vlucas/valitron",
-            "version": "v1.4.4",
+            "version": "v1.4.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vlucas/valitron.git",
-                "reference": "c6893fc67ef1228f7692a86ca13c34e5e9ecc9a8"
+                "reference": "c3b4dac8586291990e6398961852e972600ac7b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/valitron/zipball/c6893fc67ef1228f7692a86ca13c34e5e9ecc9a8",
-                "reference": "c6893fc67ef1228f7692a86ca13c34e5e9ecc9a8",
+                "url": "https://api.github.com/repos/vlucas/valitron/zipball/c3b4dac8586291990e6398961852e972600ac7b5",
+                "reference": "c3b4dac8586291990e6398961852e972600ac7b5",
                 "shasum": ""
             },
             "require": {
@@ -495,7 +495,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-12-14T21:15:14+00:00"
+            "time": "2019-03-21T20:12:22+00:00"
         }
     ],
     "packages-dev": [
