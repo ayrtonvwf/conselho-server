@@ -99,7 +99,9 @@ abstract class Controller {
         }
         $mapper = $atlas->mapper($this->mapper_class_name);
         $table = $mapper->getTable()->getName();
-        $select->groupBy(["$table.id"]);
+        if ($joins) {
+            $select->groupBy(["$table.id"]);
+        }
         $select->cols($cols);
 
         $results = array_map(function($result) {
