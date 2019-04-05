@@ -107,7 +107,8 @@ class Evaluation extends Controller
             $student = $atlas->fetchRecord(StudentMapper::class, $student_id, ['student_grades']);
             $school_ids[] = $student->school_id;
             $current_student_grade = array_filter($student->student_grades->getArrayCopy(), function($student_grade) {
-                return $student_grade['end_date'] >= date(self::DATE_FORMAT);
+                return $student_grade['end_date'] >= date(self::DATE_FORMAT) &&
+                    $student_grade['start_date'] <= date(self::DATE_FORMAT);
             })[0] ?? null;
         }
         if ($subject_id = $this->input_int('subject_id')) {
