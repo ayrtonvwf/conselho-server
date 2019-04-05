@@ -69,9 +69,11 @@ class MedicalReport extends Controller
             $student = $atlas->fetchRecord(StudentMapper::class, $this->input_int('id'), ['student_grades' => ['grade']]);
         }
 
-        $current_student_grade = array_filter($student->student_grades->getArrayCopy(), function($student_grade) {
-            return $student_grade['end_date'] >= date(self::DATE_FORMAT);
-        })[0] ?? null;
+        $current_student_grades = array_filter($student->student_grades->getArrayCopy(), function($student_grade) {
+            return $student_grade['end_date'] >= date(self::DATE_FORMAT) &&
+                $student_grade['start_date'] <= date(self::DATE_FORMAT);
+        });
+        $current_student_grade = $current_student_grades ? $current_student_grades[array_key_first($current_student_grades)] : null;
         if (!$current_student_grade) {
             return false;
         }
