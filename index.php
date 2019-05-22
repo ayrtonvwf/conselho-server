@@ -60,6 +60,7 @@ $router->group('Conselho\\Auth@check', function(Router $router) use ($controller
 
     $router->map('GET', '/evaluation', "{$controller_prefix}Evaluation@get");
     $router->map('POST', '/evaluation', "{$controller_prefix}Evaluation@post");
+    $router->map('PUT', '/evaluation', "{$controller_prefix}Evaluation@put");
     $router->map('PATCH', '/evaluation/{id}', "{$controller_prefix}Evaluation@patch");
     $router->map('DELETE', '/evaluation/{id}', "{$controller_prefix}Evaluation@delete");
     

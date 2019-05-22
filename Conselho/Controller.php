@@ -118,6 +118,39 @@ abstract class Controller {
         ];
     }
 
+    public function replace_many(array $dataset) : ?array {
+        $atlas = $this->atlas();
+        $now = date(self::DATETIME_INTERNAL_FORMAT);
+
+        $atlas->beginTransaction();
+
+        $records = [];
+
+        foreach ($dataset as $data) {
+            $data['updated_at'] = $now;
+
+            if (empty($data['id'])) {
+                $data['created_at'] = $now;
+                unset($data['id']);
+                $record = $atlas->newRecord($this->mapper_class_name, $data);
+            } else {
+                $record = $this->fetch($data['id']);
+                $record->set($data);
+            }
+
+            if (!$atlas->persist($record)) {
+                $atlas->rollBack();
+                return null;
+            }
+
+            $records[] = $record;
+        }
+
+        $atlas->commit();
+
+        return $records;
+    }
+
     public function insert(array $data) : ?RecordInterface {
         $atlas = $this->atlas();
         $data['created_at'] = $data['updated_at'] = date(self::DATETIME_INTERNAL_FORMAT);
@@ -203,6 +236,20 @@ abstract class Controller {
         return json_encode($data, $this->pretty());
     }
 
+    public function put_output(array $records) : string {
+        $dataset = [];
+
+        foreach ($records as $record) {
+            $dataset[] = [
+                'id' => (int) $record->id,
+                'created_at' => $this->output_datetime($record->created_at),
+                'updated_at' => $this->output_datetime($record->updated_at)
+            ];
+        }
+
+        return json_encode($dataset, $this->pretty());
+    }
+
     public function output_datetime(string $date) : string {
         $date = new DateTime($date);
         $timezone = new DateTimeZone($this->timezone);
@@ -211,7 +258,7 @@ abstract class Controller {
     }
 
     private function get_input_data() : array {
-        if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PATCH'])) {
+        if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PATCH', 'PUT'])) {
             return $_GET;
         }
 
@@ -267,6 +314,10 @@ abstract class Controller {
     }
 
     // INPUT HELPERS
+    protected function input_all() : array {
+        return $this->input_data;
+    }
+
     protected function has_input(string $key) : bool {
         return isset($this->input_data[$key]);
     }
@@ -332,25 +383,43 @@ abstract class Controller {
     }
 
     protected function run_validation(array $rules) : bool {
-        $data = [];
-        foreach ($this->input_data as $key => $value) {
-            $data[$key] = is_string($value) ? trim(strip_tags($value)) : $value;
+        $datasets = isset($this->input_data[0]) ? $this->input_data : [$this->input_data];
+
+        foreach ($datasets as $dataset) {
+            $data = [];
+            foreach ($dataset as $key => $value) {
+                $data[$key] = is_string($value) ? trim(strip_tags($value)) : $value;
+            }
+
+            if (!$this->validate_set($rules, $data)) {
+                return false;
+            }
         }
 
+        return true;
+    }
+
+    private function validate_set(array $rules, array $data) : bool {
         $atlas = $this->atlas();
+
         $validator = new Validator($data);
         $validator->addInstanceRule('id_exists', function(string $field, ?int $value, array $extra) use ($atlas) : bool {
             if (!$value) {
                 return false;
             }
+
             return (bool) $atlas->fetchRecord($extra[0] ?? $this->mapper_class_name, $value);
         }, 'The {field} does not exists in db');
+
         $validator->addInstanceRule('is_bool', function(string $field, $value, array $extra) : bool {
             $allowed_values = [true, false, 1, 0, '1', '0'];
             return in_array($value, $allowed_values, true);
         }, 'The {field} must be a boolean');
+
         $validator->mapFieldsRules($rules);
+
         $validator->validate();
+
         $this->validation_errors = $validator->errors();
 
         return !$this->validation_errors;
