@@ -23,7 +23,7 @@ date_default_timezone_set('UTC');
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Max-Age: 86400'); // cache for 1 day
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: OPTIONS, GET, POST, PATCH, DELETE');
+header('Access-Control-Allow-Methods: OPTIONS, GET, POST, PATCH, DELETE, PUT');
 if (!empty($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
     header("Access-Control-Allow-Headers: $_SERVER[HTTP_ACCESS_CONTROL_REQUEST_HEADERS]");
 }
@@ -163,8 +163,8 @@ try {
     $router->dispatch();
 } catch(Exception $e) {
     $error_code = $e->getMessage() == '404' ? 404 : 500;
-    if (getenv('ENV') == 'dev') {
+//    if (getenv('ENV') == 'dev') {
         echo json_encode([$e->getMessage(), $e->getTrace()], JSON_PRETTY_PRINT);
-    }
+//    }
     http_response_code($error_code);
 }
