@@ -43,6 +43,22 @@ class Evaluation extends Controller
         ];
     }
 
+    private function get_put_data() : array {
+        $user_id = $this->get_user()->id;
+
+        return array_map(function(array $dataset) use ($user_id) : array {
+            return [
+                'id' => !empty($dataset['id']) ? (int) $dataset['id']: null,
+                'council_id' => !is_null($dataset['council_id']) ? (int) $dataset['council_id']: null,
+                'grade_id' => !is_null($dataset['grade_id']) ? (int) $dataset['grade_id']: null,
+                'student_id' => !is_null($dataset['student_id']) ? (int) $dataset['student_id']: null,
+                'subject_id' => !is_null($dataset['subject_id']) ? (int) $dataset['subject_id']: null,
+                'topic_option_id' => !is_null($dataset['topic_option_id']) ? (int) $dataset['topic_option_id']: null,
+                'user_id' => $user_id
+            ];
+        }, $this->input_all());
+    }
+
     private function get_patch_data() : array {
         return [
             'topic_option_id' => $this->input_int('topic_option_id'),
@@ -67,6 +83,19 @@ class Evaluation extends Controller
 
     private function validate_post() : bool {
         $rules = [
+            'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
+            'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
+            'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]],
+            'subject_id' => ['required', 'integer', ['min', 1], ['id_exists', SubjectMapper::class]],
+            'topic_option_id' => ['required', 'integer', ['min', 1], ['id_exists', TopicOptionMapper::class]]
+        ];
+
+        return $this->run_validation($rules);
+    }
+
+    private function validate_put() : bool {
+        $rules = [
+            'id' => ['optional', 'integer', ['min', 1], ['id_exists', EvaluationMapper::class]],
             'council_id' => ['required', 'integer', ['min', 1], ['id_exists', CouncilMapper::class]],
             'grade_id' => ['required', 'integer', ['min', 1], ['id_exists', GradeMapper::class]],
             'student_id' => ['required', 'integer', ['min', 1], ['id_exists', StudentMapper::class]],
@@ -159,7 +188,7 @@ class Evaluation extends Controller
         if ($id) {
             $school_id = $atlas->fetchRecord($this->mapper_class_name, $id, ['council'])->council->school_id;
         } else {
-            $school_id = $atlas->fetchRecord(CouncilMapper::class, $this->input_int('council_id'))->school_id;
+            $school_id = $atlas->fetchRecord(CouncilMapper::class, $this->input_all()[0]['council_id'])->school_id;
         }
 
         return $this->has_permission('evaluate', $school_id);
@@ -243,6 +272,33 @@ class Evaluation extends Controller
         }
 
         return $this->patch_output($record);
+    }
+
+    /**
+     * Saves many evaluations at the same time.
+     *
+     * @return string|null
+     */
+    public function put() : ?string {
+        if (!$this->validate_put()) {
+            http_response_code(400);
+            return json_encode([
+                'input_errors' => $this->get_validation_errors()
+            ], $this->pretty());
+        }
+
+        if (!$this->check_permission()) {
+            http_response_code(403);
+            return null;
+        }
+
+        $data = $this->get_put_data();
+        if (!$records = $this->replace_many($data)) {
+            http_response_code(500);
+            return null;
+        }
+
+        return $this->put_output($records);
     }
 
     public function delete(int $id) : void {
