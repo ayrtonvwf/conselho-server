@@ -33,6 +33,7 @@ class StudentGradeTable extends AbstractTable
             'student_id',
             'created_at',
             'updated_at',
+            'disabled_at'
         ];
     }
 
@@ -167,6 +168,7 @@ class StudentGradeTable extends AbstractTable
             'student_id' => null,
             'created_at' => null,
             'updated_at' => null,
+            'disabled_at' => null
         ];
     }
 }
