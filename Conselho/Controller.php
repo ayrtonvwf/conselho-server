@@ -319,7 +319,7 @@ abstract class Controller {
     }
 
     protected function has_input(string $key) : bool {
-        return isset($this->input_data[$key]);
+        return array_key_exists($key, $this->input_data);
     }
 
     protected function input_jpeg(string $key) : ?string {
