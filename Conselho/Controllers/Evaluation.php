@@ -188,7 +188,10 @@ class Evaluation extends Controller
         if ($id) {
             $school_id = $atlas->fetchRecord($this->mapper_class_name, $id, ['council'])->council->school_id;
         } else {
-            $school_id = $atlas->fetchRecord(CouncilMapper::class, $this->input_all()[0]['council_id'])->school_id;
+            $council_id = $this->has_input('council_id') ?
+                $this->input_int('council_id') :
+                $this->input_all()[0]['council_id'];
+            $school_id = $atlas->fetchRecord(CouncilMapper::class, $council_id)->school_id;
         }
 
         return $this->has_permission('evaluate', $school_id);
