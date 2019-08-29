@@ -3,6 +3,7 @@ namespace Conselho\Controllers;
 use Conselho\Controller;
 use Conselho\DataSource\Council\CouncilMapper;
 use Conselho\DataSource\School\SchoolMapper;
+use Conselho\Models;
 
 class Council extends Controller
 {
@@ -105,9 +106,45 @@ class Council extends Controller
             return $this->input_error_output();
         }
 
-        $where = $this->get_get_data();
+        $query = Models\Council::getQuery();
+        if ($this->has_input('id')) {
+            $query->where('id', $this->input_int('id'));
+        }
+        if ($this->has_input('min_created_at')) {
+            $query->where('created_at', '>=', $this->input_datetime('min_created_at'));
+        }
+        if ($this->has_input('max_created_at')) {
+            $query->where('created_at', '<=', $this->input_datetime('max_created_at'));
+        }
+        if ($this->has_input('min_updated_at')) {
+            $query->where('updated_at', '>=', $this->input_datetime('min_updated_at'));
+        }
+        if ($this->has_input('max_updated_at')) {
+            $query->where('updated_at', '<=', $this->input_datetime('max_updated_at'));
+        }
+        if ($this->has_input('school_id')) {
+            $query->where('school_id', $this->input_int('school_id'));
+        }
+        if ($this->has_input('min_start_date')) {
+            $query->where('start_date', '>=', $this->input_datetime('min_start_date'));
+        }
+        if ($this->has_input('max_start_date')) {
+            $query->where('start_date', '<=', $this->input_datetime('max_start_date'));
+        }
+        if ($this->has_input('min_end_date')) {
+            $query->where('end_date', '>=', $this->input_datetime('min_end_date'));
+        }
+        if ($this->has_input('max_end_date')) {
+            $query->where('end_date', '<=', $this->input_datetime('max_end_date'));
+        }
+        if ($this->has_input('search')) {
+            $query->where('name', 'LIKE', $this->input_search('search'));
+        }
+        if ($this->has_input('active')) {
+            $query->where('active', $this->input_bool('active'));
+        }
 
-        $result = $this->search($where);
+        $result = $this->paginate($query);
 
         return json_encode($result, $this->pretty());
     }

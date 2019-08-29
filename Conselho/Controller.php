@@ -6,8 +6,11 @@ use Atlas\Orm\Mapper\Record;
 use Atlas\Orm\Mapper\RecordInterface;
 use Conselho\DataSource\Role\RoleMapper;
 use Conselho\DataSource\UserToken\UserTokenMapper;
+use Illuminate\Database\Eloquent\Builder;
 use Valitron\Validator;
 use PDO, DateTime, DateTimeZone, Exception;
+use Illuminate\Database\Capsule\Manager as Capsule;
+
 
 abstract class Controller {
     private $input_data = [];
@@ -64,9 +67,29 @@ abstract class Controller {
         if (preg_match('#^[+-]\d\d:\d\d$#', $timezone)) {
             $this->timezone = $timezone;
         }
+        $this->boot_eloquent();
     }
 
     // DB HELPERS
+
+    private function boot_eloquent() : void
+    {
+        $capsule = new Capsule;
+
+        $capsule->addConnection([
+            'driver'    => 'mysql',
+            'host'      => getenv('DB_HOST'),
+            'database'  => getenv('DB_NAME'),
+            'username'  => getenv('DB_USER'),
+            'password'  => getenv('DB_PASS'),
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
+            'prefix'    => '',
+        ]);
+
+        $capsule->setAsGlobal();
+        $capsule->bootEloquent();
+    }
 
     private function default_get_filters() : array {
         return array_filter([
@@ -115,6 +138,18 @@ abstract class Controller {
             'current_page' => $pagination['page'],
             'max_results_per_page' => $pagination['limit'],
             'results' => $results
+        ];
+    }
+
+    protected function paginate(Builder $builder) : object
+    {
+        $pagination = $this->get_pagination();
+
+        return (object) [
+            'total_results' => $builder->count(),
+            'current_page' => $pagination['page'],
+            'max_results_per_page' => $pagination['limit'],
+            'results' => $builder->limit($pagination['limit'])->offset($pagination['offset'])->get()
         ];
     }
 
@@ -310,7 +345,7 @@ abstract class Controller {
     }
 
     protected function pretty() : ?int {
-        return !empty($_SERVER['HTTP_PRETTY_OUTPUT']) ? JSON_PRETTY_PRINT : null;
+        return !empty($_SERVER['HTTP_PRETTY_OUTPUT']) ? JSON_PRETTY_PRINT : 0;
     }
 
     // INPUT HELPERS
